@@ -26,13 +26,6 @@ export const ui = {
     a11yFeelingGood: 'Feeling good',
     a11yFeelingBad: 'Feeling bad',
     sleepQuestion: 'How many hours did you sleep?',
-    a11yDismissSheet: 'Dismiss {title}',
-  },
-  weeklyStatus: {
-    eyebrow: 'STATUS',
-  },
-  headerDate: {
-    a11yOpenCalendar: 'Open calendar, {label}',
   },
   calendar: {
     a11yChangeYear: 'Change year, currently {year}',

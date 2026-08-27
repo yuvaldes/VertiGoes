@@ -80,7 +80,8 @@ export const font = {
  * substitutes whichever family we name. Naming Cal Sans is still the worst of the options: a
  * heading that mixes scripts ("Liv", a price, a digit) would set its Latin run in a quirky
  * display face right beside the system Hebrew face. Inter sits far closer to it, so Hebrew
- * borrows the body face for display too, and the brand voice is spent only on Latin.
+ * borrows the body face for display too — Bold, to keep the same weight of emphasis Cal Sans
+ * carries in the Latin headings — and the brand voice is spent only on Latin.
  *
  * Do not read this directly. `useDisplayFont()` in src/i18n picks between the two.
  */
@@ -88,8 +89,8 @@ export const fontHebrew = {
   display: Platform.select<string>({
     // A CSS stack is legal only on web, and it is worth having: it lets us name the Hebrew
     // fallback rather than leaving it to the browser's default sans.
-    web: 'Inter_400Regular, system-ui, -apple-system, "Segoe UI", Arial, sans-serif',
-    default: 'Inter_400Regular',
+    web: 'Inter_700Bold, system-ui, -apple-system, "Segoe UI", Arial, sans-serif',
+    default: 'Inter_700Bold',
   }),
 } as const;
 

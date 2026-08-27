@@ -3,38 +3,35 @@ import type { NamespaceOf } from '../index';
 /**
  * The Hebrew data catalogue.
  *
- * PLACEHOLDER: every value below is still the English source text, carried over so the key set
- * is complete and `satisfies` can prove it. A translator pass replaces the values; nothing here
- * needs restructuring first. Until then each key resolves to English either way, so the app is
- * unaffected by how much of this file has been done.
- *
- * The clinical and content caveats on `en/data.ts` apply here with more force: do not translate
- * `help.question*`, `diagnosis.*`, `medication.*` or `specialty.*` without a clinician reading
- * the result.
+ * The clinical and content caveats on `en/data.ts` apply here with more force: `help.question*`,
+ * `diagnosis.*`, `medication.*` and `specialty.*` are left in English on purpose — they are
+ * drafts no clinician has reviewed, and translating unreviewed clinical vocabulary carries the
+ * same risk as writing it. Everything else in this file is ordinary app/UI copy and has been
+ * translated.
  */
 export const data = {
   /** The three exercise sessions a day can schedule. */
   slot: {
-    morning: 'Morning',
-    midday: 'Mid-day',
-    evening: 'Evening',
+    morning: 'בוקר',
+    midday: 'צהריים',
+    evening: 'ערב',
   },
 
   /** The status card's headline, comparing this week so far against the same span last week. */
   trend: {
-    none: 'No episodes so far this week - keep it up!',
-    improving: 'Your weekly episode amount is improving!',
-    worse: 'Your episodes are up from last week.',
-    steady: 'Your episodes are holding steady this week.',
+    none: 'אין אירועים השבוע - כל הכבוד!',
+    improving: 'כמות האירועים השבועית שלכם משתפרת!',
+    worse: 'האירועים שלכם עלו מהשבוע שעבר.',
+    steady: 'האירועים שלכם יציבים השבוע.',
   },
 
   sleep: {
     /** Reading a recorded answer back as a sentence. The two ends are open-ended. */
-    underSix: 'You slept for less than 6 hours',
-    ninePlus: 'You slept for 9+ hours',
-    hoursCount: 'You slept for {hours} hours',
+    underSix: 'ישנתם פחות מ-6 שעות',
+    ninePlus: 'ישנתם 9+ שעות',
+    hoursCount: 'ישנתם {hours} שעות',
     /** The chips themselves. Each one carries its own hour count in the data, not in the text. */
-    optionUnderSix: 'Less than 6',
+    optionUnderSix: 'פחות מ-6',
     optionSix: '6',
     optionSeven: '7',
     optionEight: '8',
@@ -43,50 +40,48 @@ export const data = {
 
   /** Mock conversation summaries, seeded onto past days so the calendar has something to show. */
   livSummary: {
-    standing: 'We talked about how the dizziness came on after standing up too quickly.',
-    spinning: 'You mentioned the room spinning for about thirty seconds this morning.',
-    sleep: 'We went over your sleep and how it might be affecting the episodes.',
-    epley: 'You asked about whether the Epley manoeuvre was working.',
-    triggers: 'We talked through what triggered the spinning and how you managed it.',
+    standing: 'דיברנו על כך שהסחרחורת הופיעה אחרי שקמתם מהר מדי.',
+    spinning: 'הזכרתם שהחדר הסתחרר במשך כשלושים שניות הבוקר.',
+    sleep: 'עברנו על השינה שלכם וכיצד היא עשויה להשפיע על האירועים.',
+    epley: 'שאלתם אם תרגיל אפלי עבד.',
+    triggers: 'דיברנו על מה שגרם לסחרחורת ואיך התמודדתם עם זה.',
   },
 
   /** Labels for the buttons on a card where Liv offers to do something. */
   livAction: {
-    startHelp: 'Help me through it',
-    completeExercise: 'Mark it done',
+    startHelp: 'עזרו לי להתמודד',
+    completeExercise: 'סמנו כבוצע',
   },
 
   help: {
+    // Clinical drafts — see the file header. Left in English pending a clinician's review.
     questionSpinningNow: 'Is the room spinning right now?',
     questionHeadPosition: 'Did it start when you moved or turned your head?',
     questionCanSit: 'Are you somewhere you can safely sit or lie down?',
     questionWorseThanUsual: 'Is this worse than your usual episode?',
     questionRedFlags: 'Do you have new hearing loss, a severe headache, or trouble speaking?',
 
-    urgentTitle: 'Please get medical advice now',
-    urgentStepCauses: 'What you described can have causes that need checking in person.',
-    urgentStepCall:
-      'Call your emergency contact, or your doctor, rather than waiting this one out.',
-    urgentStepEscalate: 'If your symptoms are severe or getting worse, seek urgent care.',
+    urgentTitle: 'קבלו ייעוץ רפואי עכשיו',
+    urgentStepCauses: 'מה שתיארתם עשוי לנבוע מסיבות שדורשות בדיקה פרונטלית אצל רופא.',
+    urgentStepCall: 'התקשרו לאיש הקשר לשעת חירום שלכם, או לרופא שלכם, במקום לחכות שזה יעבור.',
+    urgentStepEscalate: 'אם התסמינים שלכם חמורים או מחמירים, פנו לטיפול דחוף.',
 
-    calmTitle: 'Let’s settle this together',
-    stepSteady: 'Get to a wall or a chair and steady yourself before anything else.',
-    stepSit: 'Sit or lie down somewhere you feel supported.',
-    stepFixEyes: 'Fix your eyes on something still and keep them there.',
-    stepBreathe: 'Breathe slowly - in for four, out for six - until the spinning eases.',
-    stepMoveSlowly: 'Move your head slowly when you get up again.',
-    stepMentionDoctor:
-      'Since this is worse than usual, mention it to your doctor at your next visit.',
+    calmTitle: 'בואו נרגיע את זה יחד',
+    stepSteady: 'התקרבו לקיר או לכיסא וייצבו את עצמכם לפני כל דבר אחר.',
+    stepSit: 'שבו או שכבו במקום שבו אתם מרגישים נתמכים.',
+    stepFixEyes: 'קבעו את מבטכם על משהו יציב והישארו כך.',
+    stepBreathe: 'נשמו לאט - שאיפה לארבע ספירות, נשיפה לשש - עד שהסחרחורת נרגעת.',
+    stepMoveSlowly: 'הזיזו את הראש לאט כשאתם קמים שוב.',
+    stepMentionDoctor: 'מכיוון שזה גרוע מהרגיל, ציינו זאת לרופא שלכם בביקור הבא.',
 
     /** One sentence per session, appended to the day's calendar summary. */
-    summaryPlain: 'You used in-app help.',
-    summaryRedFlag: 'You used in-app help, and reported symptoms worth getting checked.',
+    summaryPlain: 'השתמשתם בעזרה באפליקציה.',
+    summaryRedFlag: 'השתמשתם בעזרה באפליקציה, ודיווחתם על תסמינים שכדאי לבדוק.',
     summaryPositionalWorse:
-      'You used in-app help for an episode that started when you moved your head, and was worse than usual.',
-    summaryPositional:
-      'You used in-app help for an episode that started when you moved your head.',
-    summaryWorse: 'You used in-app help for an episode worse than your usual.',
-    summaryEpisode: 'You used in-app help during an episode.',
+      'השתמשתם בעזרה באפליקציה לאירוע שהחל כשהזזתם את הראש, והיה גרוע מהרגיל.',
+    summaryPositional: 'השתמשתם בעזרה באפליקציה לאירוע שהחל כשהזזתם את הראש.',
+    summaryWorse: 'השתמשתם בעזרה באפליקציה לאירוע גרוע מהרגיל שלכם.',
+    summaryEpisode: 'השתמשתם בעזרה באפליקציה במהלך אירוע.',
   },
 
   /**
@@ -95,69 +90,69 @@ export const data = {
    * on the other side of it.
    */
   duration: {
-    minutes: '{minutes} min',
+    minutes: '{minutes} דק׳',
   },
 
   exercise: {
-    armStretches: { title: 'Arm Stretches', focus: 'Seated warm-up' },
-    epleyLeft: { title: 'Epley Left', focus: 'Left-ear canalith repositioning' },
-    epleyRight: { title: 'Epley Right', focus: 'Right-ear canalith repositioning' },
-    dixHallpike: { title: 'Dix Hallpike', focus: 'Positional assessment' },
-    brandtDaroff: { title: 'Brandt-Daroff', focus: 'Habituation, both sides' },
-    semont: { title: 'Semont Manoeuvre', focus: 'Rapid canalith repositioning' },
-    gazeStabilisation: { title: 'Gaze Stabilisation', focus: 'Seated, eye-head coordination' },
-    balanceTraining: { title: 'Standing Balance', focus: 'Postural control' },
-    neckMobility: { title: 'Neck Mobility', focus: 'Seated warm-up' },
+    armStretches: { title: 'מתיחות זרועות', focus: 'חימום בישיבה' },
+    epleyLeft: { title: 'אפלי שמאל', focus: 'מיקום מחדש של גבישונים - אוזן שמאל' },
+    epleyRight: { title: 'אפלי ימין', focus: 'מיקום מחדש של גבישונים - אוזן ימין' },
+    dixHallpike: { title: 'דיקס-הולפייק', focus: 'הערכה תנוחתית' },
+    brandtDaroff: { title: 'ברנדט-דרוף', focus: 'הרגלה, משני הצדדים' },
+    semont: { title: 'תמרון סמונט', focus: 'מיקום מחדש מהיר של גבישונים' },
+    gazeStabilisation: { title: 'ייצוב מבט', focus: 'בישיבה, תיאום עין-ראש' },
+    balanceTraining: { title: 'איזון בעמידה', focus: 'שליטה יציבתית' },
+    neckMobility: { title: 'ניידות צוואר', focus: 'חימום בישיבה' },
   },
 
   drill: {
     boxBreathing: {
-      title: 'Box Breathing',
-      focus: 'Calms a racing heart before an episode',
+      title: 'נשימת קופסה',
+      focus: 'מרגיע לב דוהר לפני אירוע',
     },
     breathing478: {
-      title: '4-7-8 Breathing',
-      focus: 'Slows breathing to ease acute dizziness',
+      title: 'נשימת 4-7-8',
+      focus: 'מאט את הנשימה כדי להקל על סחרחורת חריפה',
     },
     grounding54321: {
-      title: 'Grounding: 5-4-3-2-1',
-      focus: 'Anchors attention away from the spinning',
+      title: 'הארקה: 5-4-3-2-1',
+      focus: 'מעגן את תשומת הלב הרחק מהסחרחורת',
     },
     bodyScan: {
-      title: 'Body Scan',
-      focus: 'Releases tension that builds during an episode',
+      title: 'סריקת גוף',
+      focus: 'משחרר מתח שנבנה במהלך אירוע',
     },
     progressiveRelaxation: {
-      title: 'Progressive Muscle Relaxation',
-      focus: 'Works through tension head to toe',
+      title: 'הרפיית שרירים מתקדמת',
+      focus: 'עובר על המתח מהראש ועד כף הרגל',
     },
     diaphragmaticBreathing: {
-      title: 'Diaphragmatic Breathing',
-      focus: 'Builds a steadier baseline breath',
+      title: 'נשימה סרעפתית',
+      focus: 'בונה נשימת בסיס יציבה יותר',
     },
     sleepWindDown: {
-      title: 'Sleep Wind-Down',
-      focus: 'Settles the mind before bed',
+      title: 'הרגעה לפני שינה',
+      focus: 'מרגיע את הנפש לפני השינה',
     },
   },
 
   home: {
-    todayLabel: 'Today is {date}',
-    insight:
-      'You’ve slept 7 hours for 6 days straight. This may affect your episode frequency.',
+    todayLabel: 'היום הוא {date}',
+    insight: 'ישנתם 7 שעות במשך 6 ימים ברציפות. זה עשוי להשפיע על תדירות האירועים שלכם.',
   },
 
   /** The mock contact's tie to the user. The name and number are data, not copy. */
   emergency: {
-    relationship: 'brother',
+    relationship: 'אח',
   },
 
   gender: {
-    female: 'Female',
-    male: 'Male',
-    other: 'Other',
+    female: 'נקבה',
+    male: 'זכר',
+    other: 'אחר',
   },
 
+  // Clinical drafts — see the file header. Left in English pending a clinician's review.
   diagnosis: {
     bppv: 'BPPV (benign paroxysmal positional vertigo)',
     menieres: 'Ménière’s disease',
@@ -167,6 +162,7 @@ export const data = {
     centralVertigo: 'Central vertigo',
   },
 
+  // Clinical drafts — see the file header. Left in English pending a clinician's review.
   medication: {
     meclizine: 'Meclizine',
     betahistine: 'Betahistine',
@@ -180,19 +176,20 @@ export const data = {
    * unlike the language *picker*, which uses endonyms (`common.language.*`).
    */
   languageName: {
-    hebrew: 'Hebrew',
-    english: 'English',
-    russian: 'Russian',
-    arabic: 'Arabic',
+    hebrew: 'עברית',
+    english: 'אנגלית',
+    russian: 'רוסית',
+    arabic: 'ערבית',
   },
 
   city: {
-    herzliya: 'Herzliya',
-    telAviv: 'Tel Aviv',
-    ramatGan: 'Ramat Gan',
-    jerusalem: 'Jerusalem',
+    herzliya: 'הרצליה',
+    telAviv: 'תל אביב',
+    ramatGan: 'רמת גן',
+    jerusalem: 'ירושלים',
   },
 
+  // Clinical drafts — see the file header. Left in English pending a clinician's review.
   specialty: {
     bppv: 'BPPV',
     vestibularMigraine: 'Vestibular migraine',
@@ -213,46 +210,46 @@ export const data = {
 
   pro: {
     noaBerger: {
-      profession: 'ENT - Vestibular disorders',
-      clinic: 'Herzliya Balance Clinic',
+      profession: 'רופאת אף אוזן גרון - הפרעות וסטיבולריות',
+      clinic: 'מרפאת שיווי המשקל הרצליה',
       about:
-        'Specialises in benign paroxysmal positional vertigo and vestibular migraine. Runs a combined diagnostic and rehab clinic, and prefers to see patients within a week of an acute episode.',
+        'מתמחה בסחרחורת תנוחתית התקפית שפירה ובמיגרנה וסטיבולרית. מנהלת מרפאה משולבת לאבחון ולשיקום, ומעדיפה לקבל מטופלים תוך שבוע מאירוע חריף.',
     },
     amirCohen: {
-      profession: 'Vestibular physiotherapist',
-      clinic: 'Tel Aviv Rehab Centre',
+      profession: 'פיזיותרפיסט וסטיבולרי',
+      clinic: 'מרכז השיקום תל אביב',
       about:
-        'Works mainly on habituation and gaze stabilisation programmes, and on getting people confident on their feet again after a long spell of episodes.',
+        'עובד בעיקר על תוכניות הרגלה וייצוב מבט, ועל בניית ביטחון מחודש על הרגליים לאחר תקופה ארוכה של אירועים.',
     },
     yaelShani: {
-      profession: 'Neurologist',
-      clinic: 'Ichilov Neurology',
+      profession: 'נוירולוגית',
+      clinic: 'נוירולוגיה איכילוב',
       about:
-        'Sees patients whose dizziness has features that need ruling out centrally - new hearing loss, persistent headache, or neurological signs alongside the vertigo.',
+        'מקבלת מטופלים שהסחרחורת שלהם כוללת מאפיינים שיש לשלול מבחינה מרכזית - אובדן שמיעה חדש, כאב ראש מתמשך, או סימנים נוירולוגיים לצד הוורטיגו.',
     },
     danielRosen: {
-      profession: 'Audiologist',
-      clinic: 'Hearing & Balance Lab',
+      profession: 'אודיולוג',
+      clinic: 'מעבדת שמיעה ושיווי משקל',
       about:
-        'Handles the hearing side - audiograms, VEMP and caloric testing - and explains the results in plain language rather than a printout.',
+        'מטפל בצד השמיעתי - אודיוגרמות, בדיקות VEMP וקלוריות - ומסביר את התוצאות בשפה פשוטה במקום כהדפסה יבשה.',
     },
     mayaLevi: {
-      profession: 'Occupational therapist',
-      clinic: 'Independent practice',
+      profession: 'מרפאה בעיסוק',
+      clinic: 'קליניקה עצמאית',
       about:
-        'Focuses on the practical side: getting back to driving, work and stairs, and adapting the day around episodes rather than waiting them out.',
+        'מתמקדת בצד המעשי: חזרה לנהיגה, לעבודה ולמדרגות, והתאמת היום סביב האירועים במקום להמתין להם שיחלפו.',
     },
   },
 
   billing: {
-    monthly: 'Monthly',
-    annual: 'Annual',
+    monthly: 'חודשי',
+    annual: 'שנתי',
   },
 
   /** The same choice as an adverb, for sentences - "Billed annually", not "Billed annual". */
   billingAdverb: {
-    monthly: 'monthly',
-    annual: 'annually',
+    monthly: 'חודשית',
+    annual: 'שנתית',
   },
 
   /**
@@ -265,11 +262,11 @@ export const data = {
   },
 
   payment: {
-    card: 'Credit or debit card',
+    card: 'כרטיס אשראי או חיוב',
     apple: 'Apple Pay',
     google: 'Google Pay',
-    cardLast4: 'Card ···· {last4}',
-    cardShort: 'Card',
+    cardLast4: 'כרטיס ···· {last4}',
+    cardShort: 'כרטיס',
   },
 
   /**
@@ -278,33 +275,32 @@ export const data = {
    */
   plan: {
     log: {
-      label: 'Symptoms log',
-      free: 'Last {days} days',
-      premium: 'Full history',
+      label: 'יומן תסמינים',
+      free: '{days} הימים האחרונים',
+      premium: 'היסטוריה מלאה',
     },
     insights: {
-      label: 'Insights',
-      free: 'From {days} days of data',
-      premium: 'Long-term trends and patterns',
+      label: 'תובנות',
+      free: 'מ-{days} ימי נתונים',
+      premium: 'מגמות ודפוסים לטווח ארוך',
     },
     community: {
-      label: 'Community',
+      label: 'קהילה',
     },
     professionals: {
-      label: 'All professionals',
-      free: 'First 3 only',
+      label: 'כל אנשי המקצוע',
+      free: '3 הראשונים בלבד',
     },
     meditation: {
-      label: 'All meditation drills',
-      free: 'First 3 only',
+      label: 'כל תרגילי המדיטציה',
+      free: '3 הראשונים בלבד',
     },
     liv: {
-      label: 'Liv, your AI chat',
+      label: 'ליב, הצ׳אט מבוסס הבינה המלאכותית שלכם',
     },
     ads: {
-      label: 'No ads',
+      label: 'ללא פרסומות',
     },
-    premiumSummary:
-      'Your whole history, the community, every professional and drill, Liv, and no ads.',
+    premiumSummary: 'כל ההיסטוריה שלכם, הקהילה, כל אנשי המקצוע והתרגילים, ליב, וללא פרסומות.',
   },
 } satisfies NamespaceOf<'data'>;

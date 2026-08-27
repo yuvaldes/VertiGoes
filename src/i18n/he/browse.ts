@@ -1,82 +1,80 @@
 import type { NamespaceOf } from '../index';
 
 /**
- * Hebrew for the browse screens. Every value is still the English source string: the keys and
- * their shape are what this file locks down, and a translator fills the values in next.
- *
- * `satisfies` rather than an annotation, so a key that drifts from the English tree fails here
- * instead of quietly falling back at runtime.
+ * `satisfies` rather than a type annotation, so a key that drifts from `en/browse.ts` fails
+ * here instead of silently falling back to English at runtime.
  */
 export const browse = {
   liv: {
-    title: 'Liv',
-    voiceReplying: 'Liv is replying…',
-    voiceMuted: 'Muted',
-    voiceListening: 'Listening… (simulated, no audio recorded)',
+    title: 'ליב',
+    voiceReplying: 'ליב עונה…',
+    voiceMuted: 'מושתק',
+    voiceListening: 'מאזין… (מדומה, לא מוקלט שום קול)',
   },
   menu: {
-    title: 'Menu',
-    rowMeditation: 'Meditation drills',
-    rowExercises: 'Exercises',
-    rowProfessionals: 'Professionals',
-    rowPlaylists: 'Relief playlists',
-    playlistsNote: 'Calming playlists will open in your music app once the links are set up.',
-    rowCommunity: 'Community',
-    communityNote: 'The community feed and groups will live here.',
-    rowPersonalInfo: 'Personal information',
-    rowSymptoms: 'My symptoms',
-    symptomsNote:
-      'The symptoms you report during onboarding will be listed and editable here.',
-    rowSubscription: 'Subscription',
-    planPremium: 'Premium',
-    planFree: 'Free',
-    rowLanguage: 'Language',
-    rowSignOut: 'Sign out',
-    languageSheetTitle: 'Language',
-    restartNotice:
-      'Your language is saved. Close and reopen the app to switch the layout direction.',
+    title: 'תפריט',
+    rowMeditation: 'תרגילי מדיטציה',
+    rowExercises: 'תרגילים',
+    rowProfessionals: 'אנשי מקצוע',
+    rowPlaylists: 'פלייליסטים להקלה',
+    playlistsNote: 'פלייליסטים מרגיעים ייפתחו באפליקציית המוזיקה שלכם לאחר חיבור הקישורים.',
+    rowCommunity: 'קהילה',
+    communityNote: 'הפיד הקהילתי והקבוצות יופיעו כאן.',
+    rowPersonalInfo: 'פרטים אישיים',
+    rowSymptoms: 'התסמינים שלי',
+    symptomsNote: 'התסמינים שדיווחתם עליהם בתהליך ההרשמה יוצגו ויהיו ניתנים לעריכה כאן.',
+    rowSubscription: 'מנוי',
+    planPremium: 'פרימיום',
+    planFree: 'חינם',
+    rowLanguage: 'שפה',
+    rowSignOut: 'התנתקות',
+    languageSheetTitle: 'שפה',
+    /**
+     * Native only, and about the layout rather than the language: the text changes at once,
+     * but the process was laid out left-to-right at launch and cannot turn around mid-session.
+     */
+    restartNotice: 'השפה נשמרה. סגרו ופתחו מחדש את האפליקציה כדי להחליף את כיוון התצוגה.',
   },
   meditation: {
-    title: 'Meditation drills',
+    title: 'תרגילי מדיטציה',
     a11yCard: '{title}, {duration}',
-    gateItemLabel: 'drills',
-    gateBody: 'Upgrade to Premium to unlock every breathing and grounding drill.',
+    gateItemLabel: 'תרגילים',
+    gateBody: 'שדרגו לפרימיום כדי לפתוח את כל תרגילי הנשימה וההיאחזות בקרקע.',
   },
   library: {
-    title: 'Exercises',
-    searchPlaceholder: 'Search exercises',
-    a11ySearch: 'Search exercises',
-    a11yClearSearch: 'Clear search',
+    title: 'תרגילים',
+    searchPlaceholder: 'חיפוש תרגילים',
+    a11ySearch: 'חיפוש תרגילים',
+    a11yClearSearch: 'נקה חיפוש',
     a11yCard: '{title}, {duration}',
-    noResults: 'No exercises match “{query}”.',
-    gateItemLabel: 'exercises',
-    gateBody: 'Upgrade to Premium to unlock the full exercise library.',
+    noResults: 'אין תרגילים התואמים ל-“{query}”.',
+    gateItemLabel: 'תרגילים',
+    gateBody: 'שדרגו לפרימיום כדי לפתוח את כל ספריית התרגילים.',
   },
   professionals: {
-    title: 'Professionals',
-    note: 'Specialists who work with vestibular conditions. Details are a mock directory for now.',
+    title: 'אנשי מקצוע',
+    note: 'מומחים העובדים עם הפרעות וסטיבולריות. הפרטים הם מדריך מדומה בינתיים.',
     a11yCard: '{name}, {profession}',
-    yearsExperience: '{years} years’ experience',
-    waitlistBadge: 'Waitlist',
-    gateItemLabel: 'professionals',
-    gateBody:
-      'Upgrade to Premium to see the rest of the directory and book with any specialist.',
+    yearsExperience: '{years} שנות ניסיון',
+    waitlistBadge: 'רשימת המתנה',
+    gateItemLabel: 'אנשי מקצוע',
+    gateBody: 'שדרגו לפרימיום כדי לראות את שאר המדריך ולקבוע תור עם כל מומחה.',
   },
   proDetail: {
-    fallbackTitle: 'Professional',
-    missing: 'This professional is no longer in the directory.',
-    yearsAndCity: '{years} years’ experience · {city}',
-    statusAccepting: 'Accepting new patients',
-    statusWaitlist: 'Waitlist only',
-    sectionAbout: 'About',
-    sectionSpecialties: 'Specialties',
-    sectionContact: 'Contact',
-    a11yCall: 'Call {name}',
-    a11yEmail: 'Email {name}',
+    fallbackTitle: 'איש מקצוע',
+    missing: 'איש מקצוע זה אינו נמצא עוד במדריך.',
+    yearsAndCity: '{years} שנות ניסיון · {city}',
+    statusAccepting: 'מקבל מטופלים חדשים',
+    statusWaitlist: 'רשימת המתנה בלבד',
+    sectionAbout: 'אודות',
+    sectionSpecialties: 'תחומי התמחות',
+    sectionContact: 'יצירת קשר',
+    a11yCall: 'התקשרו אל {name}',
+    a11yEmail: 'שלחו דוא"ל אל {name}',
     clinicLine: '{clinic}, {city}',
-    bookCta: 'Request an appointment',
+    bookCta: 'בקשת תור',
   },
   placeholder: {
-    heading: 'Not built yet',
+    heading: 'עדיין לא בנוי',
   },
 } satisfies NamespaceOf<'browse'>;

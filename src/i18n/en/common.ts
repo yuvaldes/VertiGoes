@@ -41,9 +41,6 @@ export const common = {
     tasksWaitingOne: 'is waiting for you today',
     tasksWaitingOther: 'are waiting for you today',
   },
-  brandRow: {
-    a11ySwitchLayout: 'Switch home layout',
-  },
   bottomBar: {
     emergency: 'Emergency',
     a11yOpenEmergency: 'Open emergency options',

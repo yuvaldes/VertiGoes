@@ -5,21 +5,18 @@ import { BottomBar } from '../components/BottomBar';
 import { BrandRow } from '../components/BrandRow';
 import { EmergencySheet } from '../components/EmergencySheet';
 import { SheetHostProvider } from '../components/SheetHost';
-import { HeaderDateButton } from '../components/home/HeaderDateButton';
 import { emergencyContact, type TabKey } from '../data/home';
 import type { HelpAnswer } from '../data/helpFlow';
 import type { OnboardingAnswers } from '../data/onboarding';
 import type { BillingPeriod, PaymentMethod } from '../data/subscription';
-import { useDateFormat, useDirection, useT } from '../i18n';
+import { useDirection, useT } from '../i18n';
 import { CalendarScreen } from '../screens/CalendarScreen';
 import { CheckoutScreen } from '../screens/CheckoutScreen';
 import { DayDetailScreen } from '../screens/DayDetailScreen';
 import { EditExercisesScreen } from '../screens/EditExercisesScreen';
 import { ExerciseLibraryScreen } from '../screens/ExerciseLibraryScreen';
-import { ExerciseVideosScreen } from '../screens/ExerciseVideosScreen';
 import { HelpFlowScreen } from '../screens/HelpFlowScreen';
 import { HomeScreen } from '../screens/HomeScreen';
-import { HomeStatusScreen } from '../screens/HomeStatusScreen';
 import { LivScreen } from '../screens/LivScreen';
 import { MeditationDrillsScreen } from '../screens/MeditationDrillsScreen';
 import { MenuScreen } from '../screens/MenuScreen';
@@ -41,7 +38,6 @@ import { useEdgeSwipeBack } from './useEdgeSwipeBack';
  */
 type Pushed =
   | { route: 'editExercises' }
-  | { route: 'exerciseVideos' }
   | { route: 'calendar' }
   | { route: 'dayDetail'; date: string }
   | { route: 'helpFlow' }
@@ -102,12 +98,11 @@ export function AppShell() {
 }
 
 function Shell() {
-  const { today, todayKey, recordEmergencyCall, recordInAppHelp } = useDayRecords();
+  const { todayKey, recordEmergencyCall, recordInAppHelp } = useDayRecords();
   const { refreshDaySummary } = useLivChat();
   const { setLanguage } = usePreferences();
   const { subscribe, setPaymentMethod, paymentMethod } = useSubscription();
   const t = useT();
-  const date = useDateFormat();
   const { isRTL } = useDirection();
 
   /**
@@ -123,11 +118,6 @@ function Shell() {
   const [leaving, setLeaving] = useState<StackItem | null>(null);
   const [activeTab, setActiveTab] = useState<TabKey>('home');
   const [emergencyOpen, setEmergencyOpen] = useState(false);
-  /**
-   * Which Home design is showing. Tapping the wordmark flips it, and it deliberately resets on
-   * reload — this is a way to compare the two layouts, not a saved preference.
-   */
-  const [homeLayout, setHomeLayout] = useState<'classic' | 'status'>('classic');
   /**
    * Which cycle the pricing page is showing. It lives here rather than in the screen so the
    * choice survives the push to checkout — checkout has to charge what the toggle said.
@@ -236,33 +226,13 @@ function Shell() {
     pop();
   };
 
-  /** Toggling layouts only means anything on the Home tab with nothing pushed over it. */
-  const onHomeRoot = activeTab === 'home' && stack.length === 0 && leaving === null;
-
-  /**
-   * The date button belongs to the status layout, and its design puts the same header on the
-   * exercise videos screen — so it survives that one push rather than being Home-only.
-   */
   const topRoute = stack.length > 0 ? stack[stack.length - 1].entry.route : null;
-  const showHeaderDate =
-    homeLayout === 'status' &&
-    activeTab === 'home' &&
-    leaving === null &&
-    (topRoute === null || topRoute === 'exerciseVideos');
 
-  /**
-   * The Emergency drawer is not on every screen: it belongs to Home and — because the design
-   * carries the same bar across — the exercise videos pushed over it. Everywhere else the bar
-   * is the tab pill alone.
-   */
-  const showEmergency =
-    (activeTab === 'home' && topRoute === null) || topRoute === 'exerciseVideos';
+  /** The Emergency drawer is not on every screen: it belongs to Home alone. */
+  const showEmergency = activeTab === 'home' && topRoute === null;
 
   /** Onboarding is the one screen with no bar at all: it owns the whole frame. */
   const showBottomBar = topRoute !== 'onboarding';
-
-  const toggleHomeLayout = () =>
-    setHomeLayout((current) => (current === 'classic' ? 'status' : 'classic'));
 
   /**
    * No account/profile store exists yet, so this is a stub like `finishHelpFlow` used to be —
@@ -280,16 +250,6 @@ function Shell() {
       case 'editExercises':
         return (
           <EditExercisesScreen onBack={pop} activeTab={activeTab} onChangeTab={changeTab} />
-        );
-      case 'exerciseVideos':
-        return (
-          <ExerciseVideosScreen
-            onBack={pop}
-            onEdit={() => push({ route: 'editExercises' })}
-            onOpenEmergency={() => setEmergencyOpen(true)}
-            activeTab={activeTab}
-            onChangeTab={changeTab}
-          />
         );
       case 'calendar':
         return (
@@ -441,13 +401,6 @@ function Shell() {
             onOpenSubscription={openSubscription}
             onOpenPlaceholder={openPlaceholder}
           />
-        ) : homeLayout === 'status' ? (
-          <HomeStatusScreen
-            activeTab={activeTab}
-            onChangeTab={changeTab}
-            onOpenEmergency={() => setEmergencyOpen(true)}
-            onOpenExercises={() => push({ route: 'exerciseVideos' })}
-          />
         ) : (
           <HomeScreen
             activeTab={activeTab}
@@ -506,18 +459,7 @@ function Shell() {
         so the logo would stop sliding along with the screen underneath it on every push and pop.
       */}
       <View style={styles.brandBar} pointerEvents="box-none">
-        <BrandRow
-          // Only on the Home root: elsewhere the toggle would be an invisible no-op.
-          onPressLogo={onHomeRoot ? toggleHomeLayout : undefined}
-          trailing={
-            showHeaderDate ? (
-              <HeaderDateButton
-                label={date.monthDay(today)}
-                onPress={() => push({ route: 'calendar' })}
-              />
-            ) : null
-          }
-        />
+        <BrandRow />
       </View>
 
       {/*

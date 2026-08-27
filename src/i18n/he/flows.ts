@@ -1,10 +1,6 @@
 import type { NamespaceOf } from '../index';
 
 /**
- * The Hebrew tree for the flow screens. Every key is present with its English value so the
- * shape is already correct; a translator fills the values in, one namespace at a time, and
- * anything still in English simply falls back the way an absent key would.
- *
  * `satisfies` rather than an annotation: it checks each key against the English tree while
  * keeping the literal types, so a misspelt or misplaced key fails here rather than silently
  * resolving to English at runtime.
@@ -12,151 +8,148 @@ import type { NamespaceOf } from '../index';
 export const flows = {
   /** The wizard chrome that wraps every onboarding step. */
   onboarding: {
-    finish: 'Finish',
-    continue: 'Continue',
+    finish: 'סיום',
+    continue: 'המשך',
   },
 
   basicInfo: {
-    title: 'Basic info',
-    firstNameLabel: 'First name',
-    firstNamePlaceholder: 'Dafna',
-    lastNameLabel: 'Last name',
-    lastNamePlaceholder: 'Levi',
-    ageLabel: 'Age',
+    title: 'פרטים בסיסיים',
+    firstNameLabel: 'שם פרטי',
+    firstNamePlaceholder: 'דפנה',
+    lastNameLabel: 'שם משפחה',
+    lastNamePlaceholder: 'לוי',
+    ageLabel: 'גיל',
     agePlaceholder: '34',
-    genderLabel: 'Gender',
-    languageLabel: 'Language',
+    genderLabel: 'מגדר',
+    languageLabel: 'שפה',
   },
 
   medicalHistory: {
-    title: 'Medical history',
-    diagnosedQuestion: 'Have you been diagnosed before?',
-    diagnosedHint: 'This will help personalize your experience.',
-    /** The two escape hatches appended to the clinical lists in `data/onboarding`. */
-    diagnosisOther: 'I have another that was not listed',
-    diagnosisNone: 'None of the above',
-    otherDiagnosisLabel: 'What were you diagnosed with?',
-    otherDiagnosisPlaceholder: 'Describe it in your own words',
+    title: 'היסטוריה רפואית',
+    diagnosedQuestion: 'האם אובחנתם בעבר?',
+    diagnosedHint: 'זה יעזור להתאים אישית את החוויה שלכם.',
+    diagnosisOther: 'יש לי אבחנה אחרת שלא מופיעה ברשימה',
+    diagnosisNone: 'אף אחת מהאפשרויות',
+    otherDiagnosisLabel: 'במה אובחנתם?',
+    otherDiagnosisPlaceholder: 'תארו זאת במילים שלכם',
     notDiagnosedInfo:
-      "No problem - the next screen has a few yes/no questions that can help point toward a diagnosis. It's optional, so you can skip it and come back to it anytime.",
-    medicationQuestion: 'Do you take any medication related to vertigo?',
-    medicationOther: 'Something else',
-    medicationNone: 'None',
-    otherMedicationLabel: 'Which medication?',
-    otherMedicationPlaceholder: 'Name and dose, if you know it',
+      'אין בעיה - במסך הבא יש כמה שאלות כן/לא שיכולות לעזור לכוון לאבחנה. זה אופציונלי, כך שתוכלו לדלג ולחזור לזה בכל עת.',
+    medicationQuestion: 'האם אתם נוטלים תרופות הקשורות לסחרחורת?',
+    medicationOther: 'משהו אחר',
+    medicationNone: 'ללא',
+    otherMedicationLabel: 'איזו תרופה?',
+    otherMedicationPlaceholder: 'שם ומינון, אם ידוע לכם',
   },
 
   diagnosis: {
-    title: 'Diagnosis',
-    hint: 'Not required - you can do this later at any time.',
-    emptyTitle: 'No questions yet',
+    title: 'אבחנה',
+    hint: 'לא חובה - תוכלו לעשות זאת מאוחר יותר בכל עת.',
+    emptyTitle: 'אין עדיין שאלות',
     emptyBody:
-      "This screen is ready for a set of yes/no diagnostic questions - there just isn't one loaded yet. If you already know your diagnosis, enter it below instead.",
-    manualLabel: 'Already know your diagnosis?',
-    manualPlaceholder: 'Enter it here',
+      'המסך הזה מוכן לסדרת שאלות אבחון כן/לא - פשוט עוד לא נטענה כזו. אם אתם כבר יודעים מה האבחנה שלכם, הזינו אותה למטה במקום זאת.',
+    manualLabel: 'כבר יודעים מה האבחנה שלכם?',
+    manualPlaceholder: 'הזינו אותה כאן',
   },
 
   emergencyContact: {
-    title: 'Emergency contact',
-    hint: 'Who should we call if you need help during an episode?',
-    nameLabel: 'Full name',
-    namePlaceholder: 'George Levi',
-    phoneLabel: 'Phone number',
+    title: 'איש קשר לשעת חירום',
+    hint: 'למי כדאי שנתקשר אם תזדקקו לעזרה במהלך אירוע?',
+    nameLabel: 'שם מלא',
+    namePlaceholder: 'ג׳ורג׳ לוי',
+    phoneLabel: 'מספר טלפון',
     phonePlaceholder: '+1 555 0142',
   },
 
   help: {
-    title: 'Help me through it',
-    progress: 'Question {step} of {total}',
-    callContact: 'Call {name} ({relationship})',
-    done: 'I’m done',
-    recorded: 'Saved to today in your calendar.',
+    title: 'עזרו לי להתמודד',
+    progress: 'שאלה {step} מתוך {total}',
+    callContact: 'התקשרו אל {name} ({relationship})',
+    done: 'סיימתי',
+    recorded: 'נשמר להיום ביומן שלכם.',
   },
 
   subscription: {
-    title: 'Subscription',
+    title: 'מנוי',
 
-    a11yAnnual: 'Annual billing, save {percent} percent',
-    a11yMonthly: 'Monthly billing',
+    a11yAnnual: 'חיוב שנתי, חסכו {percent} אחוזים',
+    a11yMonthly: 'חיוב חודשי',
     saveBadge: '−{percent}%',
 
-    activeTitle: 'Premium is active',
-    trialUntil: "Your free trial runs until {date}. We'll remind you two days before it ends.",
-    thanks: 'Thanks for subscribing.',
+    activeTitle: 'פרימיום פעיל',
+    trialUntil: 'תקופת הניסיון החינמית שלכם נמשכת עד {date}. נזכיר לכם יומיים לפני שהיא מסתיימת.',
+    thanks: 'תודה על ההרשמה.',
     /** Appended to whichever of the two above applies, with a space between. */
-    billedAdverb: 'Billed {period}.',
+    billedAdverb: 'החיוב מתבצע {period}.',
 
-    rowPaymentMethod: 'Payment method',
-    paymentNone: 'None',
-    rowCancel: 'Cancel subscription',
+    rowPaymentMethod: 'אמצעי תשלום',
+    paymentNone: 'ללא',
+    rowCancel: 'ביטול המנוי',
 
-    planName: 'Premium',
-    trialPill: '{days}-day free trial',
-    perMonth: '/mo',
-    priceNoteAnnual: 'Billed {price} once a year - {percent}% less than monthly.',
-    priceNoteMonthly: 'Switch to annual to save {percent}%.',
-    a11yCta: 'Start your {days} day free trial, then {price} {period}',
-    cta: 'Start {days}-day free trial',
-    reminder:
-      "We'll remind you two days before the trial ends, so you can stop before you're charged.",
+    planName: 'פרימיום',
+    trialPill: '{days} ימי ניסיון חינם',
+    perMonth: '/לחודש',
+    priceNoteAnnual: 'חיוב של {price} פעם בשנה - {percent}% פחות מאשר תשלום חודשי.',
+    priceNoteMonthly: 'עברו לתשלום שנתי כדי לחסוך {percent}%.',
+    a11yCta: 'התחילו את תקופת הניסיון בת {days} הימים, ולאחר מכן {price} {period}',
+    cta: 'התחילו {days} ימי ניסיון חינם',
+    reminder: 'נזכיר לכם יומיים לפני שתקופת הניסיון מסתיימת, כדי שתוכלו לבטל לפני שתחויבו.',
 
-    compareTitle: "What's included",
-    columnFeatures: 'Features',
-    columnFree: 'Free',
-    columnPremium: 'Premium',
+    compareTitle: 'מה כלול',
+    columnFeatures: 'תכונות',
+    columnFree: 'חינם',
+    columnPremium: 'פרימיום',
 
-    cancelTitle: 'Cancel Premium?',
-    cancelInTrial: "You're still in the free trial, so you won't be charged anything.",
-    cancelNotInTrial: 'You will not be charged again.',
+    cancelTitle: 'לבטל את הפרימיום?',
+    cancelInTrial: 'אתם עדיין בתקופת הניסיון החינמית, כך שלא תחויבו בכלום.',
+    cancelNotInTrial: 'לא תחויבו שוב.',
     /** Appended to whichever of the two above applies, with a space between. */
-    cancelHistoryNote:
-      "Your log stays put, but you'll only be able to see the last {days} days of it again.",
-    cancelKeep: 'Keep Premium',
-    cancelConfirm: 'Cancel it',
+    cancelHistoryNote: 'ההיסטוריה שלכם נשארת, אבל תוכלו לראות שוב רק את {days} הימים האחרונים בה.',
+    cancelKeep: 'השאירו פרימיום',
+    cancelConfirm: 'בטלו אותו',
   },
 
   checkout: {
-    titleSubscribe: 'Checkout',
-    titleUpdate: 'Payment method',
+    titleSubscribe: 'תשלום',
+    titleUpdate: 'אמצעי תשלום',
 
-    summaryPlan: 'Premium, billed {period}',
-    perYear: '/yr',
-    perMonth: '/mo',
-    dueToday: 'Due today',
+    summaryPlan: 'פרימיום, חיוב {period}',
+    perYear: '/לשנה',
+    perMonth: '/לחודש',
+    dueToday: 'לתשלום היום',
     dueTodayAmount: '$0.00',
-    summaryNote: "Your {days}-day trial starts now. We'll remind you two days before it ends.",
+    summaryNote: 'תקופת הניסיון בת {days} הימים שלכם מתחילה עכשיו. נזכיר לכם יומיים לפני שהיא מסתיימת.',
     updateNote:
-      "This replaces the card or wallet your subscription is billed to. Your plan and renewal date don't change.",
+      'זה מחליף את הכרטיס או הארנק שהמנוי שלכם מחויב אליו. התוכנית ותאריך החידוש שלכם לא משתנים.',
 
-    sectionPayWith: 'Pay with',
+    sectionPayWith: 'שלמו באמצעות',
     a11yMethod: '{label}. {detail}',
-    methodCardDetail: 'Visa, Mastercard, Amex',
-    methodAppleDetail: 'Confirm with Face ID',
-    methodGoogleDetail: 'Confirm in the Google Pay sheet',
+    methodCardDetail: 'ויזה, מאסטרקארד, אמקס',
+    methodAppleDetail: 'אשרו עם Face ID',
+    methodGoogleDetail: 'אשרו בחלונית Google Pay',
 
-    cardNumberLabel: 'Card number',
+    cardNumberLabel: 'מספר כרטיס',
     cardNumberPlaceholder: '4242 4242 4242 4242',
-    expiryLabel: 'Expiry',
+    expiryLabel: 'תוקף',
     expiryPlaceholder: 'MM/YY',
     cvcLabel: 'CVC',
     cvcPlaceholder: '123',
-    nameLabel: 'Name on card',
-    namePlaceholder: 'Dafna Levi',
+    nameLabel: 'שם על הכרטיס',
+    namePlaceholder: 'דפנה לוי',
 
     walletNote:
-      '{wallet} will ask you to confirm. Your card details stay with {wallet} - VertiGoes never sees them.',
+      '{wallet} יבקש מכם לאשר. פרטי הכרטיס שלכם נשארים אצל {wallet} - VertiGoes אף פעם לא רואה אותם.',
 
-    a11ySave: 'Save payment method',
-    a11yTrial: 'Start free trial, {price} {period} after {days} days',
-    ctaSave: 'Save payment method',
-    ctaWallet: 'Pay with {wallet}',
-    ctaTrial: 'Start {days}-day free trial',
-    legal: "Demo - nothing is submitted and no card is charged. Don't enter a real card number.",
+    a11ySave: 'שמרו אמצעי תשלום',
+    a11yTrial: 'התחילו ניסיון חינם, {price} {period} לאחר {days} ימים',
+    ctaSave: 'שמרו אמצעי תשלום',
+    ctaWallet: 'שלמו עם {wallet}',
+    ctaTrial: 'התחילו {days} ימי ניסיון חינם',
+    legal: 'הדגמה - שום דבר לא נשלח ואף כרטיס לא מחויב. אל תזינו מספר כרטיס אמיתי.',
   },
 
   /** Written by `AppShell` when it pushes a screen whose real content does not exist yet. */
   shell: {
-    drillPlaceholderNote: 'The guided audio for {title} ({duration}) will live here.',
-    exercisePlaceholderNote: 'The guided player for {title} ({duration}) will live here.',
+    drillPlaceholderNote: 'הנגן המודרך עבור {title} ({duration}) יופיע כאן.',
+    exercisePlaceholderNote: 'הנגן המודרך עבור {title} ({duration}) יופיע כאן.',
   },
 } satisfies NamespaceOf<'flows'>;

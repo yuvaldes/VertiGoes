@@ -5,16 +5,15 @@ import type { NamespaceOf } from '../index';
  * while keeping the literal types, so a misspelt or misplaced key fails here instead of
  * silently falling back to English at runtime.
  *
- * Anything below still holding English is a scaffold for the translation pass, not a
- * decision — the endonyms in `language` are the one exception, and they stay English by
- * design. Search this file for Latin text to find what is still outstanding.
+ * The endonyms in `language` are deliberately English/Hebrew regardless of locale — see the
+ * note in en/common.ts.
  */
 export const common = {
   action: {
     back: 'חזרה',
     close: 'סגירה',
     done: 'סיום',
-    dismiss: 'Dismiss',
+    dismiss: 'סגור',
   },
   answer: {
     yes: 'כן',
@@ -27,42 +26,39 @@ export const common = {
   },
   header: {
     greeting: 'שלום, {firstName}',
-    taskCountOne: '{count} task',
-    taskCountOther: '{count} tasks',
-    tasksWaitingOne: 'is waiting for you today',
-    tasksWaitingOther: 'are waiting for you today',
-  },
-  brandRow: {
-    a11ySwitchLayout: 'Switch home layout',
+    taskCountOne: '{count} משימה',
+    taskCountOther: '{count} משימות',
+    tasksWaitingOne: 'מחכה לך היום',
+    tasksWaitingOther: 'מחכות לך היום',
   },
   bottomBar: {
-    emergency: 'Emergency',
-    a11yOpenEmergency: 'Open emergency options',
-    tabHome: 'Home',
-    tabLiv: 'Liv',
-    tabMenu: 'Menu',
+    emergency: 'חירום',
+    a11yOpenEmergency: 'פתחו אפשרויות חירום',
+    tabHome: 'בית',
+    tabLiv: 'ליב',
+    tabMenu: 'תפריט',
   },
   emergency: {
-    title: 'Emergency',
-    callTitle: 'Call emergency contact',
+    title: 'חירום',
+    callTitle: 'התקשרו לאיש קשר לשעת חירום',
     callSubtitle: '{name} ({relationship})',
-    helpTitle: 'Help me through it',
-    helpSubtitle: 'Get immediate in-app help',
-    a11yDismiss: 'Dismiss emergency options',
+    helpTitle: 'עזרו לי להתמודד',
+    helpSubtitle: 'קבלו עזרה מיידית באפליקציה',
+    a11yDismiss: 'סגרו אפשרויות חירום',
   },
   exercises: {
-    title: 'Today’s exercises',
-    a11yEdit: 'Edit exercises',
-    allDoneTitle: 'All exercises completed!',
-    allDoneSubtitle: 'Come back later to repeat them.',
-    statusCompleted: 'Completed',
-    statusStart: 'Start',
+    title: 'התרגילים של היום',
+    a11yEdit: 'ערכו תרגילים',
+    allDoneTitle: 'כל התרגילים הושלמו!',
+    allDoneSubtitle: 'חיזרו מאוחר יותר כדי לחזור עליהם.',
+    statusCompleted: 'הושלם',
+    statusStart: 'התחילו',
   },
   insight: {
-    openCalendar: 'Open calendar',
+    openCalendar: 'פתחו יומן',
   },
   menuRow: {
-    a11yPremium: '{label} - requires Premium',
+    a11yPremium: '{label} - דורש פרימיום',
     a11yWithValue: '{label}, {value}',
   },
 } satisfies NamespaceOf<'common'>;

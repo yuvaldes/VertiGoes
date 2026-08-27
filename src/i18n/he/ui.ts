@@ -1,98 +1,94 @@
 import type { NamespaceOf } from '../index';
 
 /**
- * The Hebrew tree for the `ui` namespace. Every value below is still the English source
- * string: this file is the scaffold the translation pass fills in, not a decision. Search it
- * for Latin text to find what is outstanding, which right now is all of it.
- *
  * `satisfies` rather than a type annotation, so a key that drifts from `en/ui.ts` fails here
  * instead of silently falling back to English at runtime.
  */
 export const ui = {
   premiumGate: {
-    a11yUnlock: 'Unlock {count} more {itemLabel} with Premium',
-    title: '{count} more {itemLabel}',
-    cta: 'Get Premium',
+    a11yUnlock: 'פתחו עוד {count} {itemLabel} עם פרימיום',
+    title: 'עוד {count} {itemLabel}',
+    cta: 'קבלו פרימיום',
   },
   reorderList: {
-    a11yReorder: 'Reorder {title}',
-    a11yRemove: 'Remove {title}',
+    a11yReorder: 'סדרו מחדש את {title}',
+    a11yRemove: 'הסירו את {title}',
   },
+  /** The three Home tasks, inline on the card and again inside the sheet each one opens. */
   task: {
-    completed: 'COMPLETED',
-    notCompleted: 'NOT COMPLETED',
-    feelingQuestion: 'How are you feeling currently?',
-    feelingAnswered: 'Thanks, I’ll ask you this again later!',
-    a11yFeelingGood: 'Feeling good',
-    a11yFeelingBad: 'Feeling bad',
-    sleepQuestion: 'How many hours did you sleep?',
-    a11yDismissSheet: 'Dismiss {title}',
-  },
-  weeklyStatus: {
-    eyebrow: 'STATUS',
-  },
-  headerDate: {
-    a11yOpenCalendar: 'Open calendar, {label}',
+    completed: 'הושלם',
+    notCompleted: 'לא הושלם',
+    feelingQuestion: 'איך אתם מרגישים כרגע?',
+    feelingAnswered: 'תודה! נשאל אתכם שוב מאוחר יותר',
+    a11yFeelingGood: 'מרגיש טוב',
+    a11yFeelingBad: 'מרגיש רע',
+    sleepQuestion: 'כמה שעות ישנתם?',
   },
   calendar: {
-    a11yChangeYear: 'Change year, currently {year}',
-    a11yDismissYearPicker: 'Dismiss year picker',
-    yearPickerTitle: 'Jump to year',
+    a11yChangeYear: 'החליפו שנה, נוכחית {year}',
+    a11yDismissYearPicker: 'סגרו את בורר השנים',
+    yearPickerTitle: 'קפצו לשנה',
   },
   dayBreakdown: {
-    emergencyCall: 'You called your emergency contact',
-    episodesOne: 'You had {count} episode',
-    episodesOther: 'You had {count} episodes',
-    noEpisodes: 'You had no episodes',
-    inAppHelp: 'You got in-app help',
-    a11yOpenDay: '{line}. See everything recorded on this day.',
-    livHeading: 'Liv',
-    openConversation: 'Open conversation',
-    exercisesHeading: 'Your daily exercises',
-    showExercises: 'Show exercises',
-    sleptHours: 'You slept for {hours} hours',
-    slotMorning: 'Morning',
-    slotMidday: 'Mid-day',
-    slotEvening: 'Evening',
+    emergencyCall: 'התקשרת לאיש הקשר לשעת חירום',
+    episodesOne: 'היה לך {count} אירוע',
+    episodesOther: 'היו לך {count} אירועים',
+    noEpisodes: 'לא היו לך אירועים',
+    inAppHelp: 'קיבלת עזרה באפליקציה',
+    a11yOpenDay: '{line}. צפו בכל מה שנרשם ביום זה.',
+    livHeading: 'ליב',
+    openConversation: 'פתחו שיחה',
+    exercisesHeading: 'התרגילים היומיים שלך',
+    showExercises: 'הצג תרגילים',
+    sleptHours: 'ישנת {hours} שעות',
+    /**
+     * The same three words as `data.slot.*`. Kept here so the breakdown does not depend on the
+     * shape a data module happens to expose; see the note in DayBreakdown.tsx.
+     */
+    slotMorning: 'בוקר',
+    slotMidday: 'צהריים',
+    slotEvening: 'ערב',
   },
+  /** Keyed by `LivAction['kind']`, so a new action fails to compile until it has a label. */
   livAction: {
-    startHelp: 'Help me through it',
-    completeExercise: 'Mark it done',
-    dismiss: 'Not now',
-    taken: 'Done',
+    startHelp: 'עזרו לי להתמודד',
+    completeExercise: 'סמנו כבוצע',
+    dismiss: 'לא עכשיו',
+    taken: 'בוצע',
   },
   composer: {
-    placeholder: 'Write to Liv...',
-    a11yLabel: 'Message Liv',
-    a11yDictate: 'Dictate a message',
-    a11ySend: 'Send',
-    a11yVoiceMode: 'Start voice mode',
+    placeholder: 'כתבו לליב...',
+    a11yLabel: 'הודעה לליב',
+    a11yDictate: 'הכתיבו הודעה',
+    a11ySend: 'שלחו',
+    a11yVoiceMode: 'התחילו מצב קולי',
   },
   livAvatar: {
-    a11yLabel: 'Liv',
+    a11yLabel: 'ליב',
   },
   promptChips: {
-    greeting: 'Hi {firstName}, I’m Liv',
-    body: 'Tell me how you’re feeling and I’ll keep track of it for you. Anything you say here is summarised onto your calendar.',
-    dizzyNow: 'I feel dizzy right now',
-    episodeEarlier: 'I had an episode earlier',
-    sleep: 'How has my sleep been?',
-    exercises: 'Remind me about my exercises',
+    greeting: 'היי {firstName}, אני ליב',
+    body: 'ספרו לי איך אתם מרגישים ואני אעקוב אחר זה בשבילכם. כל מה שתגידו כאן יסוכם ביומן שלכם.',
+    dizzyNow: 'אני מרגיש סחרחורת ממש עכשיו',
+    episodeEarlier: 'היה לי אירוע קודם לכן',
+    sleep: 'איך הייתה השינה שלי?',
+    exercises: 'תזכירו לי לגבי התרגילים שלי',
   },
   voiceListening: {
-    title: 'Listening…',
-    hint: 'Simulated - no audio is recorded',
-    a11yStop: 'Stop listening',
+    title: 'מאזין…',
+    hint: 'מדומה - לא מוקלט שום קול',
+    a11yStop: 'הפסיקו להאזין',
   },
   voiceMode: {
-    a11yMute: 'Mute microphone',
-    a11yUnmute: 'Unmute microphone',
-    a11yEnd: 'End voice mode',
+    a11yMute: 'השתיקו מיקרופון',
+    a11yUnmute: 'בטלו השתקת מיקרופון',
+    a11yEnd: 'סיימו מצב קולי',
   },
+  /** Simulated speech. These are put into the user's own turn, so they are the user's voice. */
   cannedPhrase: {
-    episodeMorning: 'I had a spinning episode this morning when I got out of bed',
-    sleepFiveHours: 'I only slept about five hours last night',
-    exercisesDizzy: 'I finished my exercises but the second one made me dizzy',
-    unsteady: 'I feel a bit unsteady on my feet today',
+    episodeMorning: 'היה לי אירוע סחרחורת הבוקר כשקמתי מהמיטה',
+    sleepFiveHours: 'ישנתי רק כחמש שעות הלילה',
+    exercisesDizzy: 'סיימתי את התרגילים אבל השני גרם לי לסחרחורת',
+    unsteady: 'אני מרגיש קצת לא יציב על הרגליים היום',
   },
 } satisfies NamespaceOf<'ui'>;
