@@ -23,7 +23,7 @@ type ExercisesValue = {
 const ExercisesContext = createContext<ExercisesValue | null>(null);
 
 /**
- * Today's exercises live here rather than in HomeScreen because the edit screen
+ * Today's exercises live here rather than in a screen because the edit screen
  * (7338:215283) mutates the same list — reordering, deleting and adding from the library.
  */
 export function ExercisesProvider({ children }: { children: ReactNode }) {

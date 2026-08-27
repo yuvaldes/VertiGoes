@@ -5,18 +5,20 @@ import { BottomBar } from '../components/BottomBar';
 import { BrandRow } from '../components/BrandRow';
 import { EmergencySheet } from '../components/EmergencySheet';
 import { SheetHostProvider } from '../components/SheetHost';
+import { HeaderDateButton } from '../components/home/HeaderDateButton';
 import { emergencyContact, type TabKey } from '../data/home';
 import type { HelpAnswer } from '../data/helpFlow';
 import type { OnboardingAnswers } from '../data/onboarding';
 import type { BillingPeriod, PaymentMethod } from '../data/subscription';
-import { useDirection, useT } from '../i18n';
+import { useDateFormat, useDirection, useT } from '../i18n';
 import { CalendarScreen } from '../screens/CalendarScreen';
 import { CheckoutScreen } from '../screens/CheckoutScreen';
 import { DayDetailScreen } from '../screens/DayDetailScreen';
 import { EditExercisesScreen } from '../screens/EditExercisesScreen';
 import { ExerciseLibraryScreen } from '../screens/ExerciseLibraryScreen';
+import { ExerciseVideosScreen } from '../screens/ExerciseVideosScreen';
 import { HelpFlowScreen } from '../screens/HelpFlowScreen';
-import { HomeScreen } from '../screens/HomeScreen';
+import { HomeStatusScreen } from '../screens/HomeStatusScreen';
 import { LivScreen } from '../screens/LivScreen';
 import { MeditationDrillsScreen } from '../screens/MeditationDrillsScreen';
 import { MenuScreen } from '../screens/MenuScreen';
@@ -38,6 +40,7 @@ import { useEdgeSwipeBack } from './useEdgeSwipeBack';
  */
 type Pushed =
   | { route: 'editExercises' }
+  | { route: 'exerciseVideos' }
   | { route: 'calendar' }
   | { route: 'dayDetail'; date: string }
   | { route: 'helpFlow' }
@@ -98,11 +101,12 @@ export function AppShell() {
 }
 
 function Shell() {
-  const { todayKey, recordEmergencyCall, recordInAppHelp } = useDayRecords();
+  const { today, todayKey, recordEmergencyCall, recordInAppHelp } = useDayRecords();
   const { refreshDaySummary } = useLivChat();
   const { setLanguage } = usePreferences();
   const { subscribe, setPaymentMethod, paymentMethod } = useSubscription();
   const t = useT();
+  const date = useDateFormat();
   const { isRTL } = useDirection();
 
   /**
@@ -228,8 +232,22 @@ function Shell() {
 
   const topRoute = stack.length > 0 ? stack[stack.length - 1].entry.route : null;
 
-  /** The Emergency drawer is not on every screen: it belongs to Home alone. */
-  const showEmergency = activeTab === 'home' && topRoute === null;
+  /**
+   * The date button belongs to Home's design, and its design puts the same header on the
+   * exercise videos screen — so it survives that one push rather than being Home-only.
+   */
+  const showHeaderDate =
+    activeTab === 'home' &&
+    leaving === null &&
+    (topRoute === null || topRoute === 'exerciseVideos');
+
+  /**
+   * The Emergency drawer is not on every screen: it belongs to Home and — because the design
+   * carries the same bar across — the exercise videos pushed over it. Everywhere else the bar
+   * is the tab pill alone.
+   */
+  const showEmergency =
+    (activeTab === 'home' && topRoute === null) || topRoute === 'exerciseVideos';
 
   /** Onboarding is the one screen with no bar at all: it owns the whole frame. */
   const showBottomBar = topRoute !== 'onboarding';
@@ -250,6 +268,16 @@ function Shell() {
       case 'editExercises':
         return (
           <EditExercisesScreen onBack={pop} activeTab={activeTab} onChangeTab={changeTab} />
+        );
+      case 'exerciseVideos':
+        return (
+          <ExerciseVideosScreen
+            onBack={pop}
+            onEdit={() => push({ route: 'editExercises' })}
+            onOpenEmergency={() => setEmergencyOpen(true)}
+            activeTab={activeTab}
+            onChangeTab={changeTab}
+          />
         );
       case 'calendar':
         return (
@@ -402,12 +430,11 @@ function Shell() {
             onOpenPlaceholder={openPlaceholder}
           />
         ) : (
-          <HomeScreen
+          <HomeStatusScreen
             activeTab={activeTab}
             onChangeTab={changeTab}
             onOpenEmergency={() => setEmergencyOpen(true)}
-            onEditExercises={() => push({ route: 'editExercises' })}
-            onOpenCalendar={() => push({ route: 'calendar' })}
+            onOpenExercises={() => push({ route: 'exerciseVideos' })}
           />
         )}
       </View>
@@ -457,9 +484,19 @@ function Shell() {
         screen, every pushed screen, and both while they're mid-slide. Every screen still renders
         `AppHeader`, but that only reserves the space now; it stopped rendering `BrandRow` itself
         so the logo would stop sliding along with the screen underneath it on every push and pop.
+        Purely decorative: tapping it does nothing.
       */}
       <View style={styles.brandBar} pointerEvents="box-none">
-        <BrandRow />
+        <BrandRow
+          trailing={
+            showHeaderDate ? (
+              <HeaderDateButton
+                label={date.monthDay(today)}
+                onPress={() => push({ route: 'calendar' })}
+              />
+            ) : null
+          }
+        />
       </View>
 
       {/*

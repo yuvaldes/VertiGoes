@@ -13,7 +13,7 @@ type Props = {
 };
 
 /**
- * A wrapping row of pill toggles, styled after `TaskSleep`'s hour chips.
+ * A wrapping row of pill toggles, styled after the app's hour-chip pattern.
  *
  * Purely presentational — it reports taps via `onToggle` and leaves single- vs multi-select
  * semantics to the caller. A single-select caller just always replaces the selection on toggle;

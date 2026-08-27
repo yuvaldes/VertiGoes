@@ -142,19 +142,6 @@ export const emergencyContact = {
 };
 
 /**
- * Home's date line. The date itself was frozen English text ("Today is July 24th") that never
- * advanced; it is now a `{date}` the caller fills from `useDateFormat().monthDay(new Date())`,
- * which both localises it and makes it true.
- */
-export const today = {
-  labelKey: 'data.home.todayLabel' as TKey,
-};
-
-export const insight = {
-  textKey: 'data.home.insight' as TKey,
-};
-
-/**
  * The five sleep chips.
  *
  * `hours` is what gets recorded, and it used to be recovered by comparing the rendered label

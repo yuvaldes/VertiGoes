@@ -23,6 +23,13 @@ export const ui = {
     a11yFeelingGood: 'מרגיש טוב',
     a11yFeelingBad: 'מרגיש רע',
     sleepQuestion: 'כמה שעות ישנתם?',
+    a11yDismissSheet: 'סגרו את {title}',
+  },
+  weeklyStatus: {
+    eyebrow: 'סטטוס',
+  },
+  headerDate: {
+    a11yOpenCalendar: 'פתחו יומן, {label}',
   },
   calendar: {
     a11yChangeYear: 'החליפו שנה, נוכחית {year}',

@@ -24,13 +24,6 @@ export const common = {
     en: 'English',
     he: 'עברית',
   },
-  header: {
-    greeting: 'שלום, {firstName}',
-    taskCountOne: '{count} משימה',
-    taskCountOther: '{count} משימות',
-    tasksWaitingOne: 'מחכה לך היום',
-    tasksWaitingOther: 'מחכות לך היום',
-  },
   bottomBar: {
     emergency: 'חירום',
     a11yOpenEmergency: 'פתחו אפשרויות חירום',
@@ -45,17 +38,6 @@ export const common = {
     helpTitle: 'עזרו לי להתמודד',
     helpSubtitle: 'קבלו עזרה מיידית באפליקציה',
     a11yDismiss: 'סגרו אפשרויות חירום',
-  },
-  exercises: {
-    title: 'התרגילים של היום',
-    a11yEdit: 'ערכו תרגילים',
-    allDoneTitle: 'כל התרגילים הושלמו!',
-    allDoneSubtitle: 'חיזרו מאוחר יותר כדי לחזור עליהם.',
-    statusCompleted: 'הושלם',
-    statusStart: 'התחילו',
-  },
-  insight: {
-    openCalendar: 'פתחו יומן',
   },
   menuRow: {
     a11yPremium: '{label} - דורש פרימיום',

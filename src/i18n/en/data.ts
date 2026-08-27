@@ -142,12 +142,6 @@ export const data = {
     },
   },
 
-  home: {
-    todayLabel: 'Today is {date}',
-    insight:
-      'You’ve slept 7 hours for 6 days straight. This may affect your episode frequency.',
-  },
-
   /** The mock contact's tie to the user. The name and number are data, not copy. */
   emergency: {
     relationship: 'brother',

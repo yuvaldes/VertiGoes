@@ -651,13 +651,14 @@ const styles = StyleSheet.create({
     color: color.brand600,
   },
   /**
-   * The label column's head is left-aligned with the feature names beneath it, not centred.
-   * `'left'` rather than a logical value on purpose: RN has no `textAlign: 'start'`, and both
-   * platforms already flip this value under RTL, which is exactly what tracking the feature
-   * names requires.
+   * The label column's head tracks the feature names beneath it, not centred.
+   * `'auto'` rather than a hardcoded `'left'`: a literal `left` stays physically pinned under
+   * RTL, while `featureLabel` below has no textAlign override and so auto-mirrors with the
+   * platform's writing direction. `'auto'` keeps this header aligned with that body text in
+   * both directions.
    */
   columnHeadLabel: {
-    textAlign: 'left',
+    textAlign: 'auto',
   },
   featureRow: {
     flexDirection: 'row',

@@ -136,11 +136,6 @@ export const data = {
     },
   },
 
-  home: {
-    todayLabel: 'היום הוא {date}',
-    insight: 'ישנתם 7 שעות במשך 6 ימים ברציפות. זה עשוי להשפיע על תדירות האירועים שלכם.',
-  },
-
   /** The mock contact's tie to the user. The name and number are data, not copy. */
   emergency: {
     relationship: 'אח',

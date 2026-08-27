@@ -29,18 +29,6 @@ export const common = {
     en: 'English',
     he: 'עברית',
   },
-  header: {
-    greeting: 'Hello, {firstName}',
-    /**
-     * The count and the rest of the sentence are two strings because they are two colours
-     * on screen. Each half is a whole phrase rather than a word, so a translator can order
-     * the words inside it freely; only the two halves themselves are pinned in sequence.
-     */
-    taskCountOne: '{count} task',
-    taskCountOther: '{count} tasks',
-    tasksWaitingOne: 'is waiting for you today',
-    tasksWaitingOther: 'are waiting for you today',
-  },
   bottomBar: {
     emergency: 'Emergency',
     a11yOpenEmergency: 'Open emergency options',
@@ -55,17 +43,6 @@ export const common = {
     helpTitle: 'Help me through it',
     helpSubtitle: 'Get immediate in-app help',
     a11yDismiss: 'Dismiss emergency options',
-  },
-  exercises: {
-    title: 'Today’s exercises',
-    a11yEdit: 'Edit exercises',
-    allDoneTitle: 'All exercises completed!',
-    allDoneSubtitle: 'Come back later to repeat them.',
-    statusCompleted: 'Completed',
-    statusStart: 'Start',
-  },
-  insight: {
-    openCalendar: 'Open calendar',
   },
   menuRow: {
     a11yPremium: '{label} - requires Premium',
