@@ -121,7 +121,7 @@ export function HomeCarousel({ headline, week, tips, onOpenExercises }: Props) {
 
 const styles = StyleSheet.create({
   section: {
-    gap: 10,
+    gap: 8,
   },
   /** Cancels the page gutter so the strip is full-bleed; the content padding puts it back. */
   strip: {
