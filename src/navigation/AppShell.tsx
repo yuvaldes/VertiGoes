@@ -127,6 +127,8 @@ function Shell() {
    * choice survives the push to checkout — checkout has to charge what the toggle said.
    */
   const [billing, setBilling] = useState<BillingPeriod>('annual');
+  /** Whether the help flow is still on a question — see `fullBleed` below. */
+  const [helpAsking, setHelpAsking] = useState(true);
 
   const nextId = useRef(0);
 
@@ -198,6 +200,7 @@ function Shell() {
 
   const startHelpFlow = () => {
     setEmergencyOpen(false);
+    setHelpAsking(true);
     push({ route: 'helpFlow' });
   };
 
@@ -249,8 +252,17 @@ function Shell() {
   const showEmergency =
     (activeTab === 'home' && topRoute === null) || topRoute === 'exerciseVideos';
 
-  /** Onboarding is the one screen with no bar at all: it owns the whole frame. */
-  const showBottomBar = topRoute !== 'onboarding';
+  /**
+   * Two screens own the whole frame and render no shell chrome: onboarding, and the emergency
+   * help flow while it is asking its questions. The help flow's design (Figma 484:10276) gives
+   * the entire viewport to one question and two very large targets, and a wordmark and tab bar
+   * above it would be both noise and a way to wander off mid-episode.
+   *
+   * The flow drops back into the ordinary chrome for its guidance step, which is a page to read
+   * rather than a prompt to answer - so this follows the screen's own state, not just the route.
+   */
+  const fullBleed = topRoute === 'onboarding' || (topRoute === 'helpFlow' && helpAsking);
+  const showBottomBar = !fullBleed;
 
   /**
    * No account/profile store exists yet, so this is a stub like `finishHelpFlow` used to be —
@@ -302,6 +314,7 @@ function Shell() {
           <HelpFlowScreen
             onBack={pop}
             onFinish={finishHelpFlow}
+            onAskingChange={setHelpAsking}
             onCallEmergencyContact={callEmergencyContact}
             activeTab={activeTab}
             onChangeTab={changeTab}
@@ -486,6 +499,7 @@ function Shell() {
         so the logo would stop sliding along with the screen underneath it on every push and pop.
         Purely decorative: tapping it does nothing.
       */}
+      {!fullBleed && (
       <View style={styles.brandBar} pointerEvents="box-none">
         <BrandRow
           trailing={
@@ -498,6 +512,7 @@ function Shell() {
           }
         />
       </View>
+      )}
 
       {/*
         The tab bar, rendered exactly once and pinned over every screen — the same treatment

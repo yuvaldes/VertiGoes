@@ -14,6 +14,7 @@ export const common = {
     close: 'סגירה',
     done: 'סיום',
     dismiss: 'סגור',
+    cancel: 'ביטול',
   },
   answer: {
     yes: 'כן',

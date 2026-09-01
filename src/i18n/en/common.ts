@@ -15,6 +15,7 @@ export const common = {
     close: 'Close',
     done: 'Done',
     dismiss: 'Dismiss',
+    cancel: 'Cancel',
   },
   answer: {
     yes: 'Yes',

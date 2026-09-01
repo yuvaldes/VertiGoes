@@ -1,9 +1,11 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import { Check, Phone, WarningCircle } from 'phosphor-react-native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { AppHeader } from '../components/AppHeader';
 import { BottomBarSlot } from '../components/BottomBar';
+import { LivAvatar } from '../components/liv/LivAvatar';
 import { Ring } from '../components/Ring';
 import { ScreenTitleRow } from '../components/ScreenTitleRow';
 import { HELP_QUESTIONS, guidanceFor, type HelpAnswer } from '../data/helpFlow';
@@ -15,10 +17,60 @@ type Props = {
   onBack: () => void;
   /** Called once every question is answered, so the day record can be written. */
   onFinish: (answers: HelpAnswer[]) => void;
+  /**
+   * Reports whether the flow is still asking. `AppShell` hides its wordmark and tab bar while
+   * it is, because the question state is a full-bleed takeover; the guidance step is an
+   * ordinary page and gets the chrome back.
+   */
+  onAskingChange: (asking: boolean) => void;
   onCallEmergencyContact: () => void;
   activeTab: TabKey;
   onChangeTab: (tab: TabKey) => void;
 };
+
+/** Figma 484:10276 sizes Liv at 128 on this screen - far larger than the 64 she gets elsewhere. */
+const AVATAR_SIZE = 128;
+
+/**
+ * One of the two answer buttons: a full-width gradient pill, 84 tall with a 36pt label.
+ *
+ * Deliberately enormous. Every other button in the app is 48; these are the only controls a
+ * user might be reaching for while the room is spinning, and the design trades all the page's
+ * spare height for target size.
+ */
+function BigAnswer({
+  label,
+  from,
+  to,
+  border,
+  onPress,
+}: {
+  label: string;
+  from: string;
+  to: string;
+  border: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label}>
+      {({ pressed }) => (
+        // Pressing inverts the gradient. The button reads as lit from above at rest and from
+        // below once held, which is the whole feedback here: at this size a tint or a scale
+        // would be easy to miss, and these are the two controls that most need to feel
+        // answered under a thumb.
+        <LinearGradient
+          colors={pressed ? ([to, from] as const) : ([from, to] as const)}
+          style={styles.bigAnswer}
+        >
+          {/* Uppercase in the style rather than the string: Hebrew has no case, so the same key
+              renders "YES" in English and an unchanged "כן" in Hebrew. */}
+          <Text style={styles.bigAnswerLabel}>{label}</Text>
+          <Ring radius={64} color={border} />
+        </LinearGradient>
+      )}
+    </Pressable>
+  );
+}
 
 /**
  * The in-app help flow: one yes/no question per step, then guidance.
@@ -32,6 +84,7 @@ type Props = {
 export function HelpFlowScreen({
   onBack,
   onFinish,
+  onAskingChange,
   onCallEmergencyContact,
   activeTab,
   onChangeTab,
@@ -58,6 +111,70 @@ export function HelpFlowScreen({
 
   const guidance = done ? guidanceFor(answers) : null;
 
+  // Reported from an effect rather than during render: the shell re-renders on it, and the
+  // back button can step from guidance back into a question, so it has to stay live.
+  useEffect(() => {
+    onAskingChange(!done);
+  }, [done, onAskingChange]);
+
+  /**
+   * The question state is a full-screen takeover, per Figma 484:10276 - no wordmark, no tab
+   * bar, no title row. Someone reaching this screen is mid-episode and possibly on the floor,
+   * so the design gives the whole viewport to one sentence and two targets big enough to hit
+   * without aiming. `AppShell` hides its fixed chrome for this route.
+   */
+  if (question) {
+    return (
+      <View style={styles.askBody}>
+        <View style={styles.askTop}>
+          {/* Liv, not a generic icon: the flow reads as her talking you through it. */}
+          <LivAvatar size={AVATAR_SIZE} />
+
+          <Pressable
+            style={styles.cancel}
+            onPress={onBack}
+            accessibilityRole="button"
+            accessibilityLabel={t('common.action.cancel')}
+          >
+            <Text style={styles.cancelLabel}>{t('common.action.cancel')}</Text>
+            <Ring radius={64} color={color.gray300} />
+          </Pressable>
+        </View>
+
+        <View style={styles.askQuestionBlock}>
+          <Text
+            style={styles.askQuestion}
+            // The step count is gone from the design, so it survives here - a screen reader
+            // user would otherwise have no idea how far through the flow they are.
+            accessibilityLabel={`${t('flows.help.progress', {
+              step: step + 1,
+              total: HELP_QUESTIONS.length,
+            })}. ${t(question.textKey)}`}
+          >
+            {t(question.textKey)}
+          </Text>
+        </View>
+
+        <View style={styles.askAnswers}>
+          <BigAnswer
+            label={t('common.answer.yes')}
+            from={color.success500}
+            to={color.success600}
+            border={color.success600}
+            onPress={() => answer(true)}
+          />
+          <BigAnswer
+            label={t('common.answer.no')}
+            from={color.orange500}
+            to={color.orange600}
+            border={color.orange600}
+            onPress={() => answer(false)}
+          />
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.body}>
       <View style={styles.gutter}>
@@ -71,34 +188,6 @@ export function HelpFlowScreen({
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        {question && (
-          <>
-            <Text style={styles.progress}>
-              {t('flows.help.progress', { step: step + 1, total: HELP_QUESTIONS.length })}
-            </Text>
-            <Text style={[styles.question, displayFont]}>{t(question.textKey)}</Text>
-
-            <View style={styles.answers}>
-              <Pressable
-                style={styles.answerButton}
-                onPress={() => answer(true)}
-                accessibilityRole="button"
-              >
-                <Text style={[styles.answerLabel, displayFont]}>{t('common.answer.yes')}</Text>
-                <Ring radius={12} color={color.gray200} />
-              </Pressable>
-              <Pressable
-                style={styles.answerButton}
-                onPress={() => answer(false)}
-                accessibilityRole="button"
-              >
-                <Text style={[styles.answerLabel, displayFont]}>{t('common.answer.no')}</Text>
-                <Ring radius={12} color={color.gray200} />
-              </Pressable>
-            </View>
-          </>
-        )}
-
         {guidance && (
           <>
             <View style={styles.resultHeader}>
@@ -168,6 +257,70 @@ export function HelpFlowScreen({
 }
 
 const styles = StyleSheet.create({
+  /** Figma 484:10276 "homeScreen" - the question state's own full-bleed layout. */
+  askBody: {
+    flex: 1,
+    backgroundColor: color.gray50,
+    paddingTop: 8,
+    paddingHorizontal: frame.gutter,
+    paddingBottom: 8,
+    gap: 12,
+  },
+  askTop: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+  },
+  cancel: {
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 64,
+    backgroundColor: color.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadow.xs,
+  },
+  cancelLabel: {
+    fontFamily: font.bodySemiBold,
+    fontSize: 16,
+    lineHeight: 24,
+    color: color.gray700,
+  },
+  /**
+   * Takes the slack between Liv and the buttons. The sentence sits at the top of it, not
+   * centred: the design lets the gap fall below the text so the reading always starts in the
+   * same place, however long the question runs.
+   */
+  askQuestionBlock: {
+    flex: 1,
+    minHeight: 0,
+    paddingVertical: 8,
+  },
+  askQuestion: {
+    fontFamily: font.bodyMedium,
+    fontSize: 30,
+    lineHeight: 42,
+    color: color.gray900,
+  },
+  askAnswers: {
+    gap: 20,
+  },
+  bigAnswer: {
+    padding: 20,
+    borderRadius: 64,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    ...shadow.xs,
+  },
+  bigAnswerLabel: {
+    fontFamily: font.bodySemiBold,
+    fontSize: 36,
+    lineHeight: 44,
+    letterSpacing: -0.72,
+    color: color.white,
+    textTransform: 'uppercase',
+  },
   body: {
     flex: 1,
     backgroundColor: color.gray50,

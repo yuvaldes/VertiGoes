@@ -64,6 +64,8 @@ export const flows = {
 
   help: {
     title: 'Help me through it',
+    /** No longer shown: the design gives the question the whole screen. Kept for the
+     *  screen reader, which otherwise loses all sense of how long the flow is. */
     progress: 'Question {step} of {total}',
     callContact: 'Call {name} ({relationship})',
     done: 'I’m done',

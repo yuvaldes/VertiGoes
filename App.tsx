@@ -1,5 +1,10 @@
 import { CalSans_400Regular } from '@expo-google-fonts/cal-sans';
-import { Inter_400Regular, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
+import {
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+} from '@expo-google-fonts/inter';
 import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
@@ -18,6 +23,7 @@ export default function App() {
   const [fontsLoaded] = useFonts({
     CalSans_400Regular,
     Inter_400Regular,
+    Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
   });
