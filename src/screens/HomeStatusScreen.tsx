@@ -10,7 +10,7 @@ import { Celebration } from '../components/Celebration';
 import { FeelingSheet } from '../components/home/FeelingSheet';
 import { SleepSheet } from '../components/home/SleepSheet';
 import { TaskCard } from '../components/home/TaskCard';
-import { WeeklyStatusCard } from '../components/home/WeeklyStatusCard';
+import { HomeCarousel } from '../components/home/HomeCarousel';
 import {
   describeSleep,
   episodeTrendKey,
@@ -19,6 +19,7 @@ import {
   type Feeling,
 } from '../data/dayRecords';
 import { user, type TabKey } from '../data/home';
+import { selectTips } from '../data/tips';
 import { useDisplayFont, useLocale, useT, type TKey } from '../i18n';
 import { useDayRecords } from '../state/DayRecordsContext';
 import { useExercises } from '../state/ExercisesContext';
@@ -95,6 +96,8 @@ export function HomeStatusScreen({
     () => streakEndingToday(records, today, allDone),
     [records, today, allDone],
   );
+  /** Recomputed only when the log or the day changes, so scrolling the page never reshuffles it. */
+  const tips = useMemo(() => selectTips(records, today), [records, today]);
 
   const answerFeeling = (value: Feeling) => {
     setSheet(null);
@@ -131,7 +134,12 @@ export function HomeStatusScreen({
           </View>
         </View>
 
-        <WeeklyStatusCard headline={t(headline)} week={week} />
+        <HomeCarousel
+          headline={t(headline)}
+          week={week}
+          tips={tips}
+          onOpenExercises={onOpenExercises}
+        />
 
         <View style={styles.tasks}>
           <View style={styles.streakRow}>

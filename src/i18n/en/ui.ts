@@ -28,6 +28,17 @@ export const ui = {
     sleepQuestion: 'How many hours did you sleep?',
     a11yDismissSheet: 'Dismiss {title}',
   },
+  /** The Home tips strip. The eyebrows name the three kinds of card. */
+  tips: {
+    open: 'Open',
+    a11yStrip: 'Tips and insights, {count} cards, scroll sideways',
+    eyebrow: {
+      insight: 'Insight',
+      progress: 'Progress',
+      coach: 'Try this',
+    },
+  },
+
   weeklyStatus: {
     eyebrow: 'STATUS',
   },

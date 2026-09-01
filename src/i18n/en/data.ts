@@ -302,4 +302,51 @@ export const data = {
     premiumSummary:
       'Your whole history, the community, every professional and drill, Liv, and no ads.',
   },
+  /**
+   * The Home tips strip. `insight` cards state what the log shows, `progress` credits a habit,
+   * `coach` asks for one specific thing. Nothing here claims a cause: the app can see that two
+   * things happened in the same week, not that one produced the other.
+   */
+  tip: {
+    episodesDown: {
+      title: 'Fewer episodes than last week',
+      body: 'You have logged {count} fewer this week. Whatever you changed, it is worth keeping.',
+    },
+    episodesUp: {
+      title: 'Episodes are up this week',
+      body: '{count} more than last week. Running your exercises in the morning is the usual place to start.',
+    },
+    shortSleep: {
+      title: 'Short nights lately',
+      body: 'You slept under {hours} hours on {nights} of the last 7. Sleep and episodes often track together, so it is worth watching.',
+    },
+    loggingStreak: {
+      title: '{days} days logged in a row',
+      body: 'A full log is what makes the weekly picture worth reading. Keep going.',
+    },
+    finishTheDay: {
+      title: 'Finish the day when you can',
+      body: 'You completed {done} of the last {total} days. Even a partly logged day helps.',
+    },
+    logEarly: {
+      title: 'Log an episode while it is fresh',
+      body: 'What you were doing just before matters as much as how it felt. Note it the same day.',
+    },
+    sameTime: {
+      title: 'Same exercises, same time',
+      body: 'Vestibular exercises work through repetition. A fixed slot in the day beats a longer session now and then.',
+    },
+    moveSlowly: {
+      title: 'Slow down the turns that set it off',
+      body: 'Sitting up, rolling over, looking up. Taking those a beat slower often takes the edge off.',
+    },
+    breathe: {
+      title: 'Breathe before bed',
+      body: 'A few minutes of paced breathing settles the tension that builds after a bad day.',
+    },
+    triggers: {
+      title: 'Look for your pattern',
+      body: 'Open the calendar and read a month at a time. Triggers show up as a shape, not as one bad day.',
+    },
+  },
 } as const;
