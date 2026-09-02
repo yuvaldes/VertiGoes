@@ -26,7 +26,6 @@ export const ui = {
     a11yDismissSheet: 'סגרו את {title}',
   },
   tips: {
-    open: 'פתחו',
     a11yStrip: 'טיפים ותובנות, {count} כרטיסים, גללו הצידה',
     eyebrow: {
       fact: 'הידעת',

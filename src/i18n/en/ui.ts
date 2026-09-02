@@ -30,7 +30,6 @@ export const ui = {
   },
   /** The Home tips strip: two "did you know" facts, cycling day to day. */
   tips: {
-    open: 'Open',
     a11yStrip: 'Tips and insights, {count} cards, scroll sideways',
     eyebrow: {
       fact: 'Did you know',

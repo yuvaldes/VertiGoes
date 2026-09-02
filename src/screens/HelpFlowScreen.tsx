@@ -8,14 +8,20 @@ import { BottomBarSlot } from '../components/BottomBar';
 import { LivAvatar } from '../components/liv/LivAvatar';
 import { Ring } from '../components/Ring';
 import { ScreenTitleRow } from '../components/ScreenTitleRow';
-import { HELP_QUESTIONS, guidanceFor, type HelpAnswer } from '../data/helpFlow';
+import {
+  currentNodeFor,
+  guidanceFor,
+  HELP_START,
+  type HelpAnswer,
+  type HelpQuestionNode,
+} from '../data/helpFlow';
 import { emergencyContact, type TabKey } from '../data/home';
 import { useDisplayFont, useT } from '../i18n';
 import { color, font, frame, shadow } from '../theme/tokens';
 
 type Props = {
   onBack: () => void;
-  /** Called once every question is answered, so the day record can be written. */
+  /** Called once a full path is answered, so the day record can be written. */
   onFinish: (answers: HelpAnswer[]) => void;
   /**
    * Reports whether the flow is still asking. `AppShell` hides its wordmark and tab bar while
@@ -30,6 +36,19 @@ type Props = {
 
 /** Figma 484:10276 sizes Liv at 128 on this screen - far larger than the 64 she gets elsewhere. */
 const AVATAR_SIZE = 128;
+
+/**
+ * A question is "yes/no" when it has exactly the two common answers, in that order — every Q0
+ * safety-gate item, plus a handful of the tree's own questions. Everything else — three- and
+ * four-way branches like "How did the dizziness start?" — gets the vertical choice list below.
+ */
+function isYesNo(question: HelpQuestionNode): boolean {
+  return (
+    question.options.length === 2 &&
+    question.options[0].labelKey === 'common.answer.yes' &&
+    question.options[1].labelKey === 'common.answer.no'
+  );
+}
 
 /**
  * One of the two answer buttons: a full-width gradient pill, 84 tall with a 36pt label.
@@ -73,13 +92,34 @@ function BigAnswer({
 }
 
 /**
- * The in-app help flow: one yes/no question per step, then guidance.
+ * A choice in a three- or four-way question. Sized generously — this still reaches for the
+ * "hittable while dizzy" goal the yes/no pair has, just without the room to be quite as huge
+ * once there are more than two.
+ */
+function ChoiceAnswer({ label, onPress }: { label: string; onPress: () => void }) {
+  return (
+    <Pressable
+      style={({ pressed }) => [styles.choice, pressed && styles.choicePressed]}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+    >
+      <Text style={styles.choiceLabel}>{label}</Text>
+      <Ring radius={20} color={color.gray200} />
+    </Pressable>
+  );
+}
+
+/**
+ * The in-app help flow: a branching triage tree, one question at a time, then guidance.
  *
  * A pushed screen rather than a sheet because it is multi-step and the user may be mid-episode —
- * a full screen with two large targets is easier to hit than a sheet with small controls.
+ * a full screen with large targets is easier to hit than a sheet with small controls.
  *
  * The answers are written on completion, not per step, so an abandoned flow leaves no partial
- * record on the calendar.
+ * record on the calendar. "Completion" is reaching any outcome node rather than answering a
+ * fixed count of questions — which node that is, and how many questions it took, depends on
+ * the path the answers actually took through the tree.
  */
 export function HelpFlowScreen({
   onBack,
@@ -93,14 +133,16 @@ export function HelpFlowScreen({
   const displayFont = useDisplayFont();
   const [answers, setAnswers] = useState<HelpAnswer[]>([]);
 
+  const node = currentNodeFor(answers);
+  const done = node.kind === 'outcome';
+  const question = done ? null : node;
   const step = answers.length;
-  const done = step >= HELP_QUESTIONS.length;
-  const question = done ? null : HELP_QUESTIONS[step];
 
-  const answer = (value: boolean) => {
-    const next = [...answers, { questionId: HELP_QUESTIONS[step].id, answer: value }];
+  const answer = (optionIndex: number) => {
+    if (!question) return;
+    const next = [...answers, { questionId: question.id, optionIndex }];
     setAnswers(next);
-    if (next.length === HELP_QUESTIONS.length) onFinish(next);
+    if (currentNodeFor(next).kind === 'outcome') onFinish(next);
   };
 
   const back = () => {
@@ -120,10 +162,13 @@ export function HelpFlowScreen({
   /**
    * The question state is a full-screen takeover, per Figma 484:10276 - no wordmark, no tab
    * bar, no title row. Someone reaching this screen is mid-episode and possibly on the floor,
-   * so the design gives the whole viewport to one sentence and two targets big enough to hit
+   * so the design gives the whole viewport to one sentence and controls big enough to hit
    * without aiming. `AppShell` hides its fixed chrome for this route.
    */
   if (question) {
+    const yesNo = isYesNo(question);
+    const progressLabel = `${t('flows.help.progress', { step: step + 1 })}. ${t(question.textKey)}`;
+
     return (
       <View style={styles.askBody}>
         <View style={styles.askTop}>
@@ -141,39 +186,63 @@ export function HelpFlowScreen({
           </Pressable>
         </View>
 
-        <View style={styles.askQuestionBlock}>
-          <Text
-            style={styles.askQuestion}
-            // The step count is gone from the design, so it survives here - a screen reader
-            // user would otherwise have no idea how far through the flow they are.
-            accessibilityLabel={`${t('flows.help.progress', {
-              step: step + 1,
-              total: HELP_QUESTIONS.length,
-            })}. ${t(question.textKey)}`}
-          >
-            {t(question.textKey)}
-          </Text>
-        </View>
+        {yesNo ? (
+          <>
+            <View style={styles.askQuestionBlock}>
+              {/* The step count is gone from the design, so it survives here - a screen reader
+                  user would otherwise have no idea how far through the flow they are. */}
+              <Text style={styles.askQuestion} accessibilityLabel={progressLabel}>
+                {t(question.textKey)}
+              </Text>
+            </View>
 
-        <View style={styles.askAnswers}>
-          <BigAnswer
-            label={t('common.answer.yes')}
-            from={color.success500}
-            to={color.success600}
-            border={color.success600}
-            onPress={() => answer(true)}
-          />
-          <BigAnswer
-            label={t('common.answer.no')}
-            from={color.orange500}
-            to={color.orange600}
-            border={color.orange600}
-            onPress={() => answer(false)}
-          />
-        </View>
+            <View style={styles.askAnswers}>
+              <BigAnswer
+                label={t('common.answer.yes')}
+                from={color.success500}
+                to={color.success600}
+                border={color.success600}
+                onPress={() => answer(0)}
+              />
+              <BigAnswer
+                label={t('common.answer.no')}
+                from={color.orange500}
+                to={color.orange600}
+                border={color.orange600}
+                onPress={() => answer(1)}
+              />
+            </View>
+          </>
+        ) : (
+          // Three- and four-way branches don't fit the huge yes/no pair, and some of their
+          // option text runs long — this scrolls instead of trying to cram everything in.
+          <ScrollView
+            style={styles.choicesScroll}
+            contentContainerStyle={styles.choicesContent}
+            showsVerticalScrollIndicator={false}
+          >
+            <Text style={styles.askQuestionChoices} accessibilityLabel={progressLabel}>
+              {t(question.textKey)}
+            </Text>
+            <View style={styles.choices}>
+              {question.options.map((option, index) => (
+                <ChoiceAnswer
+                  key={index}
+                  label={t(option.labelKey)}
+                  onPress={() => answer(index)}
+                />
+              ))}
+            </View>
+          </ScrollView>
+        )}
       </View>
     );
   }
+
+  const severity = guidance?.severity;
+  const isEmergency = severity === 'emergency';
+  const isUrgent = severity === 'urgent';
+  const emphasised = isEmergency || isUrgent;
 
   return (
     <View style={styles.body}>
@@ -191,8 +260,12 @@ export function HelpFlowScreen({
         {guidance && (
           <>
             <View style={styles.resultHeader}>
-              {guidance.urgent ? (
-                <WarningCircle size={24} weight="fill" color={color.error500} />
+              {emphasised ? (
+                <WarningCircle
+                  size={24}
+                  weight="fill"
+                  color={isEmergency ? color.error500 : color.orange500}
+                />
               ) : (
                 <Check size={24} weight="bold" color={color.success500} />
               )}
@@ -200,7 +273,7 @@ export function HelpFlowScreen({
                 style={[
                   styles.resultTitle,
                   displayFont,
-                  { color: guidance.urgent ? color.error500 : color.gray900 },
+                  emphasised && { color: isEmergency ? color.error500 : color.orange600 },
                 ]}
               >
                 {t(guidance.titleKey)}
@@ -210,13 +283,8 @@ export function HelpFlowScreen({
             <View style={styles.steps}>
               {guidance.stepKeys.map((stepKey, index) => (
                 <View key={stepKey} style={styles.step}>
-                  <View style={[styles.stepIndex, guidance.urgent && styles.stepIndexUrgent]}>
-                    <Text
-                      style={[
-                        styles.stepIndexLabel,
-                        guidance.urgent && styles.stepIndexLabelUrgent,
-                      ]}
-                    >
+                  <View style={[styles.stepIndex, isEmergency && styles.stepIndexUrgent]}>
+                    <Text style={[styles.stepIndexLabel, isEmergency && styles.stepIndexLabelUrgent]}>
                       {index + 1}
                     </Text>
                   </View>
@@ -225,8 +293,9 @@ export function HelpFlowScreen({
               ))}
             </View>
 
-            {/* Only offered when the answers actually warrant it. */}
-            {guidance.urgent && (
+            {/* Only offered when the flow actually escalated — `urgent` outcomes get a
+                prominent warning, per the source doc, but don't route to the ER contact. */}
+            {isEmergency && (
               <Pressable
                 style={styles.call}
                 onPress={onCallEmergencyContact}
@@ -321,6 +390,41 @@ const styles = StyleSheet.create({
     color: color.white,
     textTransform: 'uppercase',
   },
+  /** The multi-choice branches: same slack-taking idea as `askQuestionBlock`, but scrollable. */
+  choicesScroll: {
+    flex: 1,
+  },
+  choicesContent: {
+    paddingVertical: 8,
+    gap: 20,
+  },
+  askQuestionChoices: {
+    fontFamily: font.bodyMedium,
+    fontSize: 26,
+    lineHeight: 36,
+    color: color.gray900,
+  },
+  choices: {
+    gap: 12,
+  },
+  choice: {
+    minHeight: 64,
+    borderRadius: 20,
+    backgroundColor: color.white,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    justifyContent: 'center',
+    ...shadow.xs,
+  },
+  choicePressed: {
+    backgroundColor: color.brand50,
+  },
+  choiceLabel: {
+    fontFamily: font.bodySemiBold,
+    fontSize: 18,
+    lineHeight: 25,
+    color: color.gray900,
+  },
   body: {
     flex: 1,
     backgroundColor: color.gray50,
@@ -336,36 +440,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: frame.gutter,
     paddingBottom: 24,
     gap: 12,
-  },
-  progress: {
-    fontFamily: font.bodySemiBold,
-    fontSize: 12,
-    lineHeight: 16,
-    color: color.gray400,
-  },
-  question: {
-    fontFamily: font.display,
-    fontSize: 24,
-    lineHeight: 32,
-    color: color.black,
-  },
-  answers: {
-    marginTop: 8,
-    gap: 12,
-  },
-  /** Deliberately large — the user may be dizzy while tapping these. */
-  answerButton: {
-    height: 56,
-    borderRadius: 12,
-    backgroundColor: color.white,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...shadow.xs,
-  },
-  answerLabel: {
-    fontFamily: font.display,
-    fontSize: 18,
-    color: color.gray900,
   },
   resultHeader: {
     flexDirection: 'row',

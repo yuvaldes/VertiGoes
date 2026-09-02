@@ -1,8 +1,7 @@
-import { ArrowRight } from 'phosphor-react-native';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import type { Tip } from '../../data/tips';
-import { useDirection, useT } from '../../i18n';
+import { useT } from '../../i18n';
 import { color, font } from '../../theme/tokens';
 import { Ring } from '../Ring';
 import { CARD_WIDTH, WEB_SNAP_CARD } from './carousel';
@@ -15,8 +14,6 @@ type Props = {
   tip: Tip;
   /** Measured off the status card, so every card in the strip is exactly as tall as it is. */
   height: number;
-  /** Only passed for cards that carry an action; a card without one is not pressable. */
-  onPress?: () => void;
 };
 
 /**
@@ -26,20 +23,17 @@ type Props = {
  *
  * The headline slot holds the fact's emoji rather than a sentence — "Did you know" already
  * says what every card is, so it lives once in the eyebrow instead of repeating on each one.
+ *
+ * Purely informational: unlike the old insight/coach cards, nothing here opens another screen.
  */
-export function TipCard({ tip, height, onPress }: Props) {
+export function TipCard({ tip, height }: Props) {
   const t = useT();
-  const { isRTL } = useDirection();
-  const actionable = tip.action !== undefined && onPress !== undefined;
-
   const body = t(tip.bodyKey);
 
   return (
-    <Pressable
+    <View
       style={[styles.card, { height }, WEB_SNAP_CARD]}
-      onPress={actionable ? onPress : undefined}
-      disabled={!actionable}
-      accessibilityRole={actionable ? 'button' : 'text'}
+      accessibilityRole="text"
       accessibilityLabel={`${t('ui.tips.eyebrow.fact')}. ${body}`}
     >
       <Text style={[styles.eyebrow, { color: TINT }]}>{t('ui.tips.eyebrow.fact')}</Text>
@@ -49,21 +43,13 @@ export function TipCard({ tip, height, onPress }: Props) {
       {/* Stands where the chart stands on the status card, so the two share a baseline however
           long the copy runs. */}
       <View style={styles.block}>
-        <Text style={styles.body} numberOfLines={actionable ? 2 : 3}>
+        <Text style={styles.body} numberOfLines={3}>
           {body}
         </Text>
-
-        {actionable && (
-          <View style={styles.action}>
-            <Text style={[styles.actionLabel, { color: TINT }]}>{t('ui.tips.open')}</Text>
-            {/* The arrow points the way reading runs, so it flips with the language. */}
-            <ArrowRight size={13} color={TINT} style={isRTL ? styles.arrowFlipped : undefined} />
-          </View>
-        )}
       </View>
 
       <Ring radius={16} color={color.gray100} />
-    </Pressable>
+    </View>
   );
 }
 
@@ -100,19 +86,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 17,
     color: color.gray600,
-  },
-  action: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  actionLabel: {
-    fontFamily: font.bodySemiBold,
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  /** Mirrored rather than swapped for a left-pointing icon: same glyph, same optical weight. */
-  arrowFlipped: {
-    transform: [{ scaleX: -1 }],
   },
 });

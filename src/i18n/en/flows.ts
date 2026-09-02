@@ -64,9 +64,13 @@ export const flows = {
 
   help: {
     title: 'Help me through it',
-    /** No longer shown: the design gives the question the whole screen. Kept for the
-     *  screen reader, which otherwise loses all sense of how long the flow is. */
-    progress: 'Question {step} of {total}',
+    /**
+     * No longer shown: the design gives the question the whole screen. Kept for the screen
+     * reader, which otherwise loses all sense of how far into the flow it is. No fixed total
+     * any more — the tree branches, so how many questions are left depends on the answers
+     * already given.
+     */
+    progress: 'Question {step}',
     callContact: 'Call {name} ({relationship})',
     done: 'I’m done',
     recorded: 'Saved to today in your calendar.',

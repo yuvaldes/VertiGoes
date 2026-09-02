@@ -113,19 +113,18 @@ export function DayDetailScreen({ date, onBack, activeTab, onChangeTab }: Props)
             icon={<Sparkle size={20} weight="fill" color={color.brand500} />}
             title={t('home.dayDetail.helpTitle')}
           >
-            {/* Every question with the answer given, so a session can be reviewed later. */}
+            {/* Every question with the option chosen, so a session can be reviewed later. */}
             <View style={styles.steps}>
-              {record.inAppHelp.answers.map(({ questionId, answer }) => {
+              {record.inAppHelp.answers.map(({ questionId, optionIndex }) => {
                 // A stored session outlives the question set, so an id we can no longer
                 // name has nothing to show and is dropped rather than printed raw.
                 const question = helpQuestionById(questionId);
-                if (!question) return null;
+                const option = question?.options[optionIndex];
+                if (!question || !option) return null;
                 return (
                   <View key={questionId} style={styles.answerRow}>
                     <Text style={styles.answerQuestion}>{t(question.textKey)}</Text>
-                    <Text style={[styles.answerValue, answer && styles.answerValueYes]}>
-                      {answer ? t('common.answer.yes') : t('common.answer.no')}
-                    </Text>
+                    <Text style={styles.answerValue}>{t(option.labelKey)}</Text>
                   </View>
                 );
               })}
@@ -270,14 +269,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
+  /**
+   * Stacked rather than side-by-side: the tree's questions and chosen options can both run to
+   * a full sentence (e.g. "No, but vascular risk factors present..."), and a row layout has no
+   * good way to wrap two long texts next to each other.
+   */
   answerRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
+    gap: 2,
   },
   answerQuestion: {
-    flex: 1,
-    minWidth: 0,
     fontFamily: font.body,
     fontSize: 14,
     lineHeight: 20,
@@ -288,9 +288,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     color: color.gray500,
-  },
-  answerValueYes: {
-    color: color.brand500,
   },
   slots: {
     gap: 10,

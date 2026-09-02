@@ -134,12 +134,7 @@ export function HomeStatusScreen({
           </View>
         </View>
 
-        <HomeCarousel
-          headline={t(headline)}
-          week={week}
-          tips={tips}
-          onOpenExercises={onOpenExercises}
-        />
+        <HomeCarousel headline={t(headline)} week={week} tips={tips} />
 
         <View style={styles.tasks}>
           <View style={styles.streakRow}>

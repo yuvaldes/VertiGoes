@@ -28,8 +28,6 @@ type Props = {
   headline: string;
   week: WeekBar[];
   tips: Tip[];
-  /** Where a card with the `exercises` action goes. */
-  onOpenExercises: () => void;
 };
 
 /**
@@ -52,7 +50,7 @@ type Props = {
  * platforms start a horizontal scroll view at the leading edge, so the status card sits where
  * reading begins in either language.
  */
-export function HomeCarousel({ headline, week, tips, onOpenExercises }: Props) {
+export function HomeCarousel({ headline, week, tips }: Props) {
   const t = useT();
 
   /**
@@ -99,12 +97,7 @@ export function HomeCarousel({ headline, week, tips, onOpenExercises }: Props) {
         </View>
 
         {tips.map((tip) => (
-          <TipCard
-            key={tip.id}
-            tip={tip}
-            height={cardHeight}
-            onPress={tip.action === 'exercises' ? onOpenExercises : undefined}
-          />
+          <TipCard key={tip.id} tip={tip} height={cardHeight} />
         ))}
       </ScrollView>
 

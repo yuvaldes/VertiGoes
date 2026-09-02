@@ -8,7 +8,7 @@
  */
 
 import { t, weekdayNames, type Locale, type TKey } from '../i18n';
-import { HELP_QUESTIONS, type HelpAnswer } from './helpFlow';
+import { HELP_NODES, HELP_START, type HelpAnswer } from './helpFlow';
 
 export type ExerciseSlot = 'morning' | 'midday' | 'evening';
 
@@ -259,15 +259,21 @@ const LIV_SUMMARY_KEYS: TKey[] = [
 ];
 
 /**
- * Seeds a past help session as answers to the real question set, so history and live sessions
- * are the same shape. Red-flag questions are always seeded `false` — a mock day should not
- * claim the user reported hearing loss.
+ * Seeds a past help session by walking the real tree, so history and live sessions are the
+ * same shape. Every Q0 safety-gate item is always seeded "no" — a mock day should not claim
+ * the user reported a stroke symptom — so seeded sessions always fall through to the branching
+ * tree and pick a random option at each question from there until they land on an outcome.
  */
 function seedHelpAnswers(random: () => number): HelpAnswer[] {
-  return HELP_QUESTIONS.map((question) => ({
-    questionId: question.id,
-    answer: question.redFlag ? false : random() > 0.45,
-  }));
+  const answers: HelpAnswer[] = [];
+  let node = HELP_NODES[HELP_START];
+  while (node.kind === 'question') {
+    const isGate = node.id.startsWith('Q0.');
+    const optionIndex = isGate ? 1 : Math.floor(random() * node.options.length);
+    answers.push({ questionId: node.id, optionIndex });
+    node = HELP_NODES[node.options[optionIndex].next];
+  }
+  return answers;
 }
 
 /** How many days of history to fabricate behind today. */

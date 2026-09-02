@@ -57,37 +57,172 @@ export const data = {
     completeExercise: 'Mark it done',
   },
 
+  /**
+   * The in-app triage tree — sourced from the clinician-supplied "VertiGoes Self-Triage
+   * Decision Tree (Mode B)" document. Node ids (Q0.1, Q2A, DX-BPPV, ER, ...) match the
+   * document's own Node IDs so the two can be cross-referenced. See `src/data/helpFlow.ts`
+   * for how these compose into the graph.
+   */
   help: {
-    questionSpinningNow: 'Is the room spinning right now?',
-    questionHeadPosition: 'Did it start when you moved or turned your head?',
-    questionCanSit: 'Are you somewhere you can safely sit or lie down?',
-    questionWorseThanUsual: 'Is this worse than your usual episode?',
-    questionRedFlags: 'Do you have new hearing loss, a severe headache, or trouble speaking?',
+    /** Q0 — the safety gate. A "yes" to any one of these routes straight to `ER`. */
+    q0: {
+      headache: 'Sudden, severe headache unlike any I’ve had before',
+      weakness: 'New weakness or numbness on one side of the body (face, arm, or leg)',
+      speech: 'Sudden difficulty speaking or slurred speech',
+      doubleVision: 'Sudden double vision',
+      swallowing: 'New difficulty swallowing',
+      imbalance: 'Severe imbalance — unable to walk or stand at all without help',
+      chestPain: 'Chest pain or strong, unusual heart palpitations',
+      headInjury: 'Head or neck injury preceded symptom onset',
+      consciousness: 'Loss of consciousness or fainting',
+    },
 
-    urgentTitle: 'Please get medical advice now',
-    urgentStepCauses: 'What you described can have causes that need checking in person.',
-    urgentStepCall:
-      'Call your emergency contact, or your doctor, rather than waiting this one out.',
-    urgentStepEscalate: 'If your symptoms are severe or getting worse, seek urgent care.',
+    q1: {
+      text: 'How did the dizziness start?',
+      sudden: 'Suddenly (seconds to minutes)',
+      gradual: 'Gradually (hours to days)',
+      chronic: 'Chronic — weeks or more, comes and goes or constant',
+    },
 
-    calmTitle: 'Let’s settle this together',
-    stepSteady: 'Get to a wall or a chair and steady yourself before anything else.',
-    stepSit: 'Sit or lie down somewhere you feel supported.',
-    stepFixEyes: 'Fix your eyes on something still and keep them there.',
-    stepBreathe: 'Breathe slowly - in for four, out for six - until the spinning eases.',
-    stepMoveSlowly: 'Move your head slowly when you get up again.',
-    stepMentionDoctor:
-      'Since this is worse than usual, mention it to your doctor at your next visit.',
+    q2a: {
+      text: 'What is the pattern of the episode?',
+      positional: 'Seconds, positional (rolling, looking up, lying down)',
+      recurring: 'Minutes to hours, recurring',
+      continuous: 'Hours to days, continuously ongoing now',
+    },
+
+    q3bppv: {
+      text: 'Is it triggered by rolling over in bed, looking up, or lying down/sitting up?',
+    },
+
+    q4ear: {
+      text: 'In which head position or direction are symptoms strongest? (This helps identify the affected ear.)',
+      right: 'Right',
+      left: 'Left',
+      bilateral: 'Bilateral',
+      unclear: 'Unclear',
+    },
+
+    q3epi: {
+      text: 'Hearing loss, tinnitus (ringing), or ear fullness during the episode?',
+      yesFluctuating: 'Yes, fluctuating in intensity between episodes',
+    },
+
+    q5mig: {
+      text: 'Headache, light/sound sensitivity, or a personal/family migraine history?',
+      noVascular:
+        'No, but vascular risk factors are present (age 55+, hypertension, diabetes, smoking, AFib)',
+      noPlain: 'No, and no notable risk factors',
+    },
+
+    q3cont: {
+      text: 'Hearing loss, tinnitus, fever, or signs of infection?',
+    },
+
+    q4cent: {
+      text: 'One more check: can you walk unassisted? Is the direction of any eye-jumping constant? No double vision or weakness?',
+      abnormal: 'One or more of these is not right',
+      normal: 'All of these are fine',
+    },
+
+    q2b: {
+      text: 'Did you start a new medication recently, or did this begin close to a period of significant stress or anxiety?',
+      newMed: 'New medication',
+      stress: 'Started along with stress or anxiety',
+      neither: 'Neither of those',
+    },
+
+    q2c: {
+      text: 'What best describes the chronic dizziness?',
+      rocking:
+        'A rocking or swaying feeling, worse standing, worse in busy visual places (stores, malls)',
+      lightheaded: 'Lightheaded on standing up, not spinning',
+      neck: 'Worse with neck movement or neck pain',
+      unsteady: 'Unsteadiness only (not spinning), worse in the dark or on uneven ground',
+    },
+
+    q3ortho: {
+      text: 'Does the dizziness come with palpitations, chest pain, or feeling faint?',
+    },
+
+    /** Outcome copy. `noteKeys` in helpFlow.ts point pieces of this into the guidance list. */
+    outcome: {
+      bppv: {
+        title: 'BPPV suspected (Benign Paroxysmal Positional Vertigo)',
+        note: 'This points to the Dix-Hallpike test for diagnosis and the Epley or Semont maneuver for treatment, with vestibular physical therapy if needed.',
+        noteContraindications:
+          'Check for contraindications — neck or back issues, recent eye surgery — before trying any maneuver.',
+      },
+      bppvUnclear: {
+        title: 'BPPV suspected (Benign Paroxysmal Positional Vertigo)',
+        note: 'Because the affected side isn’t clear, a physiotherapist should assess you before trying any repositioning maneuver on your own — the wrong direction can make symptoms worse.',
+      },
+      meniere: {
+        title: 'Ménière’s disease suspected',
+        note: 'See an ENT specialist for evaluation and a hearing test (audiogram). Positional release maneuvers are not appropriate here.',
+      },
+      vm: {
+        title: 'Vestibular migraine suspected',
+        note: 'Recommend a medical evaluation (neurologist or GP) and keeping a trigger diary.',
+      },
+      tia: {
+        title: '⚠️ Possible TIA (transient ischemic attack)',
+        note: 'This doesn’t meet the criteria for an emergency, but given your risk factors it’s important to get urgent medical care today rather than wait.',
+      },
+      paroxysmia: {
+        title: 'Vestibular paroxysmia possible',
+        note: 'This is relatively rare — a neurological evaluation is recommended.',
+      },
+      labyrinthitis: {
+        title: 'Labyrinthitis suspected',
+        note: 'Get an urgent referral to a physician or ENT — you may need antibiotic or steroid treatment.',
+      },
+      neuritis: {
+        title: 'Vestibular neuritis suspected',
+        note: 'See a physician and consider vestibular physical therapy for rehabilitation.',
+        noteFollowUp: 'Follow up if symptoms don’t improve within a few days.',
+      },
+      ototoxicity: {
+        title: 'Ototoxicity possible',
+        note: 'Check with the doctor who prescribed the medication — don’t stop it on your own.',
+      },
+      anxiety: {
+        title: 'Anxiety-related dizziness possible',
+        note: 'Recommend a medical evaluation, and consider mental-health support alongside a vestibular work-up.',
+      },
+      pppd: {
+        title: 'PPPD suspected (Persistent Postural-Perceptual Dizziness)',
+        note: 'This often develops after an acute vestibular event, migraine, or anxiety. See a physician and consider tailored vestibular physical therapy (graded habituation), possibly alongside CBT-informed support.',
+      },
+      oh: {
+        title: 'Orthostatic hypotension possible',
+        note: 'See a physician for a lying/standing blood-pressure check and a review of your medications.',
+      },
+      cervicogenic: {
+        title: 'Cervicogenic dizziness possible',
+        note: 'See a physiotherapist with a combined neck-and-vestibular focus.',
+      },
+      bilateral: {
+        title: 'Bilateral vestibulopathy possible',
+        note: 'Think about any history of ototoxic medications (like aminoglycosides), and get a VNG test or physician evaluation.',
+      },
+      unknown: {
+        title: 'Not a clear pattern',
+        note: 'What you described didn’t point clearly to one thing — it’s worth getting checked by a doctor.',
+      },
+    },
+
+    /** `ER`, the emergency outcome — from the safety gate, or from Q4-CENT/Q3-ORTHO. */
+    urgentTitle: '🚨 Emergency — please seek help now',
+    urgentStepCauses: 'What you described needs to be checked in person, right away.',
+    urgentStepCall: 'Go to the emergency room, or call emergency services (101 in Israel), now.',
+    urgentStepEscalate:
+      'If you have someone with you, ask them to go with you or to call on your behalf.',
 
     /** One sentence per session, appended to the day's calendar summary. */
     summaryPlain: 'You used in-app help.',
-    summaryRedFlag: 'You used in-app help, and reported symptoms worth getting checked.',
-    summaryPositionalWorse:
-      'You used in-app help for an episode that started when you moved your head, and was worse than usual.',
-    summaryPositional:
-      'You used in-app help for an episode that started when you moved your head.',
-    summaryWorse: 'You used in-app help for an episode worse than your usual.',
-    summaryEpisode: 'You used in-app help during an episode.',
+    summaryEmergency: 'You used in-app help and were directed to seek emergency care.',
+    summaryPrefix: 'You used in-app help; Liv’s triage suggested:',
   },
 
   /**
