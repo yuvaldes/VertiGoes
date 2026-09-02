@@ -1,5 +1,6 @@
 import type { PartialTranslations } from '../index';
 
+import { auth } from './auth';
 import { browse } from './browse';
 import { common } from './common';
 import { data } from './data';
@@ -16,6 +17,7 @@ import { ui } from './ui';
  * before the bundler ever sees it.
  */
 export const he = {
+  auth,
   browse,
   common,
   data,
