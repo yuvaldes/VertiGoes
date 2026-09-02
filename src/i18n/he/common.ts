@@ -42,6 +42,7 @@ export const common = {
   },
   menuRow: {
     a11yPremium: '{label} - דורש פרימיום',
+    a11yLocked: '{label} - דורש התחברות',
     a11yWithValue: '{label}, {value}',
   },
 } satisfies NamespaceOf<'common'>;

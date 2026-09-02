@@ -34,6 +34,8 @@ type DayRecordsValue = {
   recordExerciseSlot: (date: string, slot: ExerciseSlot, progress: SlotProgress) => void;
   /** Written by the Liv chat as the day's conversation grows; read by the calendar. */
   recordLivSummary: (date: string, summary: string) => void;
+  /** Drops today's writes and re-seeds history, so a new account starts from a clean slate. */
+  reset: () => void;
 };
 
 const DayRecordsContext = createContext<DayRecordsValue | null>(null);
@@ -112,6 +114,12 @@ export function DayRecordsProvider({ children }: { children: ReactNode }) {
     [update],
   );
 
+  const reset = useCallback(() => {
+    const fresh = seedHistory(locale, today);
+    recordsRef.current = fresh;
+    setRecords(fresh);
+  }, [locale, today]);
+
   const value = useMemo(
     () => ({
       records,
@@ -125,6 +133,7 @@ export function DayRecordsProvider({ children }: { children: ReactNode }) {
       recordFeeling,
       recordExerciseSlot,
       recordLivSummary,
+      reset,
     }),
     [
       records,
@@ -138,6 +147,7 @@ export function DayRecordsProvider({ children }: { children: ReactNode }) {
       recordFeeling,
       recordExerciseSlot,
       recordLivSummary,
+      reset,
     ],
   );
 

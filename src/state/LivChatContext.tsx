@@ -29,6 +29,8 @@ type LivChatValue = {
   getThread: (date: string) => ChatThread | undefined;
   /** Recomposes a day's calendar summary. Called by the help flow, which is not a chat. */
   refreshDaySummary: (date: string) => void;
+  /** Drops every thread, so a new account doesn't inherit the last one's conversation. */
+  reset: () => void;
 };
 
 const LivChatContext = createContext<LivChatValue | null>(null);
@@ -164,6 +166,12 @@ export function LivChatProvider({ children }: { children: ReactNode }) {
 
   const getThread = useCallback((date: string) => threads.get(date), [threads]);
 
+  const reset = useCallback(() => {
+    threadsRef.current = new Map();
+    setThreads(new Map());
+    setIsThinking(false);
+  }, []);
+
   const value = useMemo(
     () => ({
       threads,
@@ -173,8 +181,9 @@ export function LivChatProvider({ children }: { children: ReactNode }) {
       acceptAction,
       getThread,
       refreshDaySummary,
+      reset,
     }),
-    [threads, todayKey, isThinking, send, acceptAction, getThread, refreshDaySummary],
+    [threads, todayKey, isThinking, send, acceptAction, getThread, refreshDaySummary, reset],
   );
 
   return <LivChatContext.Provider value={value}>{children}</LivChatContext.Provider>;

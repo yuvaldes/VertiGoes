@@ -1,4 +1,10 @@
-import { ArrowSquareOut, CaretLeft, CaretRight, CrownSimple } from 'phosphor-react-native';
+import {
+  ArrowSquareOut,
+  CaretLeft,
+  CaretRight,
+  CrownSimple,
+  LockSimple,
+} from 'phosphor-react-native';
 import { Children, Fragment, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
@@ -41,9 +47,10 @@ type MenuRowProps = {
   value?: string;
   /**
    * `external` swaps the caret for an out-arrow, telling the user they're about to leave the
-   * app. `premium` swaps it for a crown, telling them the row itself is gated.
+   * app. `premium` swaps it for a crown, telling them the row itself is gated behind a plan.
+   * `locked` swaps it for a padlock, telling them the row is gated behind signing in.
    */
-  variant?: 'push' | 'external' | 'premium';
+  variant?: 'push' | 'external' | 'premium' | 'locked';
   onPress?: () => void;
 };
 
@@ -61,9 +68,11 @@ export function MenuRow({ icon, label, value, variant = 'push', onPress }: MenuR
       accessibilityLabel={
         variant === 'premium'
           ? t('common.menuRow.a11yPremium', { label })
-          : value
-            ? t('common.menuRow.a11yWithValue', { label, value })
-            : label
+          : variant === 'locked'
+            ? t('common.menuRow.a11yLocked', { label })
+            : value
+              ? t('common.menuRow.a11yWithValue', { label, value })
+              : label
       }
     >
       <View style={styles.icon}>{icon}</View>
@@ -76,6 +85,8 @@ export function MenuRow({ icon, label, value, variant = 'push', onPress }: MenuR
         <ArrowSquareOut size={20} color={color.gray400} mirrored={isRTL} />
       ) : variant === 'premium' ? (
         <CrownSimple size={18} weight="fill" color={color.brand500} />
+      ) : variant === 'locked' ? (
+        <LockSimple size={18} weight="fill" color={color.gray400} />
       ) : (
         <Caret size={20} color={color.gray400} />
       )}

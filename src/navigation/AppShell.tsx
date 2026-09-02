@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { Animated, Easing, Linking, Platform, StyleSheet, View } from 'react-native';
 
-import { AuthSheet } from '../components/AuthSheet';
+import { AuthSheet } from '../components/auth/AuthSheet';
 import { BottomBar } from '../components/BottomBar';
 import { BrandRow } from '../components/BrandRow';
 import { EmergencySheet } from '../components/EmergencySheet';
@@ -33,6 +33,7 @@ import { SubscriptionScreen } from '../screens/SubscriptionScreen';
 import { useAuth } from '../state/AuthContext';
 import { AuthGateProvider, useGate } from '../state/AuthGateContext';
 import { useDayRecords } from '../state/DayRecordsContext';
+import { useExercises } from '../state/ExercisesContext';
 import { useLivChat } from '../state/LivChatContext';
 import { usePreferences } from '../state/PreferencesContext';
 import { useSubscription } from '../state/SubscriptionContext';
@@ -121,12 +122,30 @@ export function AppShell() {
 }
 
 function Shell() {
-  const { today, todayKey, recordEmergencyCall, recordInAppHelp } = useDayRecords();
-  const { refreshDaySummary } = useLivChat();
+  const {
+    today,
+    todayKey,
+    recordEmergencyCall,
+    recordInAppHelp,
+    reset: resetDayRecords,
+  } = useDayRecords();
+  const { refreshDaySummary, reset: resetLivChat } = useLivChat();
+  const { reset: resetExercises } = useExercises();
   const { setLanguage } = usePreferences();
-  const { subscribe, setPaymentMethod, paymentMethod } = useSubscription();
-  const { onboarding, signInWithProvider, completeOnboarding, skipOnboarding } = useAuth();
-  const { can, gate, sheet: authSheet, closeSheet, hideSheet, consumeIntent } = useGate();
+  const { subscribe, setPaymentMethod, paymentMethod, cancel: resetSubscription } =
+    useSubscription();
+  const { session, onboarding, signInWithProvider, completeOnboarding, skipOnboarding, signOut } =
+    useAuth();
+  const {
+    can,
+    gate,
+    sheet: authSheet,
+    closeSheet,
+    hideSheet,
+    consumeIntent,
+    promptAuth,
+    promptSignIn,
+  } = useGate();
   const t = useT();
   const date = useDateFormat();
   const { isRTL } = useDirection();
@@ -378,6 +397,19 @@ function Shell() {
     replayIntent();
   };
 
+  /**
+   * The shell's full sign-out: `useAuth().signOut` drops the account itself, and everything
+   * else account-shaped — the day records, the Liv threads, today's exercises, the plan — goes
+   * with it, so the next sign-in (or guest browse) doesn't inherit this one's history.
+   */
+  const signOutEverything = () => {
+    signOut();
+    resetDayRecords();
+    resetLivChat();
+    resetExercises();
+    resetSubscription();
+  };
+
   const renderPushed = (entry: Pushed) => {
     switch (entry.route) {
       case 'editExercises':
@@ -429,9 +461,11 @@ function Shell() {
         const unfinished = onboarding !== 'complete';
         return (
           <OnboardingScreen
+            mode={unfinished ? 'setup' : 'edit'}
+            initialAnswers={session.status === 'authed' ? session.answers : null}
             onBack={unfinished ? leaveOnboardingUnfinished : pop}
             onComplete={finishOnboarding}
-            onSkip={unfinished ? leaveOnboardingUnfinished : undefined}
+            onSkip={leaveOnboardingUnfinished}
           />
         );
       }
@@ -581,6 +615,10 @@ function Shell() {
             onOpenOnboarding={gate('manageProfile', () => push({ route: 'onboarding' }))}
             onOpenSubscription={openSubscription}
             onOpenPlaceholder={openPlaceholder}
+            onRequestSignIn={(capability) =>
+              capability ? promptAuth(capability) : promptSignIn()
+            }
+            onSignOut={signOutEverything}
           />
         ) : (
           <HomeStatusScreen

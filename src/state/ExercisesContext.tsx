@@ -18,6 +18,8 @@ type ExercisesValue = {
   remove: (key: string) => void;
   reorder: (from: number, to: number) => void;
   add: (definition: ExerciseDefinition) => void;
+  /** Back to the default list, so a new account doesn't inherit the last one's edits. */
+  reset: () => void;
 };
 
 const ExercisesContext = createContext<ExercisesValue | null>(null);
@@ -68,9 +70,14 @@ export function ExercisesProvider({ children }: { children: ReactNode }) {
     setExercises((current) => [...current, { ...definition, key, completed: false }]);
   }, []);
 
+  const reset = useCallback(() => {
+    setExercises(initialExercises);
+    nextKey.current = initialExercises.length + 1;
+  }, []);
+
   const value = useMemo(
-    () => ({ exercises, complete, dismissAll, remove, reorder, add }),
-    [exercises, complete, dismissAll, remove, reorder, add],
+    () => ({ exercises, complete, dismissAll, remove, reorder, add, reset }),
+    [exercises, complete, dismissAll, remove, reorder, add, reset],
   );
 
   return <ExercisesContext.Provider value={value}>{children}</ExercisesContext.Provider>;

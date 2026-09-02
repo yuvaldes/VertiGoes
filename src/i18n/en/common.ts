@@ -47,6 +47,7 @@ export const common = {
   },
   menuRow: {
     a11yPremium: '{label} - requires Premium',
+    a11yLocked: '{label} - requires sign in',
     a11yWithValue: '{label}, {value}',
   },
 } as const;
