@@ -158,12 +158,30 @@ export const data = {
   },
 
   // Clinical drafts — see the file header. Left in English pending a clinician's review.
+  /** Same Latin drug names as en/data.ts — the source table keeps them untranslated in Hebrew too. */
   medication: {
     meclizine: 'Meclizine',
-    betahistine: 'Betahistine',
     dimenhydrinate: 'Dimenhydrinate',
-    diazepam: 'Diazepam (low-dose)',
+    cinnarizineDimenhydrinate: 'Cinnarizine / Dimenhydrinate',
     prochlorperazine: 'Prochlorperazine',
+    ondansetron: 'Ondansetron',
+    diazepamLorazepam: 'Diazepam / Lorazepam',
+    scopolamine: 'Scopolamine',
+    betahistine: 'Betahistine',
+    hydrochlorothiazideTriamterene: 'Hydrochlorothiazide / Triamterene',
+    acetazolamide: 'Acetazolamide',
+    dexamethasoneIT: 'Dexamethasone (IT)',
+    gentamicinIT: 'Gentamicin (IT)',
+    amitriptylineNortriptyline: 'Amitriptyline / Nortriptyline',
+    topiramate: 'Topiramate',
+    propranololMetoprolol: 'Propranolol / Metoprolol',
+    venlafaxine: 'Venlafaxine',
+    flunarizineVerapamil: 'Flunarizine / Verapamil',
+    cgrpAntagonists: 'CGRP Antagonists',
+    sertraline: 'Sertraline',
+    escitalopram: 'Escitalopram',
+    duloxetine: 'Duloxetine',
+    prednisoneMethylprednisolone: 'Prednisone / Methylprednisolone',
   },
 
   /**
@@ -299,45 +317,20 @@ export const data = {
     premiumSummary: 'כל ההיסטוריה שלכם, הקהילה, כל אנשי המקצוע והתרגילים, ליב, וללא פרסומות.',
   },
   tip: {
-    episodesDown: {
-      title: 'פחות התקפים מהשבוע שעבר',
-      body: 'תיעדתם {count} פחות השבוע. מה שלא שיניתם, שווה להמשיך.',
+    rewire: {
+      body: 'המוח שלך יודע לתכנת את עצמו מחדש. כל תרגול קצר מלמד אותו מסלולים עצביים עוקפים שמפחיתים את הסחרחורת. מוכנים לעדכן גרסה עם התרגיל הבא?',
     },
-    episodesUp: {
-      title: 'עלייה בהתקפים השבוע',
-      body: '{count} יותר מהשבוע שעבר. ביצוע התרגילים בבוקר הוא המקום הרגיל להתחיל בו.',
+    vor: {
+      body: 'בתוך הראש שלך פועל מייצב התמונה המהיר בטבע (VOR) שמזיז את העיניים ב־10 אלפיות השנייה. תרגילי מבט מכיילים אותו מחדש כדי שהעולם לא יקפוץ. בואו נכייל אותו לכמה שניות.',
     },
-    shortSleep: {
-      title: 'לילות קצרים לאחרונה',
-      body: 'ישנתם פחות מ־{hours} שעות ב־{nights} מתוך 7 הימים האחרונים. שינה והתקפים נעים יחד לא מעט, אז כדאי לשים לב.',
+    discomfort: {
+      body: 'אי־נוחות קלה בתרגול (רמה 2–3 מתוך 10) היא סימן מצוין. ככה בדיוק המוח מבין שהתנועה בטוחה ומתרגל אליה. עוד צעד קטן והמוח מתרגל!',
     },
-    loggingStreak: {
-      title: '{days} ימים של תיעוד ברצף',
-      body: 'תיעוד מלא הוא מה שהופך את התמונה השבועית לשווה קריאה. תמשיכו כך.',
+    balanceTrio: {
+      body: 'שיווי המשקל שלך עובד בצוות של שלושה: אוזניים, עיניים וכפות רגליים. כשאחד מתעייף, התרגול מלמד את השניים האחרים לגבות אותו. מחזקים את הצוות עכשיו.',
     },
-    finishTheDay: {
-      title: 'סיימו את היום כשאפשר',
-      body: 'השלמתם {done} מתוך {total} הימים האחרונים. גם יום מתועד חלקית עוזר.',
-    },
-    logEarly: {
-      title: 'תעדו התקף כשהוא טרי',
-      body: 'מה שעשיתם רגע לפני חשוב לא פחות מאיך שזה הרגיש. רשמו זאת באותו יום.',
-    },
-    sameTime: {
-      title: 'אותם תרגילים, באותה שעה',
-      body: 'תרגילים וסטיבולריים עובדים דרך חזרתיות. שעה קבועה ביום עדיפה על אימון ארוך מדי פעם.',
-    },
-    moveSlowly: {
-      title: 'האטו את התנועות שמעוררות את זה',
-      body: 'קימה לישיבה, הסתובבות במיטה, הרמת מבט. ביצוע איטי קצת יותר מוריד לא פעם את העוצמה.',
-    },
-    breathe: {
-      title: 'נשימות לפני השינה',
-      body: 'כמה דקות של נשימה מווסתת מרגיעות את המתח שנצבר אחרי יום קשה.',
-    },
-    triggers: {
-      title: 'חפשו את הדפוס שלכם',
-      body: 'פתחו את היומן וקראו חודש שלם בבת אחת. טריגרים מופיעים כצורה, לא כיום רע אחד.',
+    consistency: {
+      body: 'שתי דקות תרגול פעמיים־שלוש ביום יעילות למוח הרבה יותר מאימון ארוך פעם בשבוע. הסוד ליציבות הוא עקביות קצרה. דקה אחת – וסימנת וי להיום!',
     },
   },
 } satisfies NamespaceOf<'data'>;

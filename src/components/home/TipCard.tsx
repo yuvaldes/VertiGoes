@@ -1,30 +1,15 @@
 import { ArrowRight } from 'phosphor-react-native';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import type { Tip, TipTone } from '../../data/tips';
-import { useDirection, useDisplayFont, useT } from '../../i18n';
+import type { Tip } from '../../data/tips';
+import { useDirection, useT } from '../../i18n';
 import { color, font } from '../../theme/tokens';
 import { Ring } from '../Ring';
 import { CARD_WIDTH, WEB_SNAP_CARD } from './carousel';
 
-type ToneStyle = {
-  tint: string;
-  eyebrowKey: 'insight' | 'progress' | 'coach';
-};
-
-/**
- * One hue per kind, reusing ramps the task cards already established: turquoise reads as an
- * observation, green as something going well, brand blue as an instruction.
- *
- * The hue is stated in the eyebrow and nowhere else. Surface and border are the status card's,
- * because the cards sit in one strip and swapping the fill under them made each page look like
- * a different component rather than the next page of the same one.
- */
-const TONES: Record<TipTone, ToneStyle> = {
-  insight: { tint: color.turquoise600, eyebrowKey: 'insight' },
-  progress: { tint: color.success500, eyebrowKey: 'progress' },
-  coach: { tint: color.brand600, eyebrowKey: 'coach' },
-};
+/** Every fact card shares one tint — unlike the old insight/progress/coach cards, they are all
+ * the same kind of thing, so there is no second hue to tell them apart by. */
+const TINT = color.turquoise600;
 
 type Props = {
   tip: Tip;
@@ -38,16 +23,16 @@ type Props = {
  * A card in the Home strip, built to the status card's own layout: eyebrow, display headline,
  * then a block the height the week chart occupies. Matching it beat inventing a second card
  * shape, because the two sit in one scrolling row and any difference reads as a mistake.
+ *
+ * The headline slot holds the fact's emoji rather than a sentence — "Did you know" already
+ * says what every card is, so it lives once in the eyebrow instead of repeating on each one.
  */
 export function TipCard({ tip, height, onPress }: Props) {
   const t = useT();
-  const displayFont = useDisplayFont();
   const { isRTL } = useDirection();
-  const tone = TONES[tip.tone];
   const actionable = tip.action !== undefined && onPress !== undefined;
 
-  const title = t(tip.titleKey, tip.params);
-  const body = t(tip.bodyKey, tip.params);
+  const body = t(tip.bodyKey);
 
   return (
     <Pressable
@@ -55,15 +40,11 @@ export function TipCard({ tip, height, onPress }: Props) {
       onPress={actionable ? onPress : undefined}
       disabled={!actionable}
       accessibilityRole={actionable ? 'button' : 'text'}
-      accessibilityLabel={`${t(`ui.tips.eyebrow.${tone.eyebrowKey}`)}. ${title}. ${body}`}
+      accessibilityLabel={`${t('ui.tips.eyebrow.fact')}. ${body}`}
     >
-      <Text style={[styles.eyebrow, { color: tone.tint }]}>
-        {t(`ui.tips.eyebrow.${tone.eyebrowKey}`)}
-      </Text>
+      <Text style={[styles.eyebrow, { color: TINT }]}>{t('ui.tips.eyebrow.fact')}</Text>
 
-      <Text style={[styles.title, displayFont]} numberOfLines={1}>
-        {title}
-      </Text>
+      <Text style={styles.emoji}>{tip.emoji}</Text>
 
       {/* Stands where the chart stands on the status card, so the two share a baseline however
           long the copy runs. */}
@@ -74,13 +55,9 @@ export function TipCard({ tip, height, onPress }: Props) {
 
         {actionable && (
           <View style={styles.action}>
-            <Text style={[styles.actionLabel, { color: tone.tint }]}>{t('ui.tips.open')}</Text>
+            <Text style={[styles.actionLabel, { color: TINT }]}>{t('ui.tips.open')}</Text>
             {/* The arrow points the way reading runs, so it flips with the language. */}
-            <ArrowRight
-              size={13}
-              color={tone.tint}
-              style={isRTL ? styles.arrowFlipped : undefined}
-            />
+            <ArrowRight size={13} color={TINT} style={isRTL ? styles.arrowFlipped : undefined} />
           </View>
         )}
       </View>
@@ -109,11 +86,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.4,
     textTransform: 'uppercase',
   },
-  title: {
-    fontFamily: font.display,
-    fontSize: 14,
+  emoji: {
+    fontSize: 16,
     lineHeight: 19,
-    color: color.gray900,
   },
   /** The chart's 56, filled with copy instead of bars. */
   block: {

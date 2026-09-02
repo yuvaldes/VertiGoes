@@ -53,6 +53,8 @@ export type AuthSession =
       onboarding: OnboardingStatus;
       /** Non-null only when `onboarding === 'complete'`. The two move together. */
       answers: OnboardingAnswers | null;
+      /** Non-null only when `onboarding === 'skipped'` — how many steps they'd finished. */
+      progressStep: number | null;
     };
 
 /** Which field an error belongs against. `form` is the whole-form fallback. */
@@ -133,7 +135,7 @@ type AuthValue = {
   signInWithEmail: (form: SignInForm) => Promise<AuthResult>;
 
   completeOnboarding: (answers: OnboardingAnswers) => void;
-  skipOnboarding: () => void;
+  skipOnboarding: (step: number) => void;
 
   signOut: () => void;
 };
@@ -160,7 +162,7 @@ function signedIn(account: Account): AuthSession {
   // Every sign-in lands in `pending`, including sign *in*: nothing persists between reloads,
   // so a returning user is a fiction this mock cannot honour. Claiming `complete` with no
   // answers behind it would split the status flag from the data it describes.
-  return { status: 'authed', account, onboarding: 'pending', answers: null };
+  return { status: 'authed', account, onboarding: 'pending', answers: null, progressStep: null };
 }
 
 /**
@@ -228,15 +230,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const completeOnboarding = useCallback((answers: OnboardingAnswers) => {
     setSession((current) =>
-      current.status === 'authed' ? { ...current, onboarding: 'complete', answers } : current,
+      current.status === 'authed'
+        ? { ...current, onboarding: 'complete', answers, progressStep: null }
+        : current,
     );
   }, []);
 
-  const skipOnboarding = useCallback(() => {
-    // Answers stay null: the screen only hands them over on finish, so there is nothing
-    // half-filled to keep, and resuming from the Menu restarts the wizard cleanly.
+  /**
+   * `step` is how many of the wizard's steps were already behind them when they backed out —
+   * the Menu's "Personal information" row turns that into a percentage. Answers stay null:
+   * only a finished run hands those over, so resuming from the Menu restarts the wizard
+   * cleanly rather than half-filled.
+   */
+  const skipOnboarding = useCallback((step: number) => {
     setSession((current) =>
-      current.status === 'authed' ? { ...current, onboarding: 'skipped', answers: null } : current,
+      current.status === 'authed'
+        ? { ...current, onboarding: 'skipped', answers: null, progressStep: step }
+        : current,
     );
   }, []);
 

@@ -39,13 +39,42 @@ export const KNOWN_DIAGNOSES: PickOption[] = [
   { id: 'central-vertigo', labelKey: 'data.diagnosis.centralVertigo' },
 ];
 
-/** TODO(clinical): same caveat as `KNOWN_DIAGNOSES` — a starting set, not a reviewed one. */
+/**
+ * Sourced from a clinician-supplied reference table (acute symptomatic relief, Meniere's,
+ * migraine prophylaxis, PPPD, and vestibular neuritis/labyrinthitis), unlike `KNOWN_DIAGNOSES`
+ * above — this list is not a starting guess. A row that named two interchangeable drugs in the
+ * reference (e.g. "Diazepam / Lorazepam") stays combined here rather than being split, since
+ * the source presented them as one choice.
+ */
 export const KNOWN_MEDICATIONS: PickOption[] = [
   { id: 'meclizine', labelKey: 'data.medication.meclizine' },
-  { id: 'betahistine', labelKey: 'data.medication.betahistine' },
   { id: 'dimenhydrinate', labelKey: 'data.medication.dimenhydrinate' },
-  { id: 'diazepam', labelKey: 'data.medication.diazepam' },
+  { id: 'cinnarizineDimenhydrinate', labelKey: 'data.medication.cinnarizineDimenhydrinate' },
   { id: 'prochlorperazine', labelKey: 'data.medication.prochlorperazine' },
+  { id: 'ondansetron', labelKey: 'data.medication.ondansetron' },
+  { id: 'diazepamLorazepam', labelKey: 'data.medication.diazepamLorazepam' },
+  { id: 'scopolamine', labelKey: 'data.medication.scopolamine' },
+  { id: 'betahistine', labelKey: 'data.medication.betahistine' },
+  {
+    id: 'hydrochlorothiazideTriamterene',
+    labelKey: 'data.medication.hydrochlorothiazideTriamterene',
+  },
+  { id: 'acetazolamide', labelKey: 'data.medication.acetazolamide' },
+  { id: 'dexamethasoneIT', labelKey: 'data.medication.dexamethasoneIT' },
+  { id: 'gentamicinIT', labelKey: 'data.medication.gentamicinIT' },
+  { id: 'amitriptylineNortriptyline', labelKey: 'data.medication.amitriptylineNortriptyline' },
+  { id: 'topiramate', labelKey: 'data.medication.topiramate' },
+  { id: 'propranololMetoprolol', labelKey: 'data.medication.propranololMetoprolol' },
+  { id: 'venlafaxine', labelKey: 'data.medication.venlafaxine' },
+  { id: 'flunarizineVerapamil', labelKey: 'data.medication.flunarizineVerapamil' },
+  { id: 'cgrpAntagonists', labelKey: 'data.medication.cgrpAntagonists' },
+  { id: 'sertraline', labelKey: 'data.medication.sertraline' },
+  { id: 'escitalopram', labelKey: 'data.medication.escitalopram' },
+  { id: 'duloxetine', labelKey: 'data.medication.duloxetine' },
+  {
+    id: 'prednisoneMethylprednisolone',
+    labelKey: 'data.medication.prednisoneMethylprednisolone',
+  },
 ];
 
 export type DiagnosisQuestion = { id: string; textKey: TKey };
@@ -101,3 +130,17 @@ export const initialOnboardingAnswers: OnboardingAnswers = {
   emergencyContactName: '',
   emergencyContactPhone: '',
 };
+
+/** Basic info, medical history, diagnosis questions, emergency contact. */
+export const ONBOARDING_STEP_COUNT = 4;
+
+/**
+ * How far through the wizard a skipped run got, as a whole percentage — shown on the Menu's
+ * "Personal information" row so a visitor can see they left off partway rather than at zero.
+ * `step` is the index they were on when they backed out, so completed steps are the ones
+ * before it; `null` (never opened, or already finished) reads as 0.
+ */
+export function onboardingPercent(step: number | null): number {
+  if (step === null) return 0;
+  return Math.round((step / ONBOARDING_STEP_COUNT) * 100);
+}

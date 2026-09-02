@@ -105,7 +105,12 @@ export const auth = {
       'A few medical questions help us tailor your exercises and your emergency steps.',
     resumeCta: 'Continue',
     /** Sits in the Personal information row's trailing slot while the answers are missing. */
-    pendingValue: 'Not finished',
+    percentComplete: '{percent}% complete',
+    /** Under the resume card's donut chart, counting down instead of up. */
+    stepsLeft: {
+      one: '{count} step left',
+      other: '{count} steps left',
+    },
   },
 
   menu: {

@@ -11,7 +11,11 @@ import {
 
 import { AppHeader } from '../components/AppHeader';
 import { BackButton } from '../components/BackButton';
-import { initialOnboardingAnswers, type OnboardingAnswers } from '../data/onboarding';
+import {
+  initialOnboardingAnswers,
+  ONBOARDING_STEP_COUNT,
+  type OnboardingAnswers,
+} from '../data/onboarding';
 import { useT } from '../i18n';
 import { color, frame, font } from '../theme/tokens';
 import { OnboardingBasicInfoStep } from './OnboardingBasicInfoStep';
@@ -31,11 +35,12 @@ type Props = {
   initialAnswers?: OnboardingAnswers | null;
   onBack: () => void;
   onComplete: (answers: OnboardingAnswers) => void;
-  /** `setup` only. Leaves the questions pending so the Menu can offer them again. */
-  onSkip: () => void;
+  /**
+   * `setup` only. Leaves the questions pending so the Menu can offer them again. Carries the
+   * step they backed out on, so the Menu can show how far they got.
+   */
+  onSkip: (step: number) => void;
 };
-
-const STEP_COUNT = 4;
 
 /**
  * The onboarding flow: basic info, medical history, an optional diagnosis questionnaire, then
@@ -75,11 +80,11 @@ export function OnboardingScreen({
     if (step > 0) setStep(step - 1);
     // Backing out of the first run is skipping it, whatever control they used to do it —
     // otherwise the status stays `pending` and the shell pushes this screen straight back.
-    else if (canSkip) onSkip();
+    else if (canSkip) onSkip(step);
     else onBack();
   };
 
-  const isLastStep = step === STEP_COUNT - 1;
+  const isLastStep = step === ONBOARDING_STEP_COUNT - 1;
   // Age is the only field the source spec marks required; everything else is free to skip.
   const canContinue = step !== 0 || answers.age.trim().length > 0;
 
@@ -95,7 +100,7 @@ export function OnboardingScreen({
           <View style={styles.topRow}>
             <BackButton onPress={back} />
             <View style={styles.progressTrack}>
-              {Array.from({ length: STEP_COUNT }, (_, index) => (
+              {Array.from({ length: ONBOARDING_STEP_COUNT }, (_, index) => (
                 <View
                   key={index}
                   style={[styles.segment, index <= step && styles.segmentFilled]}
@@ -105,7 +110,7 @@ export function OnboardingScreen({
             {canSkip && (
               <Pressable
                 style={styles.skip}
-                onPress={onSkip}
+                onPress={() => onSkip(step)}
                 accessibilityRole="button"
                 accessibilityLabel={t('auth.onboarding.a11ySkip')}
               >

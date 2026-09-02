@@ -20,9 +20,11 @@ import { AppHeader } from '../components/AppHeader';
 import { BottomBarSlot } from '../components/BottomBar';
 import { BottomSheet } from '../components/BottomSheet';
 import { MenuGroup, MenuRow } from '../components/MenuList';
+import { ProgressDonut } from '../components/ProgressDonut';
 import { Ring } from '../components/Ring';
 import { useCapabilities, type Capability } from '../data/access';
 import type { TabKey } from '../data/home';
+import { ONBOARDING_STEP_COUNT, onboardingPercent } from '../data/onboarding';
 import { useDirection, useDisplayFont, useT } from '../i18n';
 import { useAuth } from '../state/AuthContext';
 import {
@@ -89,7 +91,7 @@ export function MenuScreen({
   const { restartRequired } = useDirection();
   const { language, setLanguage } = usePreferences();
   const { isPremium } = useSubscription();
-  const { isGuest, account, needsOnboarding } = useAuth();
+  const { isGuest, account, needsOnboarding, session } = useAuth();
   const { can, reasonFor } = useCapabilities();
   const [pickingLanguage, setPickingLanguage] = useState(false);
 
@@ -99,6 +101,13 @@ export function MenuScreen({
    * in a row and the worst path in the funnel.
    */
   const communityLock = reasonFor('viewCommunity');
+
+  /** Steps finished on the last (skipped) run — 0 once complete or never opened. */
+  const onboardingStepsDone = session.status === 'authed' ? (session.progressStep ?? 0) : 0;
+  /** How far a skipped run got, as a whole percentage — 0 once complete or never opened. */
+  const onboardingProgress = onboardingPercent(
+    session.status === 'authed' ? session.progressStep : null,
+  );
 
   // An address if we were given one; otherwise which wallet signed them in. Never a fiction.
   const accountValue =
@@ -137,6 +146,7 @@ export function MenuScreen({
             body={t('auth.onboarding.resumeBody')}
             cta={t('auth.onboarding.resumeCta')}
             onPress={onOpenOnboarding}
+            progress={{ completed: onboardingStepsDone, total: ONBOARDING_STEP_COUNT }}
           />
         )}
 
@@ -204,7 +214,11 @@ export function MenuScreen({
             <MenuRow
               icon={<User size={ICON_SIZE} color={color.gray900} />}
               label={t('browse.menu.rowPersonalInfo')}
-              value={needsOnboarding ? t('auth.onboarding.pendingValue') : undefined}
+              value={
+                needsOnboarding
+                  ? t('auth.onboarding.percentComplete', { percent: onboardingProgress })
+                  : undefined
+              }
               onPress={onOpenOnboarding}
             />
             <MenuRow
@@ -321,13 +335,18 @@ function PromptCard({
   body,
   cta,
   onPress,
+  progress,
 }: {
   title: string;
   body: string;
   cta: string;
   onPress: () => void;
+  /** Onboarding only — the guest card has no steps to count down. */
+  progress?: { completed: number; total: number };
 }) {
   const displayFont = useDisplayFont();
+  const t = useT();
+  const stepsLeft = progress ? Math.max(progress.total - progress.completed, 0) : 0;
 
   return (
     <Pressable
@@ -337,9 +356,22 @@ function PromptCard({
       accessibilityLabel={title}
       accessibilityHint={body}
     >
-      <Text style={[styles.promptTitle, displayFont]}>{title}</Text>
-      <Text style={styles.promptBody}>{body}</Text>
-      <Text style={styles.promptCta}>{cta}</Text>
+      {progress && (
+        <View style={styles.promptDonut}>
+          <ProgressDonut completed={progress.completed} total={progress.total} />
+          <Text style={styles.promptDonutLabel}>
+            {t(
+              stepsLeft === 1 ? 'auth.onboarding.stepsLeft.one' : 'auth.onboarding.stepsLeft.other',
+              { count: stepsLeft },
+            )}
+          </Text>
+        </View>
+      )}
+      <View style={styles.promptText}>
+        <Text style={[styles.promptTitle, displayFont]}>{title}</Text>
+        <Text style={styles.promptBody}>{body}</Text>
+        <Text style={styles.promptCta}>{cta}</Text>
+      </View>
       <Ring radius={12} color={color.brand100} />
     </Pressable>
   );
@@ -369,9 +401,26 @@ const styles = StyleSheet.create({
     gap: 24,
   },
   prompt: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: color.brand50,
     borderRadius: 12,
     padding: 16,
+    gap: 12,
+  },
+  promptDonut: {
+    alignItems: 'center',
+    gap: 4,
+  },
+  promptDonutLabel: {
+    fontFamily: font.bodySemiBold,
+    fontSize: 11,
+    lineHeight: 14,
+    color: color.brand600,
+  },
+  promptText: {
+    flex: 1,
+    minWidth: 0,
     gap: 4,
   },
   promptTitle: {

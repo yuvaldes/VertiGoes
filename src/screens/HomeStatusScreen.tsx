@@ -96,8 +96,8 @@ export function HomeStatusScreen({
     () => streakEndingToday(records, today, allDone),
     [records, today, allDone],
   );
-  /** Recomputed only when the log or the day changes, so scrolling the page never reshuffles it. */
-  const tips = useMemo(() => selectTips(records, today), [records, today]);
+  /** Recomputed only when the day changes, so scrolling the page never reshuffles it. */
+  const tips = useMemo(() => selectTips(today), [today]);
 
   const answerFeeling = (value: Feeling) => {
     setSheet(null);

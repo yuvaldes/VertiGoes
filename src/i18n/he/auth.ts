@@ -87,7 +87,11 @@ export const auth = {
     resumeBody:
       'A few medical questions help us tailor your exercises and your emergency steps.',
     resumeCta: 'Continue',
-    pendingValue: 'Not finished',
+    percentComplete: '{percent}% הושלמו',
+    stepsLeft: {
+      one: 'נשאר עוד שלב אחד',
+      other: 'נשארו עוד {count} שלבים',
+    },
   },
 
   menu: {

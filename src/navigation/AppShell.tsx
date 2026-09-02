@@ -391,8 +391,8 @@ function Shell() {
    * hand, and the status has to say so or the Menu goes on offering the flow as though it had
    * never been seen.
    */
-  const leaveOnboardingUnfinished = () => {
-    skipOnboarding();
+  const leaveOnboardingUnfinished = (step = 0) => {
+    skipOnboarding(step);
     pop();
     replayIntent();
   };

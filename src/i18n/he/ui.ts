@@ -29,9 +29,7 @@ export const ui = {
     open: 'פתחו',
     a11yStrip: 'טיפים ותובנות, {count} כרטיסים, גללו הצידה',
     eyebrow: {
-      insight: 'תובנה',
-      progress: 'התקדמות',
-      coach: 'נסו את זה',
+      fact: 'הידעת',
     },
   },
 

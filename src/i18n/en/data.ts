@@ -162,12 +162,30 @@ export const data = {
     centralVertigo: 'Central vertigo',
   },
 
+  /** Generic names as given by the source reference table, kept in Latin script in both locales. */
   medication: {
     meclizine: 'Meclizine',
-    betahistine: 'Betahistine',
     dimenhydrinate: 'Dimenhydrinate',
-    diazepam: 'Diazepam (low-dose)',
+    cinnarizineDimenhydrinate: 'Cinnarizine / Dimenhydrinate',
     prochlorperazine: 'Prochlorperazine',
+    ondansetron: 'Ondansetron',
+    diazepamLorazepam: 'Diazepam / Lorazepam',
+    scopolamine: 'Scopolamine',
+    betahistine: 'Betahistine',
+    hydrochlorothiazideTriamterene: 'Hydrochlorothiazide / Triamterene',
+    acetazolamide: 'Acetazolamide',
+    dexamethasoneIT: 'Dexamethasone (IT)',
+    gentamicinIT: 'Gentamicin (IT)',
+    amitriptylineNortriptyline: 'Amitriptyline / Nortriptyline',
+    topiramate: 'Topiramate',
+    propranololMetoprolol: 'Propranolol / Metoprolol',
+    venlafaxine: 'Venlafaxine',
+    flunarizineVerapamil: 'Flunarizine / Verapamil',
+    cgrpAntagonists: 'CGRP Antagonists',
+    sertraline: 'Sertraline',
+    escitalopram: 'Escitalopram',
+    duloxetine: 'Duloxetine',
+    prednisoneMethylprednisolone: 'Prednisone / Methylprednisolone',
   },
 
   /**
@@ -303,50 +321,25 @@ export const data = {
       'Your whole history, the community, every professional and drill, Liv, and no ads.',
   },
   /**
-   * The Home tips strip. `insight` cards state what the log shows, `progress` credits a habit,
-   * `coach` asks for one specific thing. Nothing here claims a cause: the app can see that two
-   * things happened in the same week, not that one produced the other.
+   * The Home tips strip: five vestibular-science facts, two shown at a time (see
+   * `src/data/tips.ts`). Each is one card's body text — the emoji and the "Did you know" hook
+   * live in the card itself, not here, so this is the fact alone plus its own call to action.
    */
   tip: {
-    episodesDown: {
-      title: 'Fewer episodes than last week',
-      body: 'You have logged {count} fewer this week. Whatever you changed, it is worth keeping.',
+    rewire: {
+      body: 'Your brain is built to rewire itself. Every short exercise teaches it new neural pathways to bypass dizziness. Ready for a quick system upgrade?',
     },
-    episodesUp: {
-      title: 'Episodes are up this week',
-      body: '{count} more than last week. Running your exercises in the morning is the usual place to start.',
+    vor: {
+      body: 'You have the fastest image stabilizer in nature (VOR), moving your eyes in under 10 milliseconds. Gaze exercises recalibrate it so your vision stays steady. Let’s calibrate it for a few seconds.',
     },
-    shortSleep: {
-      title: 'Short nights lately',
-      body: 'You slept under {hours} hours on {nights} of the last 7. Sleep and episodes often track together, so it is worth watching.',
+    discomfort: {
+      body: 'Mild discomfort during practice (level 2–3 out of 10) is a great sign. It is exactly how your brain learns movement is safe and adapts to it. One small step to build tolerance!',
     },
-    loggingStreak: {
-      title: '{days} days logged in a row',
-      body: 'A full log is what makes the weekly picture worth reading. Keep going.',
+    balanceTrio: {
+      body: 'Your balance relies on a trio: inner ears, eyes, and feet. When one struggles, vestibular exercises train the other two to step up and keep you steady. Let’s back up the team.',
     },
-    finishTheDay: {
-      title: 'Finish the day when you can',
-      body: 'You completed {done} of the last {total} days. Even a partly logged day helps.',
-    },
-    logEarly: {
-      title: 'Log an episode while it is fresh',
-      body: 'What you were doing just before matters as much as how it felt. Note it the same day.',
-    },
-    sameTime: {
-      title: 'Same exercises, same time',
-      body: 'Vestibular exercises work through repetition. A fixed slot in the day beats a longer session now and then.',
-    },
-    moveSlowly: {
-      title: 'Slow down the turns that set it off',
-      body: 'Sitting up, rolling over, looking up. Taking those a beat slower often takes the edge off.',
-    },
-    breathe: {
-      title: 'Breathe before bed',
-      body: 'A few minutes of paced breathing settles the tension that builds after a bad day.',
-    },
-    triggers: {
-      title: 'Look for your pattern',
-      body: 'Open the calendar and read a month at a time. Triggers show up as a shape, not as one bad day.',
+    consistency: {
+      body: 'Practicing for 2 minutes a few times a day is far more effective for the brain than one long weekly session. Consistency is the real key to stability. Just one minute to check today’s goal.',
     },
   },
 } as const;
