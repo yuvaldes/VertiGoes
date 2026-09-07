@@ -515,8 +515,10 @@ const styles = StyleSheet.create({
   about: {
     marginTop: 16,
     padding: 16,
-    borderRadius: 12,
-    backgroundColor: color.gray50,
+    // White on the screen's gray50 body, per the card treatment used elsewhere — the panel
+    // was gray50 itself at first, which made it vanish into the page.
+    borderRadius: 16,
+    backgroundColor: color.white,
     gap: 12,
   },
   aboutTitle: {
