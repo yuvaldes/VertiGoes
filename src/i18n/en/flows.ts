@@ -74,6 +74,12 @@ export const flows = {
     callContact: 'Call {name} ({relationship})',
     done: 'I’m done',
     recorded: 'Saved to today in your calendar.',
+    about: {
+      title: 'About this condition',
+      whatIsLabel: 'What it is',
+      symptomsLabel: 'Symptoms',
+      treatmentLabel: 'Treatment',
+    },
   },
 
   subscription: {

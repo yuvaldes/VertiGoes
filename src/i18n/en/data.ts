@@ -152,6 +152,14 @@ export const data = {
         note: 'This points to the Dix-Hallpike test for diagnosis and the Epley or Semont maneuver for treatment, with vestibular physical therapy if needed.',
         noteContraindications:
           'Check for contraindications — neck or back issues, recent eye surgery — before trying any maneuver.',
+        about: {
+          whatIs:
+            'The most common cause of vertigo (~20% of all cases). Tiny calcium crystals (otoconia) dislodge and drift into the inner ear’s semicircular canals.',
+          symptoms:
+            'Intense, brief spinning sensations (lasting seconds) triggered by head position changes (turning in bed, looking up, or bending over).',
+          treatment:
+            'Repositioning maneuvers (Epley, Semont, or BBQ roll maneuvers) with an over 90% success rate.',
+        },
       },
       bppvUnclear: {
         title: 'BPPV suspected (Benign Paroxysmal Positional Vertigo)',
@@ -160,10 +168,25 @@ export const data = {
       meniere: {
         title: 'Ménière’s disease suspected',
         note: 'See an ENT specialist for evaluation and a hearing test (audiogram). Positional release maneuvers are not appropriate here.',
+        about: {
+          whatIs: 'Fluid accumulation (endolymphatic hydrops) within the inner ear chambers.',
+          symptoms:
+            'Episodic vertigo attacks (lasting 20 minutes to 12 hours), fluctuating low-frequency hearing loss, tinnitus, and ear fullness.',
+          treatment:
+            'Low-sodium diet, diuretics, targeted medical therapies, and vestibular rehabilitation between attacks.',
+        },
       },
       vm: {
         title: 'Vestibular migraine suspected',
         note: 'Recommend a medical evaluation (neurologist or GP) and keeping a trigger diary.',
+        about: {
+          whatIs:
+            'The second most common cause of episodic vertigo, frequently underdiagnosed. Linked to the brain’s migraine pathways, often occurring without an actual headache.',
+          symptoms:
+            'Episodes of vertigo or unsteadiness (lasting minutes to days), sensitivity to light, sound, or visual motion.',
+          treatment:
+            'Lifestyle modifications, migraine preventive medications, and customized vestibular rehabilitation.',
+        },
       },
       tia: {
         title: '⚠️ Possible TIA (transient ischemic attack)',
@@ -176,11 +199,27 @@ export const data = {
       labyrinthitis: {
         title: 'Labyrinthitis suspected',
         note: 'Get an urgent referral to a physician or ENT — you may need antibiotic or steroid treatment.',
+        about: {
+          whatIs:
+            'Inflammation of the inner ear labyrinth, affecting both balance and hearing structures simultaneously.',
+          symptoms:
+            'Sudden severe spinning vertigo accompanied by acute hearing loss and/or tinnitus.',
+          treatment:
+            'Urgent medical management (steroids or antibiotics based on etiology) and subsequent vestibular rehabilitation.',
+        },
       },
       neuritis: {
         title: 'Vestibular neuritis suspected',
         note: 'See a physician and consider vestibular physical therapy for rehabilitation.',
         noteFollowUp: 'Follow up if symptoms don’t improve within a few days.',
+        about: {
+          whatIs:
+            'Inflammation (usually viral) of the vestibular nerve, which carries balance signals from the inner ear to the brain.',
+          symptoms:
+            'Sudden onset of severe spinning vertigo, nausea, and unsteadiness lasting several days, with no hearing loss.',
+          treatment:
+            'Short-term medication for acute symptoms, followed by vestibular rehabilitation therapy (VRT) to drive neural compensation.',
+        },
       },
       ototoxicity: {
         title: 'Ototoxicity possible',
@@ -193,6 +232,14 @@ export const data = {
       pppd: {
         title: 'PPPD suspected (Persistent Postural-Perceptual Dizziness)',
         note: 'This often develops after an acute vestibular event, migraine, or anxiety. See a physician and consider tailored vestibular physical therapy (graded habituation), possibly alongside CBT-informed support.',
+        about: {
+          whatIs:
+            'A chronic functional vestibular disorder where the brain remains in high-alert mode following an initial balance trigger.',
+          symptoms:
+            'Persistent non-spinning dizziness, rocking, or unsteadiness (3+ months), exacerbated by upright posture, motion, and visually complex environments (malls, screens, scrolling).',
+          treatment:
+            'Tailored vestibular rehabilitation (habituation), Cognitive Behavioral Therapy (CBT), and SSRI/SNRI medications.',
+        },
       },
       oh: {
         title: 'Orthostatic hypotension possible',
@@ -201,14 +248,56 @@ export const data = {
       cervicogenic: {
         title: 'Cervicogenic dizziness possible',
         note: 'See a physiotherapist with a combined neck-and-vestibular focus.',
+        about: {
+          whatIs:
+            'Balance dysfunction resulting from faulty sensory input (proprioception) from the muscles and joints of the cervical spine.',
+          symptoms:
+            'Dizziness, unsteadiness, or lightheadedness closely tied to neck pain, stiffness, or restricted cervical motion.',
+          treatment:
+            'Manual cervical physical therapy, strengthening exercises, postural training, and sensorimotor eye-neck coordination.',
+        },
       },
       bilateral: {
         title: 'Bilateral vestibulopathy possible',
         note: 'Think about any history of ototoxic medications (like aminoglycosides), and get a VNG test or physician evaluation.',
+        about: {
+          whatIs: 'Partial or complete loss of vestibular function in both inner ears simultaneously.',
+          symptoms:
+            'Bouncing or blurry vision during head movement/walking (oscillopsia) and significant unsteadiness, especially in the dark or on uneven terrain.',
+          treatment:
+            'Advanced vestibular rehabilitation focusing on sensory substitution (vision and proprioception) and fall-prevention strategies.',
+        },
       },
       unknown: {
         title: 'Not a clear pattern',
         note: 'What you described didn’t point clearly to one thing — it’s worth getting checked by a doctor.',
+      },
+    },
+
+    /**
+     * Reference detail for two diagnoses the triage tree doesn't reach yet — no existing
+     * question routes to them, and adding that routing is a clinical decision for whoever
+     * maintains the source decision-tree doc, not something to guess at here. Kept so the
+     * copy is ready the moment the tree grows a path to either one; see helpFlow.ts.
+     */
+    futureOutcomes: {
+      mdds: {
+        title: 'Mal de Débarquement Syndrome (MdDS)',
+        whatIs:
+          'A persistent phantom motion sensation occurring when the brain fails to readapt after passive motion exposure (such as cruises, flights, or train rides).',
+        symptoms:
+          'Constant rocking, swaying, or bobbing feeling that characteristically temporarily improves during passive motion (e.g., driving in a car).',
+        treatment:
+          'Optokinetic stimulation protocols (OKN), specialized vestibular therapy, and sensory recalibration.',
+      },
+      sscd: {
+        title: 'Superior Semicircular Canal Dehiscence (SSCD)',
+        whatIs:
+          'A small bony opening (dehiscence) in the temporal bone covering the superior semicircular canal.',
+        symptoms:
+          'Vertigo triggered by loud noises (Tullio phenomenon) or pressure changes (coughing, straining), alongside amplified hearing of internal body sounds (autophony).',
+        treatment:
+          'High-resolution temporal bone CT for diagnosis; management ranges from conservative triggers avoidance to surgical repair.',
       },
     },
 

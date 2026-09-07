@@ -34,12 +34,20 @@ export type HelpQuestionNode = {
  */
 export type HelpOutcomeSeverity = 'info' | 'urgent' | 'emergency';
 
+/** Reference detail shown after the outcome's own guidance, for outcomes that have it. */
+export type HelpAboutInfo = {
+  whatIsKey: TKey;
+  symptomsKey: TKey;
+  treatmentKey: TKey;
+};
+
 export type HelpOutcomeNode = {
   kind: 'outcome';
   id: string;
   severity: HelpOutcomeSeverity;
   titleKey: TKey;
   noteKeys: TKey[];
+  about?: HelpAboutInfo;
 };
 
 export type HelpNode = HelpQuestionNode | HelpOutcomeNode;
@@ -87,8 +95,18 @@ function outcome(
   severity: HelpOutcomeSeverity,
   titleKey: TKey,
   noteKeys: TKey[],
+  about?: HelpAboutInfo,
 ): HelpOutcomeNode {
-  return { kind: 'outcome', id, severity, titleKey, noteKeys };
+  return { kind: 'outcome', id, severity, titleKey, noteKeys, about };
+}
+
+/** Builds the three `about` keys for a `data.help.outcome.<name>` entry that has one. */
+function about(name: string): HelpAboutInfo {
+  return {
+    whatIsKey: `data.help.outcome.${name}.about.whatIs` as TKey,
+    symptomsKey: `data.help.outcome.${name}.about.symptoms` as TKey,
+    treatmentKey: `data.help.outcome.${name}.about.treatment` as TKey,
+  };
 }
 
 export const HELP_NODES: Record<string, HelpNode> = {
@@ -140,10 +158,13 @@ export const HELP_NODES: Record<string, HelpNode> = {
       { labelKey: 'data.help.q4ear.unclear', next: 'DX-BPPV-UNCLEAR' },
     ],
   },
-  'DX-BPPV': outcome('DX-BPPV', 'info', 'data.help.outcome.bppv.title', [
-    'data.help.outcome.bppv.note',
-    'data.help.outcome.bppv.noteContraindications',
-  ]),
+  'DX-BPPV': outcome(
+    'DX-BPPV',
+    'info',
+    'data.help.outcome.bppv.title',
+    ['data.help.outcome.bppv.note', 'data.help.outcome.bppv.noteContraindications'],
+    about('bppv'),
+  ),
   'DX-BPPV-UNCLEAR': outcome('DX-BPPV-UNCLEAR', 'info', 'data.help.outcome.bppvUnclear.title', [
     'data.help.outcome.bppvUnclear.note',
   ]),
@@ -157,9 +178,13 @@ export const HELP_NODES: Record<string, HelpNode> = {
       { labelKey: NO, next: 'Q5-MIG' },
     ],
   },
-  'DX-MENIERE': outcome('DX-MENIERE', 'info', 'data.help.outcome.meniere.title', [
-    'data.help.outcome.meniere.note',
-  ]),
+  'DX-MENIERE': outcome(
+    'DX-MENIERE',
+    'info',
+    'data.help.outcome.meniere.title',
+    ['data.help.outcome.meniere.note'],
+    about('meniere'),
+  ),
 
   'Q5-MIG': {
     kind: 'question',
@@ -171,7 +196,13 @@ export const HELP_NODES: Record<string, HelpNode> = {
       { labelKey: 'data.help.q5mig.noPlain', next: 'DX-PAROX' },
     ],
   },
-  'DX-VM': outcome('DX-VM', 'info', 'data.help.outcome.vm.title', ['data.help.outcome.vm.note']),
+  'DX-VM': outcome(
+    'DX-VM',
+    'info',
+    'data.help.outcome.vm.title',
+    ['data.help.outcome.vm.note'],
+    about('vm'),
+  ),
   'DX-TIA': outcome('DX-TIA', 'urgent', 'data.help.outcome.tia.title', [
     'data.help.outcome.tia.note',
   ]),
@@ -180,9 +211,13 @@ export const HELP_NODES: Record<string, HelpNode> = {
   ]),
 
   'Q3-CONT': yesNo('Q3-CONT', 'data.help.q3cont.text', 'DX-LAB', 'Q4-CENT'),
-  'DX-LAB': outcome('DX-LAB', 'urgent', 'data.help.outcome.labyrinthitis.title', [
-    'data.help.outcome.labyrinthitis.note',
-  ]),
+  'DX-LAB': outcome(
+    'DX-LAB',
+    'urgent',
+    'data.help.outcome.labyrinthitis.title',
+    ['data.help.outcome.labyrinthitis.note'],
+    about('labyrinthitis'),
+  ),
   'Q4-CENT': {
     kind: 'question',
     id: 'Q4-CENT',
@@ -192,10 +227,13 @@ export const HELP_NODES: Record<string, HelpNode> = {
       { labelKey: 'data.help.q4cent.normal', next: 'DX-NEURITIS' },
     ],
   },
-  'DX-NEURITIS': outcome('DX-NEURITIS', 'info', 'data.help.outcome.neuritis.title', [
-    'data.help.outcome.neuritis.note',
-    'data.help.outcome.neuritis.noteFollowUp',
-  ]),
+  'DX-NEURITIS': outcome(
+    'DX-NEURITIS',
+    'info',
+    'data.help.outcome.neuritis.title',
+    ['data.help.outcome.neuritis.note', 'data.help.outcome.neuritis.noteFollowUp'],
+    about('neuritis'),
+  ),
 
   // --- Branch B: gradual onset ---------------------------------------------------------------
   Q2B: {
@@ -228,17 +266,29 @@ export const HELP_NODES: Record<string, HelpNode> = {
       { labelKey: 'data.help.q2c.unsteady', next: 'DX-BIL' },
     ],
   },
-  'DX-PPPD': outcome('DX-PPPD', 'info', 'data.help.outcome.pppd.title', [
-    'data.help.outcome.pppd.note',
-  ]),
+  'DX-PPPD': outcome(
+    'DX-PPPD',
+    'info',
+    'data.help.outcome.pppd.title',
+    ['data.help.outcome.pppd.note'],
+    about('pppd'),
+  ),
   'Q3-ORTHO': yesNo('Q3-ORTHO', 'data.help.q3ortho.text', 'ER', 'DX-OH'),
   'DX-OH': outcome('DX-OH', 'info', 'data.help.outcome.oh.title', ['data.help.outcome.oh.note']),
-  'DX-CERV': outcome('DX-CERV', 'info', 'data.help.outcome.cervicogenic.title', [
-    'data.help.outcome.cervicogenic.note',
-  ]),
-  'DX-BIL': outcome('DX-BIL', 'info', 'data.help.outcome.bilateral.title', [
-    'data.help.outcome.bilateral.note',
-  ]),
+  'DX-CERV': outcome(
+    'DX-CERV',
+    'info',
+    'data.help.outcome.cervicogenic.title',
+    ['data.help.outcome.cervicogenic.note'],
+    about('cervicogenic'),
+  ),
+  'DX-BIL': outcome(
+    'DX-BIL',
+    'info',
+    'data.help.outcome.bilateral.title',
+    ['data.help.outcome.bilateral.note'],
+    about('bilateral'),
+  ),
 
   // --- Emergency ---------------------------------------------------------------------------
   ER: outcome('ER', 'emergency', 'data.help.urgentTitle', [
@@ -286,12 +336,19 @@ export type HelpGuidance = {
   severity: HelpOutcomeSeverity;
   titleKey: TKey;
   stepKeys: TKey[];
+  /** Reference detail (what it is / symptoms / treatment), when the outcome has it. */
+  about?: HelpAboutInfo;
 };
 
 /** What to tell the user once a complete path has been answered. */
 export function guidanceFor(answers: HelpAnswer[]): HelpGuidance {
   const outcomeNode = resolveOutcome(answers);
-  return { severity: outcomeNode.severity, titleKey: outcomeNode.titleKey, stepKeys: outcomeNode.noteKeys };
+  return {
+    severity: outcomeNode.severity,
+    titleKey: outcomeNode.titleKey,
+    stepKeys: outcomeNode.noteKeys,
+    about: outcomeNode.about,
+  };
 }
 
 /**

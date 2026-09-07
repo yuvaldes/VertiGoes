@@ -66,6 +66,12 @@ export const flows = {
     callContact: 'התקשרו אל {name} ({relationship})',
     done: 'סיימתי',
     recorded: 'נשמר להיום ביומן שלכם.',
+    about: {
+      title: 'על המצב הזה',
+      whatIsLabel: 'מה זה',
+      symptomsLabel: 'תסמינים',
+      treatmentLabel: 'טיפול',
+    },
   },
 
   subscription: {

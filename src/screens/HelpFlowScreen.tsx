@@ -293,6 +293,29 @@ export function HelpFlowScreen({
               ))}
             </View>
 
+            {/* Reference detail for outcomes that have it — not shown for ER/unknown, where
+                there's nothing yet to describe. */}
+            {guidance.about && (
+              <View style={styles.about}>
+                <Text style={[styles.aboutTitle, displayFont]}>{t('flows.help.about.title')}</Text>
+
+                <View style={styles.aboutRow}>
+                  <Text style={styles.aboutLabel}>{t('flows.help.about.whatIsLabel')}</Text>
+                  <Text style={styles.aboutText}>{t(guidance.about.whatIsKey)}</Text>
+                </View>
+
+                <View style={styles.aboutRow}>
+                  <Text style={styles.aboutLabel}>{t('flows.help.about.symptomsLabel')}</Text>
+                  <Text style={styles.aboutText}>{t(guidance.about.symptomsKey)}</Text>
+                </View>
+
+                <View style={styles.aboutRow}>
+                  <Text style={styles.aboutLabel}>{t('flows.help.about.treatmentLabel')}</Text>
+                  <Text style={styles.aboutText}>{t(guidance.about.treatmentKey)}</Text>
+                </View>
+              </View>
+            )}
+
             {/* Only offered when the flow actually escalated — `urgent` outcomes get a
                 prominent warning, per the source doc, but don't route to the ER contact. */}
             {isEmergency && (
@@ -484,6 +507,35 @@ const styles = StyleSheet.create({
   stepLabel: {
     flex: 1,
     minWidth: 0,
+    fontFamily: font.body,
+    fontSize: 14,
+    lineHeight: 20,
+    color: color.gray900,
+  },
+  about: {
+    marginTop: 16,
+    padding: 16,
+    borderRadius: 12,
+    backgroundColor: color.gray50,
+    gap: 12,
+  },
+  aboutTitle: {
+    fontFamily: font.display,
+    fontSize: 16,
+    lineHeight: 22,
+    color: color.black,
+  },
+  aboutRow: {
+    gap: 2,
+  },
+  aboutLabel: {
+    fontFamily: font.bodySemiBold,
+    fontSize: 12,
+    lineHeight: 16,
+    color: color.brand500,
+    textTransform: 'uppercase',
+  },
+  aboutText: {
     fontFamily: font.body,
     fontSize: 14,
     lineHeight: 20,
