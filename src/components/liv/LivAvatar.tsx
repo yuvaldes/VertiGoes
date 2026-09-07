@@ -10,11 +10,12 @@ const source = require('../../assets/liv-avatar.png');
 /**
  * Liv's face.
  *
- * The asset is a 280x280 transparent cutout, so it is deliberately NOT clipped to a circle
+ * The asset is a 384x384 transparent cutout, so it is deliberately NOT clipped to a circle
  * and has no background — a circular mask would crop the hair silhouette and the chin. It
  * floats on the page, which is how the mock shows it.
  *
- * 280px against a 64pt slot is ~4x, so it stays sharp at any density.
+ * 384px is sized off the largest slot she appears in — 128pt in the help flow — at 3x
+ * density. The 64pt and 88pt slots are then comfortably oversampled.
  */
 export function LivAvatar({ size = LIV_AVATAR_SIZE }: { size?: number }) {
   const t = useT();
