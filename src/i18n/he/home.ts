@@ -27,6 +27,7 @@ export const home = {
   },
   calendar: {
     title: 'יומן',
+    today: 'היום',
   },
   dayDetail: {
     empty: 'לא נרשם דבר ביום הזה.',

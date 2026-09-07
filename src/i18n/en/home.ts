@@ -32,6 +32,7 @@ export const home = {
   },
   calendar: {
     title: 'Calendar',
+    today: 'Today',
   },
   dayDetail: {
     empty: 'Nothing was recorded on this day.',

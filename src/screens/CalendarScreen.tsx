@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { AppHeader } from '../components/AppHeader';
 import { BottomBarSlot } from '../components/BottomBar';
@@ -12,7 +12,7 @@ import { toKey } from '../data/dayRecords';
 import type { TabKey } from '../data/home';
 import { useT } from '../i18n';
 import { useDayRecords } from '../state/DayRecordsContext';
-import { color, frame } from '../theme/tokens';
+import { color, font, frame } from '../theme/tokens';
 
 type Props = {
   onBack: () => void;
@@ -53,12 +53,25 @@ export function CalendarScreen({ onBack, activeTab, onChangeTab, onOpenDay }: Pr
     gridRef.current?.scrollToMonth(year, visibleMonth);
   };
 
+  const jumpToToday = () => {
+    setSelected(today);
+    gridRef.current?.scrollToMonth(today.getFullYear(), today.getMonth());
+  };
+
   return (
     <View style={styles.body}>
       {/* This screen is full-bleed, so the header opts into the gutter here. */}
       <View style={styles.gutter}>
         <AppHeader>
-          <ScreenTitleRow title={t('home.calendar.title')} onBack={onBack} />
+          <ScreenTitleRow
+            title={t('home.calendar.title')}
+            onBack={onBack}
+            trailing={
+              <Pressable onPress={jumpToToday} hitSlop={8} accessibilityRole="button">
+                <Text style={styles.today}>{t('home.calendar.today')}</Text>
+              </Pressable>
+            }
+          />
         </AppHeader>
       </View>
 
@@ -126,6 +139,11 @@ const styles = StyleSheet.create({
   /** Sections opt into the 16px gutter individually; the root is full-bleed. */
   gutter: {
     paddingHorizontal: frame.gutter,
+  },
+  today: {
+    fontFamily: font.bodySemiBold,
+    fontSize: 14,
+    color: color.brand500,
   },
   /** Figma "Frame 36" — 393 x 325, sitting 16 below the header. */
   calendar: {
