@@ -8,8 +8,11 @@ import { WEEK_ROW_HEIGHT, WeekRow } from './WeekRow';
 
 /** Figma: the calendar column has a 24px gap between week groups. */
 const GROUP_GAP = 24;
-/** Figma "Frame 82" — the inline month label, 19 tall with a 4px gap below. */
-const MONTH_LABEL_HEIGHT = 19;
+/**
+ * Figma "Frame 82" — the inline month label, 19 tall with a 4px gap below. Bumped to 22 so
+ * CalSans descenders (g/j/p in "Sep"/"Jan"/"Jun"/"Jul") aren't clipped by the row height.
+ */
+const MONTH_LABEL_HEIGHT = 22;
 const MONTH_LABEL_GAP = 4;
 
 /** How far back the grid reaches. Bounded rather than infinite. */
@@ -217,6 +220,7 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: font.display,
     fontSize: 16,
+    lineHeight: 22,
     color: color.black,
   },
 });

@@ -296,6 +296,10 @@ const WEEKDAY_INDEXES = [0, 1, 2, 3, 4, 5, 6];
 
 /** Index 0 is January, matching `Date.getMonth()`. */
 export function monthNames(locale: Locale, style: 'long' | 'short' = 'long'): string[] {
+  // en-GB's Intl short form is "Sept" for September (4 letters), which breaks the fixed-width
+  // month label in the calendar grid, so English always uses the hardcoded 3-letter table.
+  if (locale === 'en' && style === 'short') return [...MONTHS_SHORT_EN];
+
   const formatter = dateFormatter(locale, { month: style });
   if (!formatter) return [...(style === 'long' ? MONTHS_LONG_EN : MONTHS_SHORT_EN)];
   // Mid-month, so no timezone offset can push a sample into a neighbouring month.
