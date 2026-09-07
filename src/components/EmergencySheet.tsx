@@ -98,6 +98,16 @@ export function EmergencySheet({ visible, onClose, onCall, onHelp }: Props) {
 
         <View style={styles.actions}>
           <SheetAction
+            onPress={onHelp}
+            tint={styles.helpSurface}
+            badgeColor={color.brand500}
+            icon={<Heart size={20} weight="fill" color={color.white} />}
+            title={t('common.emergency.helpTitle')}
+            subtitle={t('common.emergency.helpSubtitle')}
+            trailing={<Caret size={20} color={color.brand500} />}
+          />
+
+          <SheetAction
             onPress={onCall}
             tint={styles.callSurface}
             badgeColor={color.error400}
@@ -107,16 +117,6 @@ export function EmergencySheet({ visible, onClose, onCall, onHelp }: Props) {
               name: emergencyContact.name,
               relationship: t(emergencyContact.relationshipKey),
             })}
-          />
-
-          <SheetAction
-            onPress={onHelp}
-            tint={styles.helpSurface}
-            badgeColor={color.brand500}
-            icon={<Heart size={20} weight="fill" color={color.white} />}
-            title={t('common.emergency.helpTitle')}
-            subtitle={t('common.emergency.helpSubtitle')}
-            trailing={<Caret size={20} color={color.brand500} />}
           />
         </View>
       </Animated.View>

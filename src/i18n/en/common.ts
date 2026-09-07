@@ -15,6 +15,7 @@ export const common = {
     close: 'Close',
     done: 'Done',
     dismiss: 'Dismiss',
+    cancel: 'Cancel',
   },
   answer: {
     yes: 'Yes',
@@ -46,6 +47,7 @@ export const common = {
   },
   menuRow: {
     a11yPremium: '{label} - requires Premium',
+    a11yLocked: '{label} - requires sign in',
     a11yWithValue: '{label}, {value}',
   },
 } as const;

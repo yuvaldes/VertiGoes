@@ -28,6 +28,14 @@ export const ui = {
     sleepQuestion: 'How many hours did you sleep?',
     a11yDismissSheet: 'Dismiss {title}',
   },
+  /** The Home tips strip: two "did you know" facts, cycling day to day. */
+  tips: {
+    a11yStrip: 'Tips and insights, {count} cards, scroll sideways',
+    eyebrow: {
+      fact: 'Did you know',
+    },
+  },
+
   weeklyStatus: {
     eyebrow: 'STATUS',
   },

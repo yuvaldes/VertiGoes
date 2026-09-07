@@ -62,7 +62,7 @@ export const flows = {
 
   help: {
     title: 'עזרו לי להתמודד',
-    progress: 'שאלה {step} מתוך {total}',
+    progress: 'שאלה {step}',
     callContact: 'התקשרו אל {name} ({relationship})',
     done: 'סיימתי',
     recorded: 'נשמר להיום ביומן שלכם.',

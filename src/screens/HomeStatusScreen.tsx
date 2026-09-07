@@ -10,7 +10,7 @@ import { Celebration } from '../components/Celebration';
 import { FeelingSheet } from '../components/home/FeelingSheet';
 import { SleepSheet } from '../components/home/SleepSheet';
 import { TaskCard } from '../components/home/TaskCard';
-import { WeeklyStatusCard } from '../components/home/WeeklyStatusCard';
+import { HomeCarousel } from '../components/home/HomeCarousel';
 import {
   describeSleep,
   episodeTrendKey,
@@ -19,6 +19,7 @@ import {
   type Feeling,
 } from '../data/dayRecords';
 import { user, type TabKey } from '../data/home';
+import { selectTips } from '../data/tips';
 import { useDisplayFont, useLocale, useT, type TKey } from '../i18n';
 import { useDayRecords } from '../state/DayRecordsContext';
 import { useExercises } from '../state/ExercisesContext';
@@ -95,6 +96,8 @@ export function HomeStatusScreen({
     () => streakEndingToday(records, today, allDone),
     [records, today, allDone],
   );
+  /** Recomputed only when the day changes, so scrolling the page never reshuffles it. */
+  const tips = useMemo(() => selectTips(today), [today]);
 
   const answerFeeling = (value: Feeling) => {
     setSheet(null);
@@ -131,7 +134,7 @@ export function HomeStatusScreen({
           </View>
         </View>
 
-        <WeeklyStatusCard headline={t(headline)} week={week} />
+        <HomeCarousel headline={t(headline)} week={week} tips={tips} />
 
         <View style={styles.tasks}>
           <View style={styles.streakRow}>
@@ -207,24 +210,29 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: frame.gutter,
-    paddingBottom: 16,
-    gap: 24,
+    paddingBottom: 12,
+    gap: 20,
     // Lets the greeting below grow into whatever height the scroll viewport has spare.
     flexGrow: 1,
   },
   /**
    * The design fixes this band at 140, but that is more than the column actually has spare on a
    * 852pt device — so a hard 140 both stranded the slack and pushed the page into scrolling.
-   * Growing instead makes the greeting exactly the leftover height, which on most phones lands
-   * just under the design's 140 and removes the overflow.
+   * Growing instead makes the greeting exactly the leftover height, which on a roomy screen
+   * lands near the design's 140.
    *
    * `flexGrow` alone rather than `flex: 1` — RN defaults `flexShrink` to 0, so this fills spare
-   * space without ever being squeezed below its content. The floor only matters on a short
-   * screen, where the page scrolls again.
+   * space without ever being squeezed below its content.
+   *
+   * The floor is what decides whether Home scrolls at all: everything else on the page is a
+   * fixed height, so the shortest the column can be is this plus the cards. 48 clears a 812pt
+   * device (the smallest current iPhone that is not an SE) with room to spare, and still leaves
+   * 8pt above and below the greeting's own 32pt line. Anything shorter would read as a cramped
+   * mistake rather than as breathing space, so an SE-class 667pt screen scrolls instead.
    */
   greetingBlock: {
     flexGrow: 1,
-    minHeight: 96,
+    minHeight: 48,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',

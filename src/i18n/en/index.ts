@@ -1,3 +1,4 @@
+import { auth } from './auth';
 import { browse } from './browse';
 import { common } from './common';
 import { data } from './data';
@@ -13,6 +14,7 @@ import { ui } from './ui';
  * import it and add it to this object. Do the mirror-image edit in `he/index.ts`.
  */
 export const en = {
+  auth,
   browse,
   common,
   data,

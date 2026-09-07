@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { Animated, Easing, Linking, Platform, StyleSheet, View } from 'react-native';
 
+import { AuthSheet } from '../components/auth/AuthSheet';
 import { BottomBar } from '../components/BottomBar';
 import { BrandRow } from '../components/BrandRow';
 import { EmergencySheet } from '../components/EmergencySheet';
@@ -26,8 +27,13 @@ import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { PlaceholderScreen } from '../screens/PlaceholderScreen';
 import { ProfessionalDetailScreen } from '../screens/ProfessionalDetailScreen';
 import { ProfessionalsScreen } from '../screens/ProfessionalsScreen';
+import { SignInScreen } from '../screens/SignInScreen';
+import { SignUpScreen } from '../screens/SignUpScreen';
 import { SubscriptionScreen } from '../screens/SubscriptionScreen';
+import { useAuth } from '../state/AuthContext';
+import { AuthGateProvider, useGate } from '../state/AuthGateContext';
 import { useDayRecords } from '../state/DayRecordsContext';
+import { useExercises } from '../state/ExercisesContext';
 import { useLivChat } from '../state/LivChatContext';
 import { usePreferences } from '../state/PreferencesContext';
 import { useSubscription } from '../state/SubscriptionContext';
@@ -52,6 +58,14 @@ type Pushed =
   | { route: 'subscription' }
   /** `update` reuses the checkout screen to swap the card on an existing subscription. */
   | { route: 'checkout'; mode: 'subscribe' | 'update' }
+  /**
+   * The email half of the auth sheet. Payload-free, and chromed like every other push rather
+   * than full-bleed: signing up is not a takeover the way the medical wizard is, and leaving
+   * the tab bar there means a visitor who changes their mind can walk away instead of
+   * hunting for Back.
+   */
+  | { route: 'signUp' }
+  | { route: 'signIn' }
   | { route: 'placeholder'; title: string; note: string };
 
 const USE_NATIVE_DRIVER = Platform.OS !== 'web';
@@ -95,16 +109,43 @@ type StackItem = { id: number; entry: Pushed; anim: Animated.Value };
 export function AppShell() {
   return (
     <SheetHostProvider>
-      <Shell />
+      {/*
+        The gate wraps the shell rather than sitting in `App.tsx`, because the only thing that
+        acts on a refusal is navigation, and navigation lives here. Everything below can read
+        `useGate()` - the tab bar, the Menu rows, Home's task cards.
+      */}
+      <AuthGateProvider>
+        <Shell />
+      </AuthGateProvider>
     </SheetHostProvider>
   );
 }
 
 function Shell() {
-  const { today, todayKey, recordEmergencyCall, recordInAppHelp } = useDayRecords();
-  const { refreshDaySummary } = useLivChat();
+  const {
+    today,
+    todayKey,
+    recordEmergencyCall,
+    recordInAppHelp,
+    reset: resetDayRecords,
+  } = useDayRecords();
+  const { refreshDaySummary, reset: resetLivChat } = useLivChat();
+  const { reset: resetExercises } = useExercises();
   const { setLanguage } = usePreferences();
-  const { subscribe, setPaymentMethod, paymentMethod } = useSubscription();
+  const { subscribe, setPaymentMethod, paymentMethod, cancel: resetSubscription } =
+    useSubscription();
+  const { session, onboarding, signInWithProvider, completeOnboarding, skipOnboarding, signOut } =
+    useAuth();
+  const {
+    can,
+    gate,
+    sheet: authSheet,
+    closeSheet,
+    hideSheet,
+    consumeIntent,
+    promptAuth,
+    promptSignIn,
+  } = useGate();
   const t = useT();
   const date = useDateFormat();
   const { isRTL } = useDirection();
@@ -127,6 +168,8 @@ function Shell() {
    * choice survives the push to checkout — checkout has to charge what the toggle said.
    */
   const [billing, setBilling] = useState<BillingPeriod>('annual');
+  /** Whether the help flow is still on a question — see `fullBleed` below. */
+  const [helpAsking, setHelpAsking] = useState(true);
 
   const nextId = useRef(0);
 
@@ -155,6 +198,17 @@ function Shell() {
     });
   }, [dismiss]);
 
+  /**
+   * Empties the stack, dismissing the top so its slide-out is visible. Signing in uses it to
+   * drop the sign-up screen before onboarding takes its place; changing tab has always done
+   * exactly this and now shares it.
+   */
+  const popAll = useCallback(() => {
+    setStack((current) => {
+      if (current.length > 0) dismiss(current[current.length - 1]);
+      return [];
+    });
+  }, [dismiss]);
 
   /**
    * Edge swipe to go back. It reads the live stack through a callback rather than being
@@ -170,21 +224,39 @@ function Shell() {
    * Tapping a tab also clears the stack. Without this the tab highlights while the pushed
    * screen stays on top of it, so the tap looks like it did nothing.
    */
-  const changeTab = useCallback(
+  const selectTab = useCallback(
     (tab: TabKey) => {
       setActiveTab(tab);
-      setStack((current) => {
-        if (current.length > 0) dismiss(current[current.length - 1]);
-        return [];
-      });
+      popAll();
     },
-    [dismiss],
+    [popAll],
+  );
+
+  /**
+   * Liv is the one tab a guest cannot open, and a refused tap must leave `activeTab` exactly
+   * where it was: a pill highlighting a tab you are not on reads worse than the wall itself,
+   * and `selectTab` would also have emptied the stack on the way. All three tabs stay visible
+   * and unmarked - the bar's geometry is fixed by the design, and a Liv tab you can see is
+   * part of what there is to want.
+   */
+  const changeTab = useCallback(
+    (tab: TabKey) => {
+      if (tab === 'liv') {
+        gate('useLiv', () => selectTab('liv'))();
+        return;
+      }
+      selectTab(tab);
+    },
+    [gate, selectTab],
   );
 
   /** Mocked: dials the placeholder contact so the wiring is real end to end. */
   const callEmergencyContact = () => {
     setEmergencyOpen(false);
-    recordEmergencyCall(todayKey);
+    // A guest has no day record to write the call to. The dial is what this function is for
+    // and it still happens - the record is the only thing skipped, which is the whole of the
+    // concession the emergency path makes for being open signed out.
+    if (can('recordDay')) recordEmergencyCall(todayKey);
 
     const url = `tel:${emergencyContact.phone.replace(/[^+\d]/g, '')}`;
     if (Platform.OS === 'web') {
@@ -198,6 +270,7 @@ function Shell() {
 
   const startHelpFlow = () => {
     setEmergencyOpen(false);
+    setHelpAsking(true);
     push({ route: 'helpFlow' });
   };
 
@@ -206,6 +279,10 @@ function Shell() {
    * on the calendar. Refreshing the summary afterwards is what puts it in the day's line.
    */
   const finishHelpFlow = (answers: HelpAnswer[]) => {
+    // Both writes go or neither does: the summary refresh puts a Liv line on the same day
+    // record, so skipping only the first would leave a guest with half a day they never had.
+    // The flow itself has already run to the end by the time we are here.
+    if (!can('recordDay')) return;
     recordInAppHelp(todayKey, { answers });
     refreshDaySummary(todayKey);
   };
@@ -213,8 +290,13 @@ function Shell() {
   const openPlaceholder = (title: string, note: string) =>
     push({ route: 'placeholder', title, note });
 
-  /** Every paywall in the app — the blurred list tails, the gated menu rows — lands here. */
-  const openSubscription = () => push({ route: 'subscription' });
+  /**
+   * Every paywall in the app — the blurred list tails, the gated menu rows — lands here, which
+   * is why gating it once covers all of them. A guest gets the account wall instead: selling a
+   * subscription to someone with no account to attach it to is two walls in a row, and it is
+   * the worse of the two to meet first.
+   */
+  const openSubscription = gate('subscribe', () => push({ route: 'subscription' }));
 
   /**
    * Mock purchase. Popping back to the pricing page rather than all the way out is deliberate:
@@ -249,18 +331,83 @@ function Shell() {
   const showEmergency =
     (activeTab === 'home' && topRoute === null) || topRoute === 'exerciseVideos';
 
-  /** Onboarding is the one screen with no bar at all: it owns the whole frame. */
-  const showBottomBar = topRoute !== 'onboarding';
+  /**
+   * Two screens own the whole frame and render no shell chrome: onboarding, and the emergency
+   * help flow while it is asking its questions. The help flow's design (Figma 484:10276) gives
+   * the entire viewport to one question and two very large targets, and a wordmark and tab bar
+   * above it would be both noise and a way to wander off mid-episode.
+   *
+   * The flow drops back into the ordinary chrome for its guidance step, which is a page to read
+   * rather than a prompt to answer - so this follows the screen's own state, not just the route.
+   */
+  const fullBleed = topRoute === 'onboarding' || (topRoute === 'helpFlow' && helpAsking);
+  const showBottomBar = !fullBleed;
+
+  /** Runs whatever the visitor was reaching for when the wall went up, at most once. */
+  const replayIntent = () => {
+    consumeIntent()?.();
+  };
 
   /**
-   * No account/profile store exists yet, so this is a stub like `finishHelpFlow` used to be —
-   * only the language choice has somewhere real to go, since `PreferencesContext` already
-   * owns it. Everything else just logs until there's a login flow to persist it against.
+   * Both ways in land here: a provider button on the sheet resolving, and either email screen
+   * reporting success.
+   *
+   * It pushes onboarding unconditionally rather than reading `onboarding === 'pending'`,
+   * because `AuthContext` guarantees every sign-in lands in `pending` - so the read would be
+   * both redundant and a race with the state flip that just happened. The intent is not
+   * replayed yet; onboarding finishing or being skipped is what releases it.
+   */
+  const onAuthenticated = () => {
+    popAll();
+    push({ route: 'onboarding' });
+  };
+
+  const signInWith = async (method: 'google' | 'apple') => {
+    const result = await signInWithProvider(method);
+    if (!result.ok) return;
+    hideSheet();
+    onAuthenticated();
+  };
+
+  /** Not `closeSheet`: the sheet is handing off mid-ask, so the intent has to survive it. */
+  const startEmailAuth = () => {
+    hideSheet();
+    push({ route: 'signUp' });
+  };
+
+  /**
+   * The language is still the one answer with somewhere else to be — `PreferencesContext` owns
+   * it and it outlives a sign-out. The rest now has an account to belong to.
    */
   const finishOnboarding = (answers: OnboardingAnswers) => {
     setLanguage(answers.language);
-    console.log('[stub] onboarding complete', answers);
+    completeOnboarding(answers);
     pop();
+    replayIntent();
+  };
+
+  /**
+   * Skipping and backing out of step 0 are the same act: either way the answers are not in
+   * hand, and the status has to say so or the Menu goes on offering the flow as though it had
+   * never been seen.
+   */
+  const leaveOnboardingUnfinished = (step = 0) => {
+    skipOnboarding(step);
+    pop();
+    replayIntent();
+  };
+
+  /**
+   * The shell's full sign-out: `useAuth().signOut` drops the account itself, and everything
+   * else account-shaped — the day records, the Liv threads, today's exercises, the plan — goes
+   * with it, so the next sign-in (or guest browse) doesn't inherit this one's history.
+   */
+  const signOutEverything = () => {
+    signOut();
+    resetDayRecords();
+    resetLivChat();
+    resetExercises();
+    resetSubscription();
   };
 
   const renderPushed = (entry: Pushed) => {
@@ -302,13 +449,26 @@ function Shell() {
           <HelpFlowScreen
             onBack={pop}
             onFinish={finishHelpFlow}
+            onAskingChange={setHelpAsking}
             onCallEmergencyContact={callEmergencyContact}
             activeTab={activeTab}
             onChangeTab={changeTab}
           />
         );
-      case 'onboarding':
-        return <OnboardingScreen onBack={pop} onComplete={finishOnboarding} />;
+      case 'onboarding': {
+        // Nothing to skip once the answers are in: reopening from the Menu to edit a field is
+        // an edit, and offering to abandon it would be offering to lose the edit.
+        const unfinished = onboarding !== 'complete';
+        return (
+          <OnboardingScreen
+            mode={unfinished ? 'setup' : 'edit'}
+            initialAnswers={session.status === 'authed' ? session.answers : null}
+            onBack={unfinished ? leaveOnboardingUnfinished : pop}
+            onComplete={finishOnboarding}
+            onSkip={leaveOnboardingUnfinished}
+          />
+        );
+      }
       case 'meditationDrills':
         return (
           <MeditationDrillsScreen
@@ -388,6 +548,27 @@ function Shell() {
             onChangeTab={changeTab}
           />
         );
+      case 'signUp':
+        return (
+          <SignUpScreen
+            onBack={pop}
+            onSignedUp={onAuthenticated}
+            onSwitchToSignIn={() => push({ route: 'signIn' })}
+            onOpenPlaceholder={openPlaceholder}
+            activeTab={activeTab}
+            onChangeTab={changeTab}
+          />
+        );
+      case 'signIn':
+        return (
+          <SignInScreen
+            onBack={pop}
+            onSignedIn={onAuthenticated}
+            onSwitchToSignUp={() => push({ route: 'signUp' })}
+            activeTab={activeTab}
+            onChangeTab={changeTab}
+          />
+        );
       case 'placeholder':
         return (
           <PlaceholderScreen
@@ -422,19 +603,30 @@ function Shell() {
           <MenuScreen
             activeTab={activeTab}
             onChangeTab={changeTab}
-            onOpenMeditationDrills={() => push({ route: 'meditationDrills' })}
-            onOpenExercises={() => push({ route: 'exerciseLibrary' })}
-            onOpenProfessionals={() => push({ route: 'professionals' })}
-            onOpenOnboarding={() => push({ route: 'onboarding' })}
+            /*
+              Gated here as well as on the row itself. The Menu decides which rows wear a lock;
+              these decide that a locked row cannot navigate even if one forgets to.
+            */
+            onOpenMeditationDrills={gate('useMeditation', () =>
+              push({ route: 'meditationDrills' }),
+            )}
+            onOpenExercises={gate('browseExercises', () => push({ route: 'exerciseLibrary' }))}
+            onOpenProfessionals={gate('viewProfessionals', () => push({ route: 'professionals' }))}
+            onOpenOnboarding={gate('manageProfile', () => push({ route: 'onboarding' }))}
             onOpenSubscription={openSubscription}
             onOpenPlaceholder={openPlaceholder}
+            onRequestSignIn={(capability) =>
+              capability ? promptAuth(capability) : promptSignIn()
+            }
+            onSignOut={signOutEverything}
           />
         ) : (
           <HomeStatusScreen
             activeTab={activeTab}
             onChangeTab={changeTab}
             onOpenEmergency={() => setEmergencyOpen(true)}
-            onOpenExercises={() => push({ route: 'exerciseVideos' })}
+            /* Both the exercises task card and the tips carousel's action come through here. */
+            onOpenExercises={gate('browseExercises', () => push({ route: 'exerciseVideos' }))}
           />
         )}
       </View>
@@ -486,18 +678,20 @@ function Shell() {
         so the logo would stop sliding along with the screen underneath it on every push and pop.
         Purely decorative: tapping it does nothing.
       */}
+      {!fullBleed && (
       <View style={styles.brandBar} pointerEvents="box-none">
         <BrandRow
           trailing={
             showHeaderDate ? (
               <HeaderDateButton
                 label={date.monthDay(today)}
-                onPress={() => push({ route: 'calendar' })}
+                onPress={gate('viewHistory', () => push({ route: 'calendar' }))}
               />
             ) : null
           }
         />
       </View>
+      )}
 
       {/*
         The tab bar, rendered exactly once and pinned over every screen — the same treatment
@@ -523,6 +717,20 @@ function Shell() {
           onClose={() => setEmergencyOpen(false)}
           onCall={callEmergencyContact}
           onHelp={startHelpFlow}
+        />
+
+        {/*
+          One instance for the whole app, beside the emergency sheet and for the same reason:
+          every locked tap in every screen opens this one, so there is nothing to drift. The
+          capability it was opened for is what picks its "here is what this unlocks" line.
+        */}
+        <AuthSheet
+          visible={authSheet.visible}
+          capability={authSheet.capability}
+          onClose={closeSheet}
+          onGoogle={() => signInWith('google')}
+          onApple={() => signInWith('apple')}
+          onEmail={startEmailAuth}
         />
       </View>
     </View>

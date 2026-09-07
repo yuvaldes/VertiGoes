@@ -53,35 +53,161 @@ export const data = {
     completeExercise: 'סמנו כבוצע',
   },
 
+  /** Sourced from the clinician-supplied triage document — see en/data.ts for the note on ids. */
   help: {
-    // Clinical drafts — see the file header. Left in English pending a clinician's review.
-    questionSpinningNow: 'Is the room spinning right now?',
-    questionHeadPosition: 'Did it start when you moved or turned your head?',
-    questionCanSit: 'Are you somewhere you can safely sit or lie down?',
-    questionWorseThanUsual: 'Is this worse than your usual episode?',
-    questionRedFlags: 'Do you have new hearing loss, a severe headache, or trouble speaking?',
+    q0: {
+      headache: 'כאב ראש חד ועז, שונה מכל כאב ראש שהכרתי בעבר',
+      weakness: 'חולשה או נימול חדשים בצד אחד של הגוף (פנים, יד או רגל)',
+      speech: 'קושי בדיבור או דיבור מטושטש שהופיע פתאום',
+      doubleVision: 'ראייה כפולה שהופיעה פתאום',
+      swallowing: 'קושי חדש בבליעה',
+      imbalance: 'חוסר יציבות קיצוני — לא מסוגל/ת ללכת או לעמוד כלל בלי עזרה',
+      chestPain: 'כאבים בחזה או דפיקות לב חזקות ולא רגילות',
+      headInjury: 'פגיעת ראש או צוואר קדמה להופעת התסמינים',
+      consciousness: 'איבוד הכרה או התעלפות',
+    },
 
-    urgentTitle: 'קבלו ייעוץ רפואי עכשיו',
-    urgentStepCauses: 'מה שתיארתם עשוי לנבוע מסיבות שדורשות בדיקה פרונטלית אצל רופא.',
-    urgentStepCall: 'התקשרו לאיש הקשר לשעת חירום שלכם, או לרופא שלכם, במקום לחכות שזה יעבור.',
-    urgentStepEscalate: 'אם התסמינים שלכם חמורים או מחמירים, פנו לטיפול דחוף.',
+    q1: {
+      text: 'איך התחילה הסחרחורת?',
+      sudden: 'פתאומי (שניות עד דקות)',
+      gradual: 'בהדרגה (שעות עד ימים)',
+      chronic: 'כרוני — נמשך שבועות ומעלה, בא והולך או קבוע',
+    },
 
-    calmTitle: 'בואו נרגיע את זה יחד',
-    stepSteady: 'התקרבו לקיר או לכיסא וייצבו את עצמכם לפני כל דבר אחר.',
-    stepSit: 'שבו או שכבו במקום שבו אתם מרגישים נתמכים.',
-    stepFixEyes: 'קבעו את מבטכם על משהו יציב והישארו כך.',
-    stepBreathe: 'נשמו לאט - שאיפה לארבע ספירות, נשיפה לשש - עד שהסחרחורת נרגעת.',
-    stepMoveSlowly: 'הזיזו את הראש לאט כשאתם קמים שוב.',
-    stepMentionDoctor: 'מכיוון שזה גרוע מהרגיל, ציינו זאת לרופא שלכם בביקור הבא.',
+    q2a: {
+      text: 'מהו דפוס ההתקף?',
+      positional: 'שניות, תלוי תנוחה (גלגול, הרמת מבט, שכיבה)',
+      recurring: 'דקות עד שעות, חוזר על עצמו',
+      continuous: 'שעות עד ימים, נמשך כרגע ברציפות',
+    },
+
+    q3bppv: {
+      text: 'האם ההתקף מופעל ע"י גלגול במיטה, הרמת מבט למעלה, או שכיבה/קימה?',
+    },
+
+    q4ear: {
+      text: 'באיזו תנוחה או כיוון ראש התסמינים חזקים ביותר? (זה עוזר לזהות את האוזן הפגועה)',
+      right: 'ימין',
+      left: 'שמאל',
+      bilateral: 'דו-צדדי',
+      unclear: 'לא ברור',
+    },
+
+    q3epi: {
+      text: 'ירידה בשמיעה, טנטון (צלצול באוזניים) או תחושת מלאות באוזן במהלך ההתקף?',
+      yesFluctuating: 'כן, ומשתנה בעוצמתו בין התקפים',
+    },
+
+    q5mig: {
+      text: 'כאב ראש, רגישות לאור/רעש, או היסטוריה אישית/משפחתית של מיגרנות?',
+      noVascular: 'לא, אך יש גורמי סיכון וסקולריים (גיל 55+, יתר לחץ דם, סוכרת, עישון, פרפור עליות)',
+      noPlain: 'לא, וללא גורמי סיכון בולטים',
+    },
+
+    q3cont: {
+      text: 'ירידה בשמיעה, טנטון, חום או סימני זיהום?',
+    },
+
+    q4cent: {
+      text: 'עוד בדיקה קטנה: האם ניתן ללכת ללא עזרה? כיוון הניתור בעיניים (אם ידוע) קבוע? אין ראייה כפולה או חולשה?',
+      abnormal: 'יש חריגה כלשהי מהנ"ל',
+      normal: 'הכל תקין',
+    },
+
+    q2b: {
+      text: 'התחלתם תרופה חדשה לאחרונה, או שההופעה הייתה בסמוך לתקופת לחץ/חרדה משמעותית?',
+      newMed: 'תרופה חדשה',
+      stress: 'הופיע יחד עם חרדה או לחץ',
+      neither: 'אף אחד מהשניים',
+    },
+
+    q2c: {
+      text: 'מה מתאר בצורה הטובה ביותר את הסחרחורת הכרונית?',
+      rocking: 'תחושת נדנוד/טלטול, גרוע בעמידה ובסביבות עמוסות ויזואלית (חנויות, קניונים)',
+      lightheaded: 'סחרחורת קלה בקימה, לא סיבובית',
+      neck: 'מחמיר עם תנועת צוואר או כאב צוואר',
+      unsteady: 'חוסר יציבות בלבד (לא סחרחורת), גרוע בחושך או על משטח לא אחיד',
+    },
+
+    q3ortho: {
+      text: 'האם הסחרחורת מלווה בדפיקות לב, כאב חזה או תחושת עילפון?',
+    },
+
+    outcome: {
+      bppv: {
+        title: 'חשד ל-BPPV (ורטיגו תנוחתי התקפי שפיר)',
+        note: 'הפניה לפרוטוקול Dix-Hallpike לאבחון + Epley/Semont לטיפול, ובמידת הצורך פיזיותרפיה וסטיבולרית.',
+        noteContraindications:
+          'בדקו קונטרה-אינדיקציות (בעיות צוואר/גב, ניתוח עיניים לאחרונה) לפני ביצוע כל תרגיל.',
+      },
+      bppvUnclear: {
+        title: 'חשד ל-BPPV (ורטיגו תנוחתי התקפי שפיר)',
+        note: 'מכיוון שלא ברור מהי האוזן הפגועה, מומלץ להיבדק אצל פיזיותרפיסט/ית לפני ביצוע תרגיל מיקום עצמאי — כיוון שגוי עלול להחמיר את התסמינים.',
+      },
+      meniere: {
+        title: 'חשד למחלת מנייר',
+        note: 'הפניה לרופא אף-אוזן-גרון להערכה ובדיקות שמיעה (אודיוגרם). אין להציע תרגילי שחרור תנוחתיים.',
+      },
+      vm: {
+        title: 'חשד למיגרנה וסטיבולרית',
+        note: 'המלצה להערכה רפואית (נוירולוג/רופא ראשוני) + יומן טריגרים.',
+      },
+      tia: {
+        title: '⚠️ חשד אפשרי ל-TIA (אירוע איסכמי חולף)',
+        note: 'זה אינו עונה על קריטריונים למצב חירום, אך לאור גורמי הסיכון שלכם חשוב לקבל טיפול רפואי דחוף עוד היום.',
+      },
+      paroxysmia: {
+        title: 'חשד אפשרי לפרוקסיזמיה וסטיבולרית',
+        note: 'מצב נדיר יחסית; הפניה להערכה נוירולוגית.',
+      },
+      labyrinthitis: {
+        title: 'חשד לדלקת מבוך (Labyrinthitis)',
+        note: 'הפניה דחופה לרופא/אא"ג — ייתכן צורך בטיפול אנטיביוטי/סטרואידלי.',
+      },
+      neuritis: {
+        title: 'חשד לנוירוניטיס וסטיבולרי (דלקת עצב הוסטיבולריס)',
+        note: 'הפניה לרופא + פיזיותרפיה וסטיבולרית (שיקום).',
+        noteFollowUp: 'מומלץ מעקב אם התסמינים אינם משתפרים תוך ימים.',
+      },
+      ototoxicity: {
+        title: 'חשד לרעילות תרופתית לאוזן (Ototoxicity)',
+        note: 'המלצה לבדוק עם הרופא המרשם — לא להפסיק תרופה באופן עצמאי.',
+      },
+      anxiety: {
+        title: 'סחרחורת אפשרית הקשורה לחרדה',
+        note: 'המלצה להערכה רפואית; לשקול הפניה גם לתמיכה נפשית לצד בירור וסטיבולרי.',
+      },
+      pppd: {
+        title: 'חשד ל-PPPD (סחרחורת תפיסתית-יציבתית מתמשכת)',
+        note: 'לרוב מתפתח בעקבות אירוע וסטיבולרי חריף, מיגרנה או חרדה. הפניה לרופא + פיזיותרפיה וסטיבולרית מותאמת (הרגלה הדרגתית) ± תמיכה בגישה קוגניטיבית-התנהגותית.',
+      },
+      oh: {
+        title: 'חשד ליתר לחץ דם תנוחתי (Orthostatic Hypotension)',
+        note: 'הפניה לרופא לבדיקת לחץ דם בשכיבה/עמידה וסקירת תרופות.',
+      },
+      cervicogenic: {
+        title: 'חשד לסחרחורת ממקור צווארי (Cervicogenic)',
+        note: 'הפניה לפיזיותרפיה עם דגש צווארי-וסטיבולרי משולב.',
+      },
+      bilateral: {
+        title: 'חשד לתת-תפקוד וסטיבולרי דו-צדדי',
+        note: 'לברר היסטוריה של תרופות אוטוטוקסיות (למשל אמינוגליקוזידים). הפניה לבדיקת VNG/רופא.',
+      },
+      unknown: {
+        title: 'לא זוהתה תבנית ברורה',
+        note: 'מה שתיארתם לא הצביע בבירור על מצב מסוים — כדאי להיבדק אצל רופא/ה.',
+      },
+    },
+
+    urgentTitle: '🚨 מצב חירום — פנו לעזרה מיידית',
+    urgentStepCauses: 'מה שתיארתם דורש בדיקה מיידית פנים אל פנים.',
+    urgentStepCall: 'פנו מיד לחדר מיון, או התקשרו לשירותי החירום (בישראל: 101).',
+    urgentStepEscalate: 'אם מישהו איתכם, בקשו שילווה אתכם או יתקשר בשמכם.',
 
     /** One sentence per session, appended to the day's calendar summary. */
     summaryPlain: 'השתמשתם בעזרה באפליקציה.',
-    summaryRedFlag: 'השתמשתם בעזרה באפליקציה, ודיווחתם על תסמינים שכדאי לבדוק.',
-    summaryPositionalWorse:
-      'השתמשתם בעזרה באפליקציה לאירוע שהחל כשהזזתם את הראש, והיה גרוע מהרגיל.',
-    summaryPositional: 'השתמשתם בעזרה באפליקציה לאירוע שהחל כשהזזתם את הראש.',
-    summaryWorse: 'השתמשתם בעזרה באפליקציה לאירוע גרוע מהרגיל שלכם.',
-    summaryEpisode: 'השתמשתם בעזרה באפליקציה במהלך אירוע.',
+    summaryEmergency: 'השתמשתם בעזרה באפליקציה והופניתם לפנות לטיפול חירום.',
+    summaryPrefix: 'השתמשתם בעזרה באפליקציה; ליב הציעה באבחון:',
   },
 
   /**
@@ -158,12 +284,30 @@ export const data = {
   },
 
   // Clinical drafts — see the file header. Left in English pending a clinician's review.
+  /** Same Latin drug names as en/data.ts — the source table keeps them untranslated in Hebrew too. */
   medication: {
     meclizine: 'Meclizine',
-    betahistine: 'Betahistine',
     dimenhydrinate: 'Dimenhydrinate',
-    diazepam: 'Diazepam (low-dose)',
+    cinnarizineDimenhydrinate: 'Cinnarizine / Dimenhydrinate',
     prochlorperazine: 'Prochlorperazine',
+    ondansetron: 'Ondansetron',
+    diazepamLorazepam: 'Diazepam / Lorazepam',
+    scopolamine: 'Scopolamine',
+    betahistine: 'Betahistine',
+    hydrochlorothiazideTriamterene: 'Hydrochlorothiazide / Triamterene',
+    acetazolamide: 'Acetazolamide',
+    dexamethasoneIT: 'Dexamethasone (IT)',
+    gentamicinIT: 'Gentamicin (IT)',
+    amitriptylineNortriptyline: 'Amitriptyline / Nortriptyline',
+    topiramate: 'Topiramate',
+    propranololMetoprolol: 'Propranolol / Metoprolol',
+    venlafaxine: 'Venlafaxine',
+    flunarizineVerapamil: 'Flunarizine / Verapamil',
+    cgrpAntagonists: 'CGRP Antagonists',
+    sertraline: 'Sertraline',
+    escitalopram: 'Escitalopram',
+    duloxetine: 'Duloxetine',
+    prednisoneMethylprednisolone: 'Prednisone / Methylprednisolone',
   },
 
   /**
@@ -297,5 +441,22 @@ export const data = {
       label: 'ללא פרסומות',
     },
     premiumSummary: 'כל ההיסטוריה שלכם, הקהילה, כל אנשי המקצוע והתרגילים, ליב, וללא פרסומות.',
+  },
+  tip: {
+    rewire: {
+      body: 'המוח שלך יודע לתכנת את עצמו מחדש. כל תרגול קצר מלמד אותו מסלולים עצביים עוקפים שמפחיתים את הסחרחורת. מוכנים לעדכן גרסה עם התרגיל הבא?',
+    },
+    vor: {
+      body: 'בתוך הראש שלך פועל מייצב התמונה המהיר בטבע (VOR) שמזיז את העיניים ב־10 אלפיות השנייה. תרגילי מבט מכיילים אותו מחדש כדי שהעולם לא יקפוץ. בואו נכייל אותו לכמה שניות.',
+    },
+    discomfort: {
+      body: 'אי־נוחות קלה בתרגול (רמה 2–3 מתוך 10) היא סימן מצוין. ככה בדיוק המוח מבין שהתנועה בטוחה ומתרגל אליה. עוד צעד קטן והמוח מתרגל!',
+    },
+    balanceTrio: {
+      body: 'שיווי המשקל שלך עובד בצוות של שלושה: אוזניים, עיניים וכפות רגליים. כשאחד מתעייף, התרגול מלמד את השניים האחרים לגבות אותו. מחזקים את הצוות עכשיו.',
+    },
+    consistency: {
+      body: 'שתי דקות תרגול פעמיים־שלוש ביום יעילות למוח הרבה יותר מאימון ארוך פעם בשבוע. הסוד ליציבות הוא עקביות קצרה. דקה אחת – וסימנת וי להיום!',
+    },
   },
 } satisfies NamespaceOf<'data'>;

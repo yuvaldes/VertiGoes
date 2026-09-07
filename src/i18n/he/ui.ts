@@ -25,6 +25,13 @@ export const ui = {
     sleepQuestion: 'כמה שעות ישנתם?',
     a11yDismissSheet: 'סגרו את {title}',
   },
+  tips: {
+    a11yStrip: 'טיפים ותובנות, {count} כרטיסים, גללו הצידה',
+    eyebrow: {
+      fact: 'הידעת',
+    },
+  },
+
   weeklyStatus: {
     eyebrow: 'סטטוס',
   },

@@ -32,11 +32,13 @@ export const color = {
   orange200: '#fddcab',
   orange400: '#fd853a',
   orange500: '#fb6514',
+  orange600: '#ec4a0a',
 
   success100: '#d1fadf',
   success200: '#a6f4c5',
   success400: '#32d583',
   success500: '#12b76a',
+  success600: '#039855',
 
   /** The task cards on Home each own a hue ramp: turquoise = feeling, purple = sleep. */
   turquoise25: '#effefa',
@@ -70,6 +72,9 @@ export const color = {
 export const font = {
   display: 'CalSans_400Regular',
   body: 'Inter_400Regular',
+  /** Only the emergency flow's question, which the design sets in Inter Medium rather than
+   *  the display face - at 30pt Cal Sans would shout, and this screen is read under duress. */
+  bodyMedium: 'Inter_500Medium',
   bodySemiBold: 'Inter_600SemiBold',
 } as const;
 

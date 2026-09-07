@@ -1,5 +1,10 @@
 import { CalSans_400Regular } from '@expo-google-fonts/cal-sans';
-import { Inter_400Regular, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
+import {
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+} from '@expo-google-fonts/inter';
 import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
@@ -7,6 +12,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { PhonePreview } from './src/components/PhonePreview';
 import { AppShell } from './src/navigation/AppShell';
+import { AuthProvider } from './src/state/AuthContext';
 import { DayRecordsProvider } from './src/state/DayRecordsContext';
 import { ExercisesProvider } from './src/state/ExercisesContext';
 import { LivChatProvider } from './src/state/LivChatContext';
@@ -18,6 +24,7 @@ export default function App() {
   const [fontsLoaded] = useFonts({
     CalSans_400Regular,
     Inter_400Regular,
+    Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
   });
@@ -38,17 +45,25 @@ export default function App() {
       <StatusBar style="dark" />
       {/* LivChat sits inside DayRecords: it reads the day's record and writes its summary. */}
       <PreferencesProvider>
-        <SubscriptionProvider>
-          <DayRecordsProvider>
-            <LivChatProvider>
-              <ExercisesProvider>
-                <PhonePreview>
-                  <AppShell />
-                </PhonePreview>
-              </ExercisesProvider>
-            </LivChatProvider>
-          </DayRecordsProvider>
-        </SubscriptionProvider>
+        {/*
+          Auth sits under Preferences and over everything else. Language is a device setting
+          that outlives a sign-out, so it stays above; the plan, the day records, the Liv
+          threads and today's exercises all belong to an account, so they sit below and are
+          reset with it. AuthGateProvider, when it lands, goes on this line.
+        */}
+        <AuthProvider>
+          <SubscriptionProvider>
+            <DayRecordsProvider>
+              <LivChatProvider>
+                <ExercisesProvider>
+                  <PhonePreview>
+                    <AppShell />
+                  </PhonePreview>
+                </ExercisesProvider>
+              </LivChatProvider>
+            </DayRecordsProvider>
+          </SubscriptionProvider>
+        </AuthProvider>
       </PreferencesProvider>
     </SafeAreaProvider>
   );

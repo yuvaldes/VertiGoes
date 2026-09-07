@@ -11,7 +11,11 @@ import {
 
 import { AppHeader } from '../components/AppHeader';
 import { BackButton } from '../components/BackButton';
-import { initialOnboardingAnswers, type OnboardingAnswers } from '../data/onboarding';
+import {
+  initialOnboardingAnswers,
+  ONBOARDING_STEP_COUNT,
+  type OnboardingAnswers,
+} from '../data/onboarding';
 import { useT } from '../i18n';
 import { color, frame, font } from '../theme/tokens';
 import { OnboardingBasicInfoStep } from './OnboardingBasicInfoStep';
@@ -20,11 +24,23 @@ import { OnboardingEmergencyContactStep } from './OnboardingEmergencyContactStep
 import { OnboardingMedicalHistoryStep } from './OnboardingMedicalHistoryStep';
 
 type Props = {
+  /**
+   * Which of the two runs this is, stated by the caller rather than inferred from the session.
+   * `setup` is the first run straight after sign-up: it can be skipped, which leaves onboarding
+   * pending rather than dismissed. `edit` is reopening a finished profile from the Menu, where
+   * there is nothing to skip — the answers already exist and the user came here on purpose.
+   */
+  mode: 'setup' | 'edit';
+  /** The answers on file, seeding an `edit` run. Absent starts the wizard empty. */
+  initialAnswers?: OnboardingAnswers | null;
   onBack: () => void;
   onComplete: (answers: OnboardingAnswers) => void;
+  /**
+   * `setup` only. Leaves the questions pending so the Menu can offer them again. Carries the
+   * step they backed out on, so the Menu can show how far they got.
+   */
+  onSkip: (step: number) => void;
 };
-
-const STEP_COUNT = 4;
 
 /**
  * The onboarding flow: basic info, medical history, an optional diagnosis questionnaire, then
@@ -34,22 +50,41 @@ const STEP_COUNT = 4;
  *
  * Answers live as one object in this container and are only handed off on `onComplete` — same
  * "write on finish, not per field" rule as `HelpFlowScreen`, so an abandoned flow leaves nothing
- * half-saved anywhere else in the app.
+ * half-saved anywhere else in the app. Skipping therefore keeps nothing either: resuming from
+ * the Menu restarts at step 0, which is honest about what a half-answered form is worth.
+ *
+ * The skip control sits in the header on every step, not only the first. Someone who opened
+ * this app because they are dizzy has to be able to leave at any point; a way out you can only
+ * find on page one is a way out you cannot find once you are three pages in. It reads as chrome
+ * rather than as an equal-weight peer of Continue, which is right — finishing is what we want.
  */
-export function OnboardingScreen({ onBack, onComplete }: Props) {
+export function OnboardingScreen({
+  mode,
+  initialAnswers,
+  onBack,
+  onComplete,
+  onSkip,
+}: Props) {
   const t = useT();
   const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState<OnboardingAnswers>(initialOnboardingAnswers);
+  const [answers, setAnswers] = useState<OnboardingAnswers>(
+    initialAnswers ?? initialOnboardingAnswers,
+  );
+
+  const canSkip = mode === 'setup';
 
   const patch = (partial: Partial<OnboardingAnswers>) =>
     setAnswers((current) => ({ ...current, ...partial }));
 
   const back = () => {
-    if (step === 0) onBack();
-    else setStep(step - 1);
+    if (step > 0) setStep(step - 1);
+    // Backing out of the first run is skipping it, whatever control they used to do it —
+    // otherwise the status stays `pending` and the shell pushes this screen straight back.
+    else if (canSkip) onSkip(step);
+    else onBack();
   };
 
-  const isLastStep = step === STEP_COUNT - 1;
+  const isLastStep = step === ONBOARDING_STEP_COUNT - 1;
   // Age is the only field the source spec marks required; everything else is free to skip.
   const canContinue = step !== 0 || answers.age.trim().length > 0;
 
@@ -65,13 +100,23 @@ export function OnboardingScreen({ onBack, onComplete }: Props) {
           <View style={styles.topRow}>
             <BackButton onPress={back} />
             <View style={styles.progressTrack}>
-              {Array.from({ length: STEP_COUNT }, (_, index) => (
+              {Array.from({ length: ONBOARDING_STEP_COUNT }, (_, index) => (
                 <View
                   key={index}
                   style={[styles.segment, index <= step && styles.segmentFilled]}
                 />
               ))}
             </View>
+            {canSkip && (
+              <Pressable
+                style={styles.skip}
+                onPress={() => onSkip(step)}
+                accessibilityRole="button"
+                accessibilityLabel={t('auth.onboarding.a11ySkip')}
+              >
+                <Text style={styles.skipLabel}>{t('auth.onboarding.skip')}</Text>
+              </Pressable>
+            )}
           </View>
         </AppHeader>
       </View>
@@ -139,6 +184,18 @@ const styles = StyleSheet.create({
   },
   segmentFilled: {
     backgroundColor: color.brand500,
+  },
+  /** Fills the header's 32pt row so the tap target is the full height of the chrome. */
+  skip: {
+    height: 32,
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  skipLabel: {
+    fontFamily: font.bodySemiBold,
+    fontSize: 14,
+    lineHeight: 20,
+    color: color.gray600,
   },
   scroll: {
     flex: 1,

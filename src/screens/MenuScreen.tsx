@@ -6,9 +6,11 @@ import {
   MusicNotes,
   PlayCircle,
   CrownSimple,
+  SignIn,
   SignOut,
   Translate,
   User,
+  UserCircle,
   UsersThree,
 } from 'phosphor-react-native';
 import { useState } from 'react';
@@ -18,9 +20,13 @@ import { AppHeader } from '../components/AppHeader';
 import { BottomBarSlot } from '../components/BottomBar';
 import { BottomSheet } from '../components/BottomSheet';
 import { MenuGroup, MenuRow } from '../components/MenuList';
+import { ProgressDonut } from '../components/ProgressDonut';
 import { Ring } from '../components/Ring';
+import { useCapabilities, type Capability } from '../data/access';
 import type { TabKey } from '../data/home';
+import { ONBOARDING_STEP_COUNT, onboardingPercent } from '../data/onboarding';
 import { useDirection, useDisplayFont, useT } from '../i18n';
+import { useAuth } from '../state/AuthContext';
 import {
   LANGUAGE_FLAG,
   LANGUAGE_LABEL,
@@ -39,6 +45,17 @@ type Props = {
   onOpenOnboarding: () => void;
   onOpenSubscription: () => void;
   onOpenPlaceholder: (title: string, note: string) => void;
+  /**
+   * Opens the auth sheet. The capability picks the line that says what signing in unlocks;
+   * the Menu's own sign-in affordances pass none and get the generic one, because nothing
+   * specific was being reached for.
+   */
+  onRequestSignIn: (capability?: Capability) => void;
+  /**
+   * The shell's full sign-out, not `useAuth().signOut` on its own — the plan, the day records,
+   * the Liv threads and today's exercises are all account-shaped and have to go with it.
+   */
+  onSignOut: () => void;
 };
 
 const ICON_SIZE = 24;
@@ -47,6 +64,15 @@ const LANGUAGES: Language[] = ['en', 'he'];
 /**
  * The Menu tab — everything the app offers beyond the daily loop, plus the account settings
  * that used to live behind the header avatar. A tab root, like Liv.
+ *
+ * It is also the app's account surface, and it has to be honest in three states. A guest sees
+ * an invitation and a locked catalogue: no profile rows, no plan, no sign-out, because there is
+ * no account for any of those to describe. A signed-in user with the medical questions still
+ * outstanding sees a card that offers them again and says what they buy. A finished user sees
+ * the settings, unadorned.
+ *
+ * Language is the one row that ignores all of it: it is a device preference, so a guest keeps
+ * it — and it is the only way a guest reads the auth sheet in Hebrew.
  */
 export function MenuScreen({
   activeTab,
@@ -57,13 +83,38 @@ export function MenuScreen({
   onOpenOnboarding,
   onOpenSubscription,
   onOpenPlaceholder,
+  onRequestSignIn,
+  onSignOut,
 }: Props) {
   const t = useT();
   const displayFont = useDisplayFont();
   const { restartRequired } = useDirection();
   const { language, setLanguage } = usePreferences();
   const { isPremium } = useSubscription();
+  const { isGuest, account, needsOnboarding, session } = useAuth();
+  const { can, reasonFor } = useCapabilities();
   const [pickingLanguage, setPickingLanguage] = useState(false);
+
+  /**
+   * Auth outranks premium, so the crown only survives for a signed-in free user. A guest shown
+   * a crown is being sold a subscription for an account that does not exist, which is two walls
+   * in a row and the worst path in the funnel.
+   */
+  const communityLock = reasonFor('viewCommunity');
+
+  /** Steps finished on the last (skipped) run — 0 once complete or never opened. */
+  const onboardingStepsDone = session.status === 'authed' ? (session.progressStep ?? 0) : 0;
+  /** How far a skipped run got, as a whole percentage — 0 once complete or never opened. */
+  const onboardingProgress = onboardingPercent(
+    session.status === 'authed' ? session.progressStep : null,
+  );
+
+  // An address if we were given one; otherwise which wallet signed them in. Never a fiction.
+  const accountValue =
+    account === null
+      ? t('auth.menu.accountGuest')
+      : (account.email ??
+        t(account.method === 'apple' ? 'auth.menu.accountApple' : 'auth.menu.accountGoogle'));
 
   return (
     <View style={styles.body}>
@@ -78,27 +129,51 @@ export function MenuScreen({
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
+        {isGuest && (
+          <PromptCard
+            title={t('auth.menu.guestCardTitle')}
+            body={t('auth.menu.guestCardBody')}
+            cta={t('auth.menu.guestCardCta')}
+            onPress={() => onRequestSignIn()}
+          />
+        )}
+
+        {/* Only ever seen after a skip: while the questions are still `pending` the shell has
+            already pushed them, so nobody gets this far without having declined once. */}
+        {!isGuest && needsOnboarding && (
+          <PromptCard
+            title={t('auth.onboarding.resumeTitle')}
+            body={t('auth.onboarding.resumeBody')}
+            cta={t('auth.onboarding.resumeCta')}
+            onPress={onOpenOnboarding}
+            progress={{ completed: onboardingStepsDone, total: ONBOARDING_STEP_COUNT }}
+          />
+        )}
+
         <MenuGroup>
           <MenuRow
             icon={<Brain size={ICON_SIZE} color={color.gray900} />}
             label={t('browse.menu.rowMeditation')}
+            variant={can('useMeditation') ? 'push' : 'locked'}
             onPress={onOpenMeditationDrills}
           />
           <MenuRow
             icon={<PlayCircle size={ICON_SIZE} color={color.gray900} />}
             label={t('browse.menu.rowExercises')}
+            variant={can('browseExercises') ? 'push' : 'locked'}
             onPress={onOpenExercises}
           />
           <MenuRow
             icon={<Briefcase size={ICON_SIZE} color={color.gray900} />}
             label={t('browse.menu.rowProfessionals')}
+            variant={can('viewProfessionals') ? 'push' : 'locked'}
             onPress={onOpenProfessionals}
           />
           {/* Directly above Community, per the requested order. */}
           <MenuRow
             icon={<MusicNotes size={ICON_SIZE} color={color.gray900} />}
             label={t('browse.menu.rowPlaylists')}
-            variant="external"
+            variant={can('viewPlaylists') ? 'external' : 'locked'}
             onPress={() =>
               onOpenPlaceholder(
                 t('browse.menu.rowPlaylists'),
@@ -111,58 +186,97 @@ export function MenuScreen({
           <MenuRow
             icon={<UsersThree size={ICON_SIZE} color={color.gray900} />}
             label={t('browse.menu.rowCommunity')}
-            variant={isPremium ? 'push' : 'premium'}
+            variant={
+              communityLock === 'auth' ? 'locked' : communityLock === 'premium' ? 'premium' : 'push'
+            }
             onPress={
-              isPremium
-                ? () =>
-                    onOpenPlaceholder(
-                      t('browse.menu.rowCommunity'),
-                      t('browse.menu.communityNote'),
-                    )
-                : onOpenSubscription
+              // The only content row whose destination is decided here rather than by the
+              // shell, so it is also the only one that has to open the sheet itself.
+              communityLock === 'auth'
+                ? () => onRequestSignIn('viewCommunity')
+                : communityLock === 'premium'
+                  ? onOpenSubscription
+                  : () =>
+                      onOpenPlaceholder(
+                        t('browse.menu.rowCommunity'),
+                        t('browse.menu.communityNote'),
+                      )
             }
           />
         </MenuGroup>
 
-        <MenuGroup>
-          {/* Onboarding is the real flow that collects this; there's no separate edit-later
-              screen yet, so this reopens the same flow rather than a placeholder. */}
-          <MenuRow
-            icon={<User size={ICON_SIZE} color={color.gray900} />}
-            label={t('browse.menu.rowPersonalInfo')}
-            onPress={onOpenOnboarding}
-          />
-          <MenuRow
-            icon={<FirstAid size={ICON_SIZE} color={color.gray900} />}
-            label={t('browse.menu.rowSymptoms')}
-            onPress={() =>
-              onOpenPlaceholder(
-                t('browse.menu.rowSymptoms'),
-                t('browse.menu.symptomsNote'),
-              )
-            }
-          />
-        </MenuGroup>
+        {/* Nothing here describes a guest: these two rows edit a profile, and a guest has none.
+            A locked row would be a row about an account that does not exist. */}
+        {!isGuest && (
+          <MenuGroup>
+            {/* Onboarding is the real flow that collects this; there's no separate edit-later
+                screen yet, so this reopens the same flow rather than a placeholder. */}
+            <MenuRow
+              icon={<User size={ICON_SIZE} color={color.gray900} />}
+              label={t('browse.menu.rowPersonalInfo')}
+              value={
+                needsOnboarding
+                  ? t('auth.onboarding.percentComplete', { percent: onboardingProgress })
+                  : undefined
+              }
+              onPress={onOpenOnboarding}
+            />
+            <MenuRow
+              icon={<FirstAid size={ICON_SIZE} color={color.gray900} />}
+              label={t('browse.menu.rowSymptoms')}
+              onPress={() =>
+                onOpenPlaceholder(
+                  t('browse.menu.rowSymptoms'),
+                  t('browse.menu.symptomsNote'),
+                )
+              }
+            />
+          </MenuGroup>
+        )}
 
         <MenuGroup>
-          {/* Above Language, so the plan sits with the account rows rather than the content ones. */}
-          <MenuRow
-            icon={<CrownSimple size={ICON_SIZE} color={color.gray900} />}
-            label={t('browse.menu.rowSubscription')}
-            value={isPremium ? t('browse.menu.planPremium') : t('browse.menu.planFree')}
-            onPress={onOpenSubscription}
-          />
+          {isGuest ? (
+            <MenuRow
+              icon={<SignIn size={ICON_SIZE} color={color.gray900} />}
+              label={t('auth.menu.rowSignIn')}
+              onPress={() => onRequestSignIn()}
+            />
+          ) : (
+            /* Static rather than a `MenuRow`: there is no account screen to open, and a caret
+               pointing nowhere is the kind of small lie this whole pass exists to remove. */
+            <View style={styles.accountRow}>
+              <View style={styles.accountIcon}>
+                <UserCircle size={ICON_SIZE} color={color.gray900} />
+              </View>
+              <Text style={styles.accountLabel}>{t('auth.menu.accountLabel')}</Text>
+              <Text style={styles.accountValue} numberOfLines={1}>
+                {accountValue}
+              </Text>
+            </View>
+          )}
+          {/* A plan belongs to an account, so a guest is shown neither the plan nor the row.
+              Above Language, so it sits with the account rows rather than the content ones. */}
+          {!isGuest && (
+            <MenuRow
+              icon={<CrownSimple size={ICON_SIZE} color={color.gray900} />}
+              label={t('browse.menu.rowSubscription')}
+              value={isPremium ? t('browse.menu.planPremium') : t('browse.menu.planFree')}
+              onPress={onOpenSubscription}
+            />
+          )}
           <MenuRow
             icon={<Translate size={ICON_SIZE} color={color.gray900} />}
             label={t('browse.menu.rowLanguage')}
             value={LANGUAGE_LABEL[language]}
             onPress={() => setPickingLanguage(true)}
           />
-          <MenuRow
-            icon={<SignOut size={ICON_SIZE} color={color.gray900} />}
-            label={t('browse.menu.rowSignOut')}
-            onPress={() => console.log('[stub] sign out — no auth until the login pass')}
-          />
+          {!isGuest && (
+            <MenuRow
+              icon={<SignOut size={ICON_SIZE} color={color.gray900} />}
+              label={t('browse.menu.rowSignOut')}
+              onPress={onSignOut}
+            />
+          )}
         </MenuGroup>
 
         {restartRequired && (
@@ -211,6 +325,58 @@ export function MenuScreen({
   );
 }
 
+/**
+ * The one card above the lists: an invitation for a guest, an unfinished-profile nudge for
+ * everyone else. Built on the brand-tinted `notice` treatment already on this screen rather
+ * than as a shared component, because two callers one file apart is not yet an abstraction.
+ */
+function PromptCard({
+  title,
+  body,
+  cta,
+  onPress,
+  progress,
+}: {
+  title: string;
+  body: string;
+  cta: string;
+  onPress: () => void;
+  /** Onboarding only — the guest card has no steps to count down. */
+  progress?: { completed: number; total: number };
+}) {
+  const displayFont = useDisplayFont();
+  const t = useT();
+  const stepsLeft = progress ? Math.max(progress.total - progress.completed, 0) : 0;
+
+  return (
+    <Pressable
+      style={styles.prompt}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      accessibilityHint={body}
+    >
+      {progress && (
+        <View style={styles.promptDonut}>
+          <ProgressDonut completed={progress.completed} total={progress.total} />
+          <Text style={styles.promptDonutLabel}>
+            {t(
+              stepsLeft === 1 ? 'auth.onboarding.stepsLeft.one' : 'auth.onboarding.stepsLeft.other',
+              { count: stepsLeft },
+            )}
+          </Text>
+        </View>
+      )}
+      <View style={styles.promptText}>
+        <Text style={[styles.promptTitle, displayFont]}>{title}</Text>
+        <Text style={styles.promptBody}>{body}</Text>
+        <Text style={styles.promptCta}>{cta}</Text>
+      </View>
+      <Ring radius={12} color={color.brand100} />
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   body: {
     flex: 1,
@@ -233,6 +399,78 @@ const styles = StyleSheet.create({
     paddingHorizontal: frame.gutter,
     paddingBottom: 24,
     gap: 24,
+  },
+  prompt: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: color.brand50,
+    borderRadius: 12,
+    padding: 16,
+    gap: 12,
+  },
+  promptDonut: {
+    alignItems: 'center',
+    gap: 4,
+  },
+  promptDonutLabel: {
+    fontFamily: font.bodySemiBold,
+    fontSize: 11,
+    lineHeight: 14,
+    color: color.brand600,
+  },
+  promptText: {
+    flex: 1,
+    minWidth: 0,
+    gap: 4,
+  },
+  promptTitle: {
+    fontFamily: font.display,
+    fontSize: 17,
+    lineHeight: 24,
+    color: color.black,
+  },
+  promptBody: {
+    fontFamily: font.body,
+    fontSize: 13,
+    lineHeight: 18,
+    color: color.gray700,
+  },
+  promptCta: {
+    marginTop: 4,
+    fontFamily: font.bodySemiBold,
+    fontSize: 14,
+    lineHeight: 20,
+    color: color.brand600,
+  },
+  /** Mirrors `MenuRow`'s geometry exactly, so it sits in the group without a seam. */
+  accountRow: {
+    height: 56,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingHorizontal: 16,
+  },
+  accountIcon: {
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  accountLabel: {
+    flex: 1,
+    minWidth: 0,
+    fontFamily: font.body,
+    fontSize: 16,
+    lineHeight: 22,
+    color: color.gray900,
+  },
+  accountValue: {
+    // Truncates rather than wraps or pushes: an email is longer than the slot a plan name left.
+    flexShrink: 1,
+    fontFamily: font.body,
+    fontSize: 16,
+    lineHeight: 22,
+    color: color.gray500,
   },
   option: {
     height: 56,
