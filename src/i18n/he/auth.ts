@@ -84,14 +84,9 @@ export const auth = {
     skip: 'Skip',
     a11ySkip: 'Skip for now and finish later from the menu',
     resumeTitle: 'Finish setting up',
-    resumeBody:
-      'A few medical questions help us tailor your exercises and your emergency steps.',
+    resumeBody: 'A few medical questions tailor your exercises and emergency steps.',
     resumeCta: 'Continue',
-    percentComplete: '{percent}% הושלמו',
-    stepsLeft: {
-      one: 'נשאר עוד שלב אחד',
-      other: 'נשארו עוד {count} שלבים',
-    },
+    percentComplete: '{percent}%',
   },
 
   menu: {

@@ -101,16 +101,10 @@ export const auth = {
     skip: 'Skip',
     a11ySkip: 'Skip for now and finish later from the menu',
     resumeTitle: 'Finish setting up',
-    resumeBody:
-      'A few medical questions help us tailor your exercises and your emergency steps.',
+    resumeBody: 'A few medical questions tailor your exercises and emergency steps.',
     resumeCta: 'Continue',
     /** Sits in the Personal information row's trailing slot while the answers are missing. */
-    percentComplete: '{percent}% complete',
-    /** Under the resume card's donut chart, counting down instead of up. */
-    stepsLeft: {
-      one: '{count} step left',
-      other: '{count} steps left',
-    },
+    percentComplete: '{percent}%',
   },
 
   menu: {

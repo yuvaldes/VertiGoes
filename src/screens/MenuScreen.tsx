@@ -341,12 +341,10 @@ function PromptCard({
   body: string;
   cta: string;
   onPress: () => void;
-  /** Onboarding only — the guest card has no steps to count down. */
+  /** Onboarding only — the guest card has no progress to show. */
   progress?: { completed: number; total: number };
 }) {
   const displayFont = useDisplayFont();
-  const t = useT();
-  const stepsLeft = progress ? Math.max(progress.total - progress.completed, 0) : 0;
 
   return (
     <Pressable
@@ -356,17 +354,7 @@ function PromptCard({
       accessibilityLabel={title}
       accessibilityHint={body}
     >
-      {progress && (
-        <View style={styles.promptDonut}>
-          <ProgressDonut completed={progress.completed} total={progress.total} />
-          <Text style={styles.promptDonutLabel}>
-            {t(
-              stepsLeft === 1 ? 'auth.onboarding.stepsLeft.one' : 'auth.onboarding.stepsLeft.other',
-              { count: stepsLeft },
-            )}
-          </Text>
-        </View>
-      )}
+      {progress && <ProgressDonut completed={progress.completed} total={progress.total} />}
       <View style={styles.promptText}>
         <Text style={[styles.promptTitle, displayFont]}>{title}</Text>
         <Text style={styles.promptBody}>{body}</Text>
@@ -407,16 +395,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     gap: 12,
-  },
-  promptDonut: {
-    alignItems: 'center',
-    gap: 4,
-  },
-  promptDonutLabel: {
-    fontFamily: font.bodySemiBold,
-    fontSize: 11,
-    lineHeight: 14,
-    color: color.brand600,
   },
   promptText: {
     flex: 1,
