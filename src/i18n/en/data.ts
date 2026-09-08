@@ -568,7 +568,10 @@ export const data = {
       body: 'Mild discomfort while you practise (level 2–3 of 10) is normal; ease off if it climbs.',
     },
     balanceTrio: {
-      body: 'Balance blends three signals: your inner ears, your eyes, and the feel of the ground.',
+      // "what your body feels" rather than "the feel of the ground": the somatosensory input is
+      // body-wide, and neck proprioception is the one that matters in cervicogenic dizziness —
+      // which this app diagnoses. "The ground" also has no referent seated, as BPPV work is.
+      body: 'Your brain blends three signals for balance: inner ears, eyes, and what your body feels.',
     },
     consistency: {
       body: 'Short practice spread through the day works better than one long weekly session.',
