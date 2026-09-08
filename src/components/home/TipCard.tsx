@@ -43,7 +43,7 @@ export function TipCard({ tip, height }: Props) {
       {/* Stands where the chart stands on the status card, so the two share a baseline however
           long the copy runs. */}
       <View style={styles.block}>
-        <Text style={styles.body} numberOfLines={3}>
+        <Text style={styles.body} numberOfLines={2}>
           {body}
         </Text>
       </View>

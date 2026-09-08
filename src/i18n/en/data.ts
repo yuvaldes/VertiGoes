@@ -549,21 +549,29 @@ export const data = {
    * `src/data/tips.ts`). Each is one card's body text — the emoji and the "Did you know" hook
    * live in the card itself, not here, so this is the fact alone plus its own call to action.
    */
+  /**
+   * Two rendered lines is the whole budget — the card clamps at two and truncates past it, so
+   * each of these is kept under ~92 characters, measured against Inter 12 in the card's column.
+   *
+   * They also carry no call to action, unlike the first draft of them: the card is purely
+   * informational and has nowhere to send a tap, so "ready for a quick system upgrade?" was
+   * inviting a press that does nothing.
+   */
   tip: {
     rewire: {
-      body: 'Your brain is built to rewire itself. Every short exercise teaches it new neural pathways to bypass dizziness. Ready for a quick system upgrade?',
+      body: 'Your brain can adapt. Short, repeated exercises retrain how it handles dizziness.',
     },
     vor: {
-      body: 'You have the fastest image stabilizer in nature (VOR), moving your eyes in under 10 milliseconds. Gaze exercises recalibrate it so your vision stays steady. Let’s calibrate it for a few seconds.',
+      body: 'Your eye-stabilising reflex (VOR) reacts in about 10 milliseconds — among the body’s fastest.',
     },
     discomfort: {
-      body: 'Mild discomfort during practice (level 2–3 out of 10) is a great sign. It is exactly how your brain learns movement is safe and adapts to it. One small step to build tolerance!',
+      body: 'Mild discomfort while you practise (level 2–3 of 10) is normal; ease off if it climbs.',
     },
     balanceTrio: {
-      body: 'Your balance relies on a trio: inner ears, eyes, and feet. When one struggles, vestibular exercises train the other two to step up and keep you steady. Let’s back up the team.',
+      body: 'Balance blends three signals: your inner ears, your eyes, and the feel of the ground.',
     },
     consistency: {
-      body: 'Practicing for 2 minutes a few times a day is far more effective for the brain than one long weekly session. Consistency is the real key to stability. Just one minute to check today’s goal.',
+      body: 'Short practice spread through the day works better than one long weekly session.',
     },
   },
 } as const;
