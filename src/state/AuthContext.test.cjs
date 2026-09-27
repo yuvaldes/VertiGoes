@@ -55,7 +55,7 @@ const profileFor = (id, onboarding = 'complete') => ({
 
 function makeBackend(initial = null) {
   const listeners = new Set();
-  const calls = { reads: [], writes: [], auth: [] };
+  const calls = { reads: [], writes: [], auth: [], functions: [] };
   const profiles = new Map(['alice', 'bob'].map(id => [id, profileFor(id)]));
   let insideAuthCallback = false;
   const backend = {
@@ -67,6 +67,7 @@ function makeBackend(initial = null) {
       finally { insideAuthCallback = false; }
     },
     read: async (id) => success(profiles.get(id) ?? null),
+    invoke: async () => success({ deleted: true }),
     write: async (row) => {
       profiles.set(row.id, { ...profileFor(row.id, 'pending'), ...profiles.get(row.id), ...row });
       return success();
@@ -120,6 +121,12 @@ function makeBackend(initial = null) {
         },
       };
       return query;
+    },
+    functions: {
+      async invoke(name, options) {
+        calls.functions.push({ name, options });
+        return backend.invoke(name, options);
+      },
     },
   };
   for (const name of Object.keys(backend.methods)) {
@@ -516,6 +523,28 @@ test('sign-out failure keeps the session and returns failure to its caller', asy
   assert.equal(await h.call('signOut'), false);
   assert.equal(h.value.account.id, 'alice');
   assert.equal(h.value.authError.key, 'auth.error.connection');
+});
+
+test('account deletion calls only the protected function, clears tokens, and signs out locally', async (t) => {
+  const h = await mountAuth(t, { initial: sessionFor('alice') });
+  const result = await h.call('deleteAccount');
+  assert.equal(result.ok, true);
+  assert.deepEqual(h.backend.calls.functions, [
+    { name: 'delete-account', options: { method: 'POST' } },
+  ]);
+  assert.equal(h.value.isAuthed, false);
+  assert.equal(h.backend.calls.auth.at(-1).name, 'signOut');
+  assert.deepEqual(h.backend.calls.auth.at(-1).args, [{ scope: 'local' }]);
+});
+
+test('failed account deletion preserves the signed-in account', async (t) => {
+  const h = await mountAuth(t, { initial: sessionFor('alice') });
+  h.backend.invoke = async () => failure('function_error');
+  const result = await h.call('deleteAccount');
+  assert.equal(result.ok, false);
+  assert.equal(result.errors.form.key, 'auth.error.deleteAccount');
+  assert.equal(h.value.account.id, 'alice');
+  assert.equal(h.backend.calls.auth.some(call => call.name === 'signOut'), false);
 });
 
 test('password reset validates the email and forwards the redirect without exposing backend details', async (t) => {

@@ -112,6 +112,7 @@ export const auth = {
     passwordMismatch: 'The two passwords do not match.',
     consent: 'Please agree to the disclaimers to continue.',
     inProgress: 'Already signing in - give it a moment.',
+    deleteAccount: 'לא הצלחנו למחוק את החשבון. נסו שוב.',
   },
 
   onboarding: {
@@ -131,6 +132,15 @@ export const auth = {
     accountLabel: 'Account',
     accountGuest: 'Guest',
     accountGoogle: 'Google account',
+  },
+
+  deleteAccount: {
+    row: 'מחיקת החשבון',
+    title: 'למחוק את החשבון?',
+    body: 'הפעולה תמחק לצמיתות את החשבון, התשובות הרפואיות והיסטוריית היומן. לא ניתן לבטל אותה.',
+    retention: 'דיווחי תקלות שכבר נשלחו יישמרו ללא זיהוי: הקישור לחשבון ותוכן ההודעה יימחקו, ורק פרטים טכניים כמו פלטפורמה, גרסת אפליקציה, סטטוס ותאריך יישמרו.',
+    confirm: 'מחיקה לצמיתות',
+    deleting: 'מוחקים…',
   },
 
   a11y: {

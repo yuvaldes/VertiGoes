@@ -125,6 +125,7 @@ export const auth = {
     consent: 'Please agree to the disclaimers to continue.',
     /** The double-submit backstop. Reachable only if a button forgets its disabled state. */
     inProgress: 'Already signing in - give it a moment.',
+    deleteAccount: 'We could not delete your account. Please try again.',
   },
 
   /** The skip control and what it leaves behind. Lives here, not in `flows.onboarding`. */
@@ -147,6 +148,15 @@ export const auth = {
     accountLabel: 'Account',
     accountGuest: 'Guest',
     accountGoogle: 'Google account',
+  },
+
+  deleteAccount: {
+    row: 'Delete account',
+    title: 'Delete your account?',
+    body: 'This permanently deletes your account, medical answers, and calendar history. This cannot be undone.',
+    retention: 'Submitted bug reports are anonymized: your account link and message are removed, while technical details such as platform, app version, status, and date are retained.',
+    confirm: 'Delete permanently',
+    deleting: 'Deleting…',
   },
 
   a11y: {

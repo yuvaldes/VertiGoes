@@ -37,8 +37,9 @@ deployed database, email delivery, or a complete Google sign-in round trip.
    expiration, and resend behavior with non-team email addresses. Configure CAPTCHA and
    rate limits together with the app's Turnstile site key if enabling CAPTCHA.
 5. Publish actual privacy/disclaimer pages and replace the placeholder consent links.
-   Implement account deletion and document which data is retained, for what purpose, and
-   for how long. This checkout does not contain an account-deletion endpoint or UI.
+   The account-deletion endpoint, UI, and database scrubbing migration are implemented;
+   deploy them, test with a disposable account, and state the bug-metadata retention period
+   in the privacy policy.
 6. Verify deployed migrations, grants, RLS, quotas, backups, and retention. Test with two
    controlled user accounts: profiles/calendar persist after reload; neither account can
    read or write the other's data; bug reports remain private.

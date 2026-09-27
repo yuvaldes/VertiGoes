@@ -231,6 +231,34 @@ test('security hardening validates input and enforces private atomic quotas', as
     }
   });
 
+  await t.test('account deletion erases health data and anonymizes retained bug metadata', async () => {
+    await db.exec('reset role');
+    await db.query("select set_config('request.jwt.claim.sub', '', false)");
+    await db.query(`insert into public.profiles(id,onboarding_status,answers)
+      values($1,'complete',$2) on conflict(id) do update set answers=excluded.answers`,
+      [alice, JSON.stringify(profile)]);
+    await db.query(`insert into public.day_records(user_id,record_date,record)
+      values($1,'2026-09-24',$2) on conflict(user_id,record_date) do update set record=excluded.record`,
+      [alice, JSON.stringify(record)]);
+    await db.query(`insert into public.bug_reports(user_id,description,platform,locale,app_version)
+      values($1,'Contains private details','web','en','1.0.0')`, [alice]);
+    await db.query('delete from auth.users where id=$1', [alice]);
+
+    assert.equal((await db.query('select * from public.profiles where id=$1', [alice])).rows.length, 0);
+    assert.equal((await db.query('select * from public.day_records where user_id=$1', [alice])).rows.length, 0);
+    assert.equal((await db.query('select * from vertigoes_private.write_limits where user_id=$1', [alice])).rows.length, 0);
+    const retained = (await db.query(
+      "select * from public.bug_reports where description='[removed when account was deleted]'",
+    )).rows;
+    assert.ok(retained.length >= 1);
+    assert.ok(retained.every(row => row.user_id === null && row.anonymized_at !== null));
+
+    await asUser(bob);
+    assert.equal((await db.query(
+      "select * from public.bug_reports where description='[removed when account was deleted]'",
+    )).rows.length, 0, 'another user cannot read retained anonymous reports');
+  });
+
   await t.test('the read-only dashboard verification script confirms the expected configuration', async () => {
     await db.exec('reset role');
     const results = await db.exec(readFileSync(path.join(__dirname, 'verify_security.sql'), 'utf8'));

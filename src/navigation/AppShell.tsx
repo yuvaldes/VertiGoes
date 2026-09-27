@@ -143,6 +143,7 @@ function Shell() {
   const { subscribe, setPaymentMethod, paymentMethod, cancel: resetSubscription } =
     useSubscription();
   const { session, onboarding, signInWithProvider, completeOnboarding, skipOnboarding, signOut,
+    deleteAccount,
     isRestoring, authError, retryProfile, clearAuthError, recoveringPassword } =
     useAuth();
   const {
@@ -466,6 +467,16 @@ function Shell() {
     resetSubscription();
   };
 
+  const deleteEverything = async () => {
+    const result = await deleteAccount();
+    if (!result.ok) return false;
+    resetDayRecords();
+    resetLivChat();
+    resetExercises();
+    resetSubscription();
+    return true;
+  };
+
   const renderPushed = (entry: Pushed) => {
     const pending = pendingFeatureForRoute(entry.route);
     if (pending) return <ComingSoonScreen feature={pending} onBack={pop} />;
@@ -682,6 +693,7 @@ function Shell() {
               capability ? promptAuth(capability) : promptSignIn()
             }
             onSignOut={signOutEverything}
+            onDeleteAccount={deleteEverything}
           />
         ) : (
           <HomeStatusScreen

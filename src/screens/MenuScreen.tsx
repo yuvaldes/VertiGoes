@@ -9,6 +9,7 @@ import {
   CrownSimple,
   SignIn,
   SignOut,
+  Trash,
   Translate,
   User,
   UserCircle,
@@ -59,6 +60,7 @@ type Props = {
    * the Liv threads and today's exercises are all account-shaped and have to go with it.
    */
   onSignOut: () => void;
+  onDeleteAccount: () => Promise<boolean>;
 };
 
 const ICON_SIZE = 24;
@@ -89,6 +91,7 @@ export function MenuScreen({
   onOpenPlaceholder,
   onRequestSignIn,
   onSignOut,
+  onDeleteAccount,
 }: Props) {
   const t = useT();
   const displayFont = useDisplayFont();
@@ -98,6 +101,9 @@ export function MenuScreen({
   const { isGuest, account, needsOnboarding, session } = useAuth();
   const { can, reasonFor } = useCapabilities();
   const [pickingLanguage, setPickingLanguage] = useState(false);
+  const [confirmingDeletion, setConfirmingDeletion] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteFailed, setDeleteFailed] = useState(false);
 
   /**
    * Auth outranks premium, so the crown only survives for a signed-in free user. A guest shown
@@ -295,6 +301,13 @@ export function MenuScreen({
               onPress={onSignOut}
             />
           )}
+          {!isGuest && (
+            <MenuRow
+              icon={<Trash size={ICON_SIZE} color={color.error500} />}
+              label={t('auth.deleteAccount.row')}
+              onPress={() => { setDeleteFailed(false); setConfirmingDeletion(true); }}
+            />
+          )}
         </MenuGroup>
 
         {restartRequired && (
@@ -338,6 +351,47 @@ export function MenuScreen({
             </Pressable>
           );
         })}
+      </BottomSheet>
+
+      <BottomSheet
+        visible={confirmingDeletion}
+        onClose={() => { if (!deleting) setConfirmingDeletion(false); }}
+        title={t('auth.deleteAccount.title')}
+      >
+        <Text style={styles.deleteBody}>{t('auth.deleteAccount.body')}</Text>
+        <Text style={styles.deleteRetention}>{t('auth.deleteAccount.retention')}</Text>
+        {deleteFailed && (
+          <Text style={styles.deleteError} accessibilityRole="alert">
+            {t('auth.error.deleteAccount')}
+          </Text>
+        )}
+        <View style={styles.deleteActions}>
+          <Pressable
+            disabled={deleting}
+            onPress={() => setConfirmingDeletion(false)}
+            style={styles.cancelButton}
+            accessibilityRole="button"
+          >
+            <Text style={styles.cancelButtonText}>{t('common.action.cancel')}</Text>
+          </Pressable>
+          <Pressable
+            disabled={deleting}
+            onPress={async () => {
+              setDeleting(true);
+              setDeleteFailed(false);
+              const deleted = await onDeleteAccount();
+              setDeleting(false);
+              if (deleted) setConfirmingDeletion(false);
+              else setDeleteFailed(true);
+            }}
+            style={[styles.deleteButton, deleting && styles.buttonDisabled]}
+            accessibilityRole="button"
+          >
+            <Text style={styles.deleteButtonText}>
+              {t(deleting ? 'auth.deleteAccount.deleting' : 'auth.deleteAccount.confirm')}
+            </Text>
+          </Pressable>
+        </View>
       </BottomSheet>
     </View>
   );
@@ -511,4 +565,25 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     color: color.gray700,
   },
+  deleteBody: {
+    fontFamily: font.body, fontSize: 15, lineHeight: 22, color: color.gray900,
+  },
+  deleteRetention: {
+    marginTop: 10, fontFamily: font.body, fontSize: 13, lineHeight: 19, color: color.gray600,
+  },
+  deleteError: {
+    marginTop: 10, fontFamily: font.body, fontSize: 13, lineHeight: 19, color: color.error500,
+  },
+  deleteActions: { marginTop: 20, flexDirection: 'row', gap: 12 },
+  cancelButton: {
+    flex: 1, minHeight: 48, alignItems: 'center', justifyContent: 'center', borderRadius: 12,
+    backgroundColor: color.white, borderWidth: 1, borderColor: color.gray300,
+  },
+  cancelButtonText: { fontFamily: font.bodySemiBold, fontSize: 15, color: color.gray900 },
+  deleteButton: {
+    flex: 1, minHeight: 48, alignItems: 'center', justifyContent: 'center', borderRadius: 12,
+    backgroundColor: color.error500,
+  },
+  deleteButtonText: { fontFamily: font.bodySemiBold, fontSize: 15, color: color.white },
+  buttonDisabled: { opacity: 0.55 },
 });

@@ -14,6 +14,8 @@ Use a project dedicated to VertiGoes in your existing Supabase account.
 In the SQL Editor, run
 [the initial migration](supabase/migrations/202609240001_accounts_and_bug_reports.sql) once,
 then [the security migration](supabase/migrations/202609240002_security_hardening.sql) once.
+Run [the account-deletion migration](supabase/migrations/202609270001_account_deletion.sql)
+after both of them.
 It creates `profiles`, `day_records`, and `bug_reports` with row-level security.
 If the project already contains tables with these names, inspect them before applying the
 migration; do not overwrite existing data. The migration is transactional.
@@ -101,14 +103,39 @@ The menu button is visible to guests too; submitting requires email sign-in, wit
 kept open beneath that screen. Failed submissions preserve text and reuse a report ID, so a
 retry after a lost response does not create a duplicate.
 
-## 5. Verify after connecting
+## 5. Deploy account deletion
+
+The Menu contains a permanent account-deletion flow. The authenticated client calls the
+`delete-account` Edge Function; only that function receives Supabase's server-side service
+role credential. Never add that credential to Render or to an `EXPO_PUBLIC_` variable.
+
+With the Supabase CLI linked to the production project, deploy it with:
+
+```sh
+supabase db push
+supabase secrets set ALLOWED_ORIGINS=https://app.vertigoes.co,https://vertigoes-app.onrender.com,http://localhost:8081
+supabase functions deploy delete-account
+```
+
+Supabase supplies `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and
+`SUPABASE_SERVICE_ROLE_KEY` to its Edge Function environment. The origin allowlist must use
+origins only—no path or trailing slash. Update it when the production/staging origins change.
+
+Deleting an auth account cascades to its profile, medical answers, calendar records, and
+private quota counters. Existing bug reports retain only operational metadata. Their account
+link and user-written description are removed before deletion, and `anonymized_at` records
+when that happened. Retained anonymous reports are not readable through the user API.
+
+## 6. Verify after connecting
 
 1. Sign up, confirm the email, sign in, reload, and check the account is restored.
 2. Finish or skip onboarding; reload and verify the saved state.
 3. Record sleep/feeling, reload, and verify the calendar entry.
 4. Submit a bug, verify it in Table Editor, and check a second account cannot read it.
-5. Test wrong credentials, password reset, sign-out, and temporary network loss.
-6. Run `npm test`, `npm run typecheck`, and `npm run build:web`.
+5. Delete a disposable account and confirm its Auth user, profile, and calendar rows disappear;
+   confirm its bug-report row has `user_id = null`, scrubbed text, and `anonymized_at` set.
+6. Test wrong credentials, password reset, sign-out, and temporary network loss.
+7. Run `npm test`, `npm run typecheck`, and `npm run build:web`.
 
 ## Phone installation and hosting
 

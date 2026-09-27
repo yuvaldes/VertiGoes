@@ -80,6 +80,7 @@ type AuthValue = {
   completeOnboarding: (answers: OnboardingAnswers) => Promise<AuthResult>;
   skipOnboarding: (step: number) => Promise<AuthResult>;
   signOut: () => Promise<boolean>;
+  deleteAccount: () => Promise<AuthResult>;
 };
 
 const GUEST: AuthSession = { status: 'guest' };
@@ -411,6 +412,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch { fail('auth.error.connection'); return false; }
   };
 
+  const deleteAccount = async (): Promise<AuthResult> => {
+    if (!supabase || session.status !== 'authed') return fail('auth.error.deleteAccount');
+    try {
+      const { error } = await supabase.functions.invoke('delete-account', { method: 'POST' });
+      if (error) return fail('auth.error.deleteAccount');
+      await supabase.auth.signOut({ scope: 'local' });
+      setBackendSession(null);
+      setSession(GUEST);
+      setAuthError(null);
+      return { ok: true };
+    } catch {
+      return fail('auth.error.deleteAccount');
+    }
+  };
+
   const onboarding = session.status === 'authed' ? session.onboarding : null;
   const value: AuthValue = {
     session,
@@ -425,7 +441,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     cancelPasswordRecovery: () => setRecoveringPassword(false),
     completeOnboarding: (answers) => saveProfile('complete', answers, null),
     skipOnboarding: (step) => saveProfile('skipped', null, step),
-    signOut,
+    signOut, deleteAccount,
   };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
