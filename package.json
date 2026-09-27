@@ -6,6 +6,7 @@
     "@expo-google-fonts/cal-sans": "^0.4.1",
     "@expo-google-fonts/inter": "^0.4.2",
     "@react-native-async-storage/async-storage": "2.2.0",
+    "@sentry/browser": "^11.0.0",
     "@supabase/supabase-js": "^2.117.1",
     "expo": "^57.0.20",
     "expo-auth-session": "~57.0.13",
