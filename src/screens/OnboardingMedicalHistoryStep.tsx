@@ -69,6 +69,7 @@ export function OnboardingMedicalHistoryStep({ answers, patch }: Props) {
               <LabeledInput
                 label={t('flows.medicalHistory.otherDiagnosisLabel')}
                 value={answers.otherDiagnosis}
+                maxLength={1000}
                 onChangeText={(otherDiagnosis) => patch({ otherDiagnosis })}
                 placeholder={t('flows.medicalHistory.otherDiagnosisPlaceholder')}
               />
@@ -92,6 +93,7 @@ export function OnboardingMedicalHistoryStep({ answers, patch }: Props) {
           <LabeledInput
             label={t('flows.medicalHistory.otherMedicationLabel')}
             value={answers.otherMedication}
+            maxLength={1000}
             onChangeText={(otherMedication) => patch({ otherMedication })}
             placeholder={t('flows.medicalHistory.otherMedicationPlaceholder')}
           />

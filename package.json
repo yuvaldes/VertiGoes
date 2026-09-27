@@ -5,29 +5,43 @@
   "dependencies": {
     "@expo-google-fonts/cal-sans": "^0.4.1",
     "@expo-google-fonts/inter": "^0.4.2",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@supabase/supabase-js": "^2.117.1",
     "expo": "^57.0.20",
+    "expo-auth-session": "~57.0.13",
     "expo-blur": "~57.0.2",
+    "expo-crypto": "~57.0.3",
     "expo-font": "~57.0.3",
     "expo-linear-gradient": "~57.0.1",
+    "expo-linking": "~57.0.11",
     "expo-status-bar": "~57.0.1",
+    "expo-web-browser": "~57.0.3",
     "phosphor-react-native": "^3.0.6",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-native": "0.86.3",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-svg": "15.15.4",
+    "react-native-url-polyfill": "^4.0.0",
     "react-native-web": "~0.21.0"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
+    "@expo/image-utils": "^0.11.5",
     "@expo/ngrok": "^4.1.3",
     "@types/react": "~19.1.10",
+    "react-test-renderer": "^19.2.3",
     "typescript": "~5.9.2"
   },
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "prepare:pwa": "node scripts/generate-pwa-icons.cjs",
+    "build:web": "npm run prepare:pwa && expo export --platform web",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test src/lib/*.test.cjs src/state/*.test.cjs supabase/*.test.cjs"
   },
   "private": true
 }

@@ -12,6 +12,7 @@ import { toKey } from '../data/dayRecords';
 import type { TabKey } from '../data/home';
 import { useT } from '../i18n';
 import { useDayRecords } from '../state/DayRecordsContext';
+import { isFeatureReady } from '../lib/featureAvailability';
 import { color, font, frame } from '../theme/tokens';
 
 type Props = {
@@ -20,6 +21,7 @@ type Props = {
   onChangeTab: (tab: TabKey) => void;
   /** Pushes the full record for a day, including its Liv transcript. */
   onOpenDay: (date: string) => void;
+  onPendingFeature: (feature: 'liv' | 'exercises') => void;
 };
 
 /**
@@ -29,7 +31,7 @@ type Props = {
  * (each section applies its own 16px padding, and the exercise-slot row is intentionally
  * edge to edge), and the bottom bar is the mainMenu alone with no Emergency drawer.
  */
-export function CalendarScreen({ onBack, activeTab, onChangeTab, onOpenDay }: Props) {
+export function CalendarScreen({ onBack, activeTab, onChangeTab, onOpenDay, onPendingFeature }: Props) {
   const t = useT();
   const { records, today } = useDayRecords();
 
@@ -111,8 +113,8 @@ export function CalendarScreen({ onBack, activeTab, onChangeTab, onOpenDay }: Pr
       >
         <DayBreakdown
           record={selectedRecord}
-          onOpenConversation={() => console.log('[stub] open Liv conversation for', toKey(selected))}
-          onShowExercises={() => console.log('[stub] show exercises for', toKey(selected))}
+          onOpenConversation={() => isFeatureReady('liv') ? onOpenDay(toKey(selected)) : onPendingFeature('liv')}
+          onShowExercises={() => isFeatureReady('exercises') ? onOpenDay(toKey(selected)) : onPendingFeature('exercises')}
           onOpenDay={() => onOpenDay(toKey(selected))}
         />
       </ScrollView>

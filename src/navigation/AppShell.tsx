@@ -1,5 +1,5 @@
-import { useCallback, useRef, useState } from 'react';
-import { Animated, Easing, Linking, Platform, StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Animated, Easing, Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { AuthSheet } from '../components/auth/AuthSheet';
 import { BottomBar } from '../components/BottomBar';
@@ -7,12 +7,17 @@ import { BrandRow } from '../components/BrandRow';
 import { EmergencySheet } from '../components/EmergencySheet';
 import { SheetHostProvider } from '../components/SheetHost';
 import { HeaderDateButton } from '../components/home/HeaderDateButton';
-import { emergencyContact, type TabKey } from '../data/home';
+import type { Capability } from '../data/access';
+import { type TabKey } from '../data/home';
 import type { HelpAnswer } from '../data/helpFlow';
 import type { OnboardingAnswers } from '../data/onboarding';
 import type { BillingPeriod, PaymentMethod } from '../data/subscription';
 import { useDateFormat, useDirection, useT } from '../i18n';
+import { isFeatureReady, pendingFeatureForRoute, type PendingFeature } from '../lib/featureAvailability';
+import { ComingSoonScreen } from '../screens/ComingSoonScreen';
 import { CalendarScreen } from '../screens/CalendarScreen';
+import { BugReportScreen } from '../screens/BugReportScreen';
+import { ResetPasswordScreen } from '../screens/ResetPasswordScreen';
 import { CheckoutScreen } from '../screens/CheckoutScreen';
 import { DayDetailScreen } from '../screens/DayDetailScreen';
 import { EditExercisesScreen } from '../screens/EditExercisesScreen';
@@ -37,7 +42,7 @@ import { useExercises } from '../state/ExercisesContext';
 import { useLivChat } from '../state/LivChatContext';
 import { usePreferences } from '../state/PreferencesContext';
 import { useSubscription } from '../state/SubscriptionContext';
-import { frame } from '../theme/tokens';
+import { color, font, frame } from '../theme/tokens';
 import { useEdgeSwipeBack } from './useEdgeSwipeBack';
 
 /**
@@ -66,6 +71,8 @@ type Pushed =
    */
   | { route: 'signUp' }
   | { route: 'signIn' }
+  | { route: 'bugReport' }
+  | { route: 'comingSoon'; feature: PendingFeature }
   | { route: 'placeholder'; title: string; note: string };
 
 const USE_NATIVE_DRIVER = Platform.OS !== 'web';
@@ -125,16 +132,18 @@ function Shell() {
   const {
     today,
     todayKey,
-    recordEmergencyCall,
     recordInAppHelp,
     reset: resetDayRecords,
+    syncStatus,
+    retrySync,
   } = useDayRecords();
   const { refreshDaySummary, reset: resetLivChat } = useLivChat();
   const { reset: resetExercises } = useExercises();
   const { setLanguage } = usePreferences();
   const { subscribe, setPaymentMethod, paymentMethod, cancel: resetSubscription } =
     useSubscription();
-  const { session, onboarding, signInWithProvider, completeOnboarding, skipOnboarding, signOut } =
+  const { session, onboarding, signInWithProvider, completeOnboarding, skipOnboarding, signOut,
+    isRestoring, authError, retryProfile, clearAuthError, recoveringPassword } =
     useAuth();
   const {
     can,
@@ -163,6 +172,10 @@ function Shell() {
   const [leaving, setLeaving] = useState<StackItem | null>(null);
   const [activeTab, setActiveTab] = useState<TabKey>('home');
   const [emergencyOpen, setEmergencyOpen] = useState(false);
+  const [callError, setCallError] = useState(false);
+  const contactName = session.status === 'authed' ? session.answers?.emergencyContactName.trim() : undefined;
+  const contactPhone = session.status === 'authed' ? session.answers?.emergencyContactPhone.replace(/[^+\d]/g, '') : undefined;
+  const hasContact = Boolean(contactPhone && /^\+?\d{7,15}$/.test(contactPhone));
   /**
    * Which cycle the pricing page is showing. It lives here rather than in the screen so the
    * choice survives the push to checkout — checkout has to charge what the toggle said.
@@ -181,6 +194,37 @@ function Shell() {
     setStack((current) => [...current, item]);
     animateTo(item.anim, 1, ENTER_DURATION);
   }, []);
+
+  const enteredAccount = useRef<string | null>(null);
+  useEffect(() => {
+    if (session.status !== 'authed') {
+      if (session.status === 'guest' && !isRestoring) enteredAccount.current = null;
+      return;
+    }
+    if (recoveringPassword || enteredAccount.current === session.account.id) return;
+    enteredAccount.current = session.account.id;
+    hideSheet();
+    if (session.onboarding === 'pending') push({ route: 'onboarding' });
+    else consumeIntent()?.();
+  }, [session, isRestoring, recoveringPassword, hideSheet, push, consumeIntent]);
+
+  // Also clear account-scoped demo state on automatic expiry or a login in another tab.
+  const previousAccount = useRef<string | null>(null);
+  useLayoutEffect(() => {
+    const id = session.status === 'authed' ? session.account.id : null;
+    if (session.status === 'authenticating' || previousAccount.current === id) return;
+    if (previousAccount.current !== null) {
+      // Drop private screens and their local form/chat state before another account loads.
+      setStack([]);
+      setLeaving(null);
+      setActiveTab('home');
+      consumeIntent();
+    }
+    previousAccount.current = id;
+    resetLivChat();
+    resetExercises();
+    resetSubscription();
+  }, [session, resetLivChat, resetExercises, resetSubscription, consumeIntent]);
 
   const dismiss = useCallback((item: StackItem) => {
     setLeaving(item);
@@ -241,7 +285,7 @@ function Shell() {
    */
   const changeTab = useCallback(
     (tab: TabKey) => {
-      if (tab === 'liv') {
+      if (tab === 'liv' && isFeatureReady('liv')) {
         gate('useLiv', () => selectTab('liv'))();
         return;
       }
@@ -250,21 +294,29 @@ function Shell() {
     [gate, selectTab],
   );
 
-  /** Mocked: dials the placeholder contact so the wiring is real end to end. */
-  const callEmergencyContact = () => {
-    setEmergencyOpen(false);
-    // A guest has no day record to write the call to. The dial is what this function is for
-    // and it still happens - the record is the only thing skipped, which is the whole of the
-    // concession the emergency path makes for being open signed out.
-    if (can('recordDay')) recordEmergencyCall(todayKey);
-
-    const url = `tel:${emergencyContact.phone.replace(/[^+\d]/g, '')}`;
-    if (Platform.OS === 'web') {
-      console.log(`[mock] would dial ${emergencyContact.name} at ${url}`);
+  // Keep unavailable features reachable without a sign-in/paywall promising access.
+  const openFeature = (feature: PendingFeature, capability: Capability, entry: Pushed) => {
+    if (!isFeatureReady(feature)) {
+      push({ route: 'comingSoon', feature });
       return;
     }
-    Linking.openURL(url).catch(() => {
-      console.warn(`[mock] no dialer available for ${url}`);
+    gate(capability, () => push(entry))();
+  };
+
+  /** Open the real dialer using only this account's saved contact. */
+  const callEmergencyContact = () => {
+    setCallError(false);
+    if (!hasContact) {
+      setEmergencyOpen(false);
+      gate('manageProfile', () => push({ route: 'onboarding' }))();
+      return;
+    }
+    // Opening a dialer cannot confirm a call happened, so do not log a completed call.
+    void Linking.openURL(`tel:${contactPhone}`).then(() => {
+      setEmergencyOpen(false);
+    }).catch(() => {
+      setCallError(true);
+      setEmergencyOpen(true);
     });
   };
 
@@ -282,7 +334,7 @@ function Shell() {
     // Both writes go or neither does: the summary refresh puts a Liv line on the same day
     // record, so skipping only the first would leave a guest with half a day they never had.
     // The flow itself has already run to the end by the time we are here.
-    if (!can('recordDay')) return;
+    if (!isFeatureReady('guidedHelp') || !can('recordDay')) return;
     recordInAppHelp(todayKey, { answers });
     refreshDaySummary(todayKey);
   };
@@ -296,7 +348,7 @@ function Shell() {
    * subscription to someone with no account to attach it to is two walls in a row, and it is
    * the worse of the two to meet first.
    */
-  const openSubscription = gate('subscribe', () => push({ route: 'subscription' }));
+  const openSubscription = () => openFeature('subscription', 'subscribe', { route: 'subscription' });
 
   /**
    * Mock purchase. Popping back to the pricing page rather than all the way out is deliberate:
@@ -340,7 +392,8 @@ function Shell() {
    * The flow drops back into the ordinary chrome for its guidance step, which is a page to read
    * rather than a prompt to answer - so this follows the screen's own state, not just the route.
    */
-  const fullBleed = topRoute === 'onboarding' || (topRoute === 'helpFlow' && helpAsking);
+  const fullBleed = topRoute === 'onboarding' ||
+    (topRoute === 'helpFlow' && isFeatureReady('guidedHelp') && helpAsking);
   const showBottomBar = !fullBleed;
 
   /** Runs whatever the visitor was reaching for when the wall went up, at most once. */
@@ -352,19 +405,20 @@ function Shell() {
    * Both ways in land here: a provider button on the sheet resolving, and either email screen
    * reporting success.
    *
-   * It pushes onboarding unconditionally rather than reading `onboarding === 'pending'`,
-   * because `AuthContext` guarantees every sign-in lands in `pending` - so the read would be
-   * both redundant and a race with the state flip that just happened. The intent is not
-   * replayed yet; onboarding finishing or being skipped is what releases it.
+   * Profile restoration drives onboarding in the effect above. Returning users retain
+   * their saved onboarding state instead of being sent through the questions again.
    */
   const onAuthenticated = () => {
-    popAll();
-    push({ route: 'onboarding' });
+    // Keep the report screen mounted underneath email auth so its draft survives.
+    setLeaving(null);
+    setStack((current) => current.filter(({ entry }) =>
+      entry.route !== 'signIn' && entry.route !== 'signUp'));
   };
 
-  const signInWith = async (method: 'google' | 'apple') => {
+  const signInWith = async (method: 'google') => {
+    if (!isFeatureReady('googleAuth')) return;
     const result = await signInWithProvider(method);
-    if (!result.ok) return;
+    if (!result.ok || result.cancelled) return;
     hideSheet();
     onAuthenticated();
   };
@@ -379,9 +433,10 @@ function Shell() {
    * The language is still the one answer with somewhere else to be — `PreferencesContext` owns
    * it and it outlives a sign-out. The rest now has an account to belong to.
    */
-  const finishOnboarding = (answers: OnboardingAnswers) => {
+  const finishOnboarding = async (answers: OnboardingAnswers) => {
+    const result = await completeOnboarding(answers);
+    if (!result.ok) return;
     setLanguage(answers.language);
-    completeOnboarding(answers);
     pop();
     replayIntent();
   };
@@ -391,8 +446,9 @@ function Shell() {
    * hand, and the status has to say so or the Menu goes on offering the flow as though it had
    * never been seen.
    */
-  const leaveOnboardingUnfinished = (step = 0) => {
-    skipOnboarding(step);
+  const leaveOnboardingUnfinished = async (step = 0) => {
+    const result = await skipOnboarding(step);
+    if (!result.ok) return;
     pop();
     replayIntent();
   };
@@ -402,8 +458,8 @@ function Shell() {
    * else account-shaped — the day records, the Liv threads, today's exercises, the plan — goes
    * with it, so the next sign-in (or guest browse) doesn't inherit this one's history.
    */
-  const signOutEverything = () => {
-    signOut();
+  const signOutEverything = async () => {
+    if (!(await signOut())) return;
     resetDayRecords();
     resetLivChat();
     resetExercises();
@@ -411,7 +467,11 @@ function Shell() {
   };
 
   const renderPushed = (entry: Pushed) => {
+    const pending = pendingFeatureForRoute(entry.route);
+    if (pending) return <ComingSoonScreen feature={pending} onBack={pop} />;
     switch (entry.route) {
+      case 'comingSoon':
+        return <ComingSoonScreen feature={entry.feature} onBack={pop} />;
       case 'editExercises':
         return (
           <EditExercisesScreen onBack={pop} activeTab={activeTab} onChangeTab={changeTab} />
@@ -433,6 +493,7 @@ function Shell() {
             activeTab={activeTab}
             onChangeTab={changeTab}
             onOpenDay={(date) => push({ route: 'dayDetail', date })}
+            onPendingFeature={(feature) => push({ route: 'comingSoon', feature })}
           />
         );
       case 'dayDetail':
@@ -451,6 +512,7 @@ function Shell() {
             onFinish={finishHelpFlow}
             onAskingChange={setHelpAsking}
             onCallEmergencyContact={callEmergencyContact}
+            contactName={hasContact ? contactName : undefined}
             activeTab={activeTab}
             onChangeTab={changeTab}
           />
@@ -569,6 +631,8 @@ function Shell() {
             onChangeTab={changeTab}
           />
         );
+      case 'bugReport':
+        return <BugReportScreen onBack={pop} onRequestSignIn={() => push({ route: 'signIn' })} />;
       case 'placeholder':
         return (
           <PlaceholderScreen
@@ -594,7 +658,7 @@ function Shell() {
       */}
       <View style={styles.screen}>
         {activeTab === 'liv' ? (
-          <LivScreen
+          !isFeatureReady('liv') ? <ComingSoonScreen feature="liv" /> : <LivScreen
             activeTab={activeTab}
             onChangeTab={changeTab}
             onStartHelpFlow={startHelpFlow}
@@ -607,13 +671,12 @@ function Shell() {
               Gated here as well as on the row itself. The Menu decides which rows wear a lock;
               these decide that a locked row cannot navigate even if one forgets to.
             */
-            onOpenMeditationDrills={gate('useMeditation', () =>
-              push({ route: 'meditationDrills' }),
-            )}
-            onOpenExercises={gate('browseExercises', () => push({ route: 'exerciseLibrary' }))}
-            onOpenProfessionals={gate('viewProfessionals', () => push({ route: 'professionals' }))}
+            onOpenMeditationDrills={() => openFeature('meditation', 'useMeditation', { route: 'meditationDrills' })}
+            onOpenExercises={() => openFeature('exercises', 'browseExercises', { route: 'exerciseLibrary' })}
+            onOpenProfessionals={() => openFeature('professionals', 'viewProfessionals', { route: 'professionals' })}
             onOpenOnboarding={gate('manageProfile', () => push({ route: 'onboarding' }))}
             onOpenSubscription={openSubscription}
+            onReportBug={() => push({ route: 'bugReport' })}
             onOpenPlaceholder={openPlaceholder}
             onRequestSignIn={(capability) =>
               capability ? promptAuth(capability) : promptSignIn()
@@ -624,9 +687,9 @@ function Shell() {
           <HomeStatusScreen
             activeTab={activeTab}
             onChangeTab={changeTab}
-            onOpenEmergency={() => setEmergencyOpen(true)}
+            onOpenEmergency={() => { setCallError(false); setEmergencyOpen(true); }}
             /* Both the exercises task card and the tips carousel's action come through here. */
-            onOpenExercises={gate('browseExercises', () => push({ route: 'exerciseVideos' }))}
+            onOpenExercises={() => openFeature('exercises', 'browseExercises', { route: 'exerciseVideos' })}
           />
         )}
       </View>
@@ -710,6 +773,34 @@ function Shell() {
         </View>
       )}
 
+      {(isRestoring || authError?.key === 'auth.error.oauthReturn' || authError?.key === 'auth.error.profileLoad' || syncStatus === 'error' || syncStatus === 'saving') && (
+        <View style={styles.syncNotice} accessibilityLiveRegion="polite">
+          {(isRestoring || syncStatus === 'saving') && <ActivityIndicator size="small" color={color.brand600} />}
+          <Text style={styles.syncText}>
+            {isRestoring ? t('auth.status.restoring') :
+              authError?.key === 'auth.error.profileLoad' || authError?.key === 'auth.error.oauthReturn' ? t(authError.key) :
+                syncStatus === 'error' ? t('auth.status.syncError') : t('auth.status.saving')}
+          </Text>
+          {!isRestoring && authError?.key === 'auth.error.oauthReturn' && (
+            <Pressable accessibilityRole="button" onPress={clearAuthError}>
+              <Text style={styles.syncRetry}>{t('common.action.close')}</Text>
+            </Pressable>
+          )}
+          {!isRestoring && (authError?.key === 'auth.error.profileLoad' || syncStatus === 'error') && (
+            <Pressable accessibilityRole="button"
+              onPress={authError?.key === 'auth.error.profileLoad' ? retryProfile : retrySync}>
+              <Text style={styles.syncRetry}>{t('auth.status.retry')}</Text>
+            </Pressable>
+          )}
+        </View>
+      )}
+
+      {recoveringPassword && (
+        <View style={[styles.screen, { zIndex: 5 }]}>
+          <ResetPasswordScreen />
+        </View>
+      )}
+
       {/* Above the pinned bars, which sit at 2 — otherwise the tab bar paints over it. */}
       <View style={styles.overlay} pointerEvents="box-none">
         <EmergencySheet
@@ -717,6 +808,9 @@ function Shell() {
           onClose={() => setEmergencyOpen(false)}
           onCall={callEmergencyContact}
           onHelp={startHelpFlow}
+          contactName={contactName}
+          hasContact={hasContact}
+          callError={callError}
         />
 
         {/*
@@ -727,9 +821,8 @@ function Shell() {
         <AuthSheet
           visible={authSheet.visible}
           capability={authSheet.capability}
-          onClose={closeSheet}
+          onClose={() => { clearAuthError(); closeSheet(); }}
           onGoogle={() => signInWith('google')}
-          onApple={() => signInWith('apple')}
           onEmail={startEmailAuth}
         />
       </View>
@@ -738,6 +831,13 @@ function Shell() {
 }
 
 const styles = StyleSheet.create({
+  syncNotice: {
+    position: 'absolute', top: 0, left: 0, right: 0, zIndex: 4,
+    flexDirection: 'row', alignItems: 'center', gap: 8, padding: 10,
+    backgroundColor: color.brand50,
+  },
+  syncText: { flex: 1, fontFamily: font.body, fontSize: 12, lineHeight: 17, color: color.gray700 },
+  syncRetry: { fontFamily: font.bodySemiBold, fontSize: 12, color: color.brand600 },
   root: {
     flex: 1,
     overflow: 'hidden',

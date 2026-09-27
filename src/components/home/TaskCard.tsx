@@ -46,6 +46,7 @@ type Props = {
   /** Shown in place of the question once the task has been answered. */
   title: string;
   completed: boolean;
+  comingSoon?: boolean;
   onPress?: () => void;
 };
 
@@ -56,7 +57,7 @@ type Props = {
  * the same decoration in `gray/100` — the design exports a separate greyed SVG per card, but
  * the geometry is identical so only the stroke changes.
  */
-export function TaskCard({ tone, title, completed, onPress }: Props) {
+export function TaskCard({ tone, title, completed, comingSoon = false, onPress }: Props) {
   const t = useT();
   const displayFont = useDisplayFont();
   const palette = TONES[tone];
@@ -67,7 +68,7 @@ export function TaskCard({ tone, title, completed, onPress }: Props) {
       <CardSwoosh
         kind={tone}
         color={completed ? color.gray100 : SWOOSH_TINT[tone]}
-        animate={!completed}
+        animate={!completed && !comingSoon}
       />
 
       {completed ? (
@@ -77,7 +78,7 @@ export function TaskCard({ tone, title, completed, onPress }: Props) {
         </View>
       ) : (
         <Text style={[styles.eyebrow, { color: palette.eyebrow }]}>
-          {t('ui.task.notCompleted')}
+          {t(comingSoon ? 'browse.placeholder.heading' : 'ui.task.notCompleted')}
         </Text>
       )}
 
@@ -121,7 +122,7 @@ export function TaskCard({ tone, title, completed, onPress }: Props) {
       style={shadowStyle}
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={title}
+      accessibilityLabel={comingSoon ? `${title}, ${t('browse.placeholder.heading')}` : title}
     >
       {gradient}
     </Pressable>

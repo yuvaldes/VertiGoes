@@ -2,6 +2,7 @@ import { auth } from './auth';
 import { browse } from './browse';
 import { common } from './common';
 import { data } from './data';
+import { feedback } from './feedback';
 import { flows } from './flows';
 import { home } from './home';
 import { ui } from './ui';
@@ -18,6 +19,7 @@ export const en = {
   browse,
   common,
   data,
+  feedback,
   flows,
   home,
   ui,

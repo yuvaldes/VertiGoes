@@ -18,9 +18,11 @@ import {
   streakEndingToday,
   type Feeling,
 } from '../data/dayRecords';
-import { user, type TabKey } from '../data/home';
+import type { TabKey } from '../data/home';
 import { selectTips } from '../data/tips';
 import { useDisplayFont, useLocale, useT, type TKey } from '../i18n';
+import { isFeatureReady } from '../lib/featureAvailability';
+import { useAuth } from '../state/AuthContext';
 import { useDayRecords } from '../state/DayRecordsContext';
 import { useExercises } from '../state/ExercisesContext';
 import { color, font, frame } from '../theme/tokens';
@@ -63,6 +65,9 @@ export function HomeStatusScreen({
   const displayFont = useDisplayFont();
   const { records, today, todayKey, getRecord, recordFeeling, recordSleep } = useDayRecords();
   const { exercises } = useExercises();
+  const { session } = useAuth();
+  const firstName = session.status === 'authed' ? session.answers?.firstName.trim() : '';
+  const exercisesAvailable = isFeatureReady('exercises');
 
   const [sheet, setSheet] = useState<OpenSheet>(null);
 
@@ -83,7 +88,7 @@ export function HomeStatusScreen({
     exercises.length === 0 || exercises.every((exercise) => exercise.completed);
 
   const openTasks =
-    (feeling === null ? 1 : 0) + (sleepHours === null ? 1 : 0) + (exercisesDone ? 0 : 1);
+    (feeling === null ? 1 : 0) + (sleepHours === null ? 1 : 0) + (exercisesAvailable && !exercisesDone ? 1 : 0);
   const allDone = openTasks === 0;
 
   /**
@@ -93,8 +98,8 @@ export function HomeStatusScreen({
   const week = useMemo(() => episodeWeek(locale, records, today), [locale, records, today]);
   const headline = useMemo(() => episodeTrendKey(records, today), [records, today]);
   const streak = useMemo(
-    () => streakEndingToday(records, today, allDone),
-    [records, today, allDone],
+    () => streakEndingToday(records, today, allDone, exercisesAvailable),
+    [records, today, allDone, exercisesAvailable],
   );
   /** Recomputed only when the day changes, so scrolling the page never reshuffles it. */
   const tips = useMemo(() => selectTips(today), [today]);
@@ -126,7 +131,7 @@ export function HomeStatusScreen({
         <View style={styles.greetingBlock}>
           <View style={styles.greetingRow}>
             <Text style={[styles.greeting, displayFont]}>
-              {t(greetingKeyFor(today), { firstName: user.firstName })}
+              {firstName ? t(greetingKeyFor(today), { firstName }) : t('home.status.welcome')}
             </Text>
             {/* Not mirrored under RTL: the emoji is a hand, not an arrow, and every platform
                 draws it facing the reader in both directions. */}
@@ -172,7 +177,8 @@ export function HomeStatusScreen({
 
           <TaskCard
             tone="exercises"
-            completed={exercisesDone}
+            completed={exercisesAvailable && exercisesDone}
+            comingSoon={!exercisesAvailable}
             title={t('home.exercises.title')}
             onPress={onOpenExercises}
           />

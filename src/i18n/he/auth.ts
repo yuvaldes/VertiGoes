@@ -13,10 +13,9 @@ export const auth = {
   sheet: {
     title: 'Sign in to VertiGoes',
     google: 'Continue with Google',
-    apple: 'Continue with Apple',
     email: 'Continue with email',
     signingIn: 'Signing in…',
-    demo: 'Demo - no real account is created. Nothing is sent anywhere, and everything resets when you reload.',
+    demo: "היכנסו כדי לשמור את ההתקדמות שלכם בין מכשירים.",
   },
 
   unlock: {
@@ -47,11 +46,12 @@ export const auth = {
     linkPrivacy: 'Read the privacy policy',
     disclaimersTitle: 'Medical and legal disclaimers',
     disclaimersNote:
-      'The medical and legal disclaimers have not been written yet. They will be here before anyone can create a real account.',
+      'The medical and legal disclaimers have not been written yet. They are not available yet.',
     privacyTitle: 'Privacy policy',
     privacyNote:
-      'The privacy policy has not been written yet. It will be here before anyone can create a real account.',
-    demo: "Demo - this form goes nowhere. Your password is not stored, sent or checked. Don't use a real one.",
+      'The privacy policy has not been written yet. It is not available yet.',
+    demo: "ייתכן שתצטרכו לאשר את כתובת האימייל לפני הכניסה.",
+    confirmation: "בדקו את האימייל ואשרו את החשבון, ואז היכנסו.",
     cta: 'Create account',
     switchPrompt: 'Already have an account?',
     switchCta: 'Sign in',
@@ -64,13 +64,47 @@ export const auth = {
     emailPlaceholder: 'name@example.com',
     passwordLabel: 'Password',
     passwordPlaceholder: 'Your password',
-    demo: 'Demo - any email and password will do. Nothing is checked and nothing is stored.',
+    demo: "השתמשו באימייל ובסיסמה של החשבון שלכם.",
+    forgot: "שכחתם את הסיסמה?",
+    resetSent: "אם קיים חשבון עם הכתובת הזו, נשלח אליו קישור לאיפוס הסיסמה.",
     cta: 'Sign in',
     switchPrompt: 'New here?',
     switchCta: 'Create an account',
   },
 
+  status: {
+    syncError: 'לא הצלחנו לשמור או לטעון חלק מהרשומות. נסו שוב לפני סגירת האפליקציה.',
+    saving: "שומרים…",
+    restoring: "טוענים את החשבון שלכם…",
+    retry: "נסו שוב",
+  },
+  resetPassword: {
+    title: "בחירת סיסמה חדשה",
+    body: "הזינו סיסמה חדשה לחשבון שלכם.",
+    cta: "שמירת סיסמה",
+  },
+
+  captcha: {
+    label: 'בדיקת אבטחה',
+    failed: 'לא הצלחנו לטעון את בדיקת האבטחה. נסו שוב.',
+    useWeb: 'השתמשו בגרסת הדפדפן כדי להשלים את בדיקת האבטחה.',
+  },
   error: {
+    oauthReturn: 'לא הצלחנו להשלים את הכניסה. נסו שוב מאותו דפדפן. אם הבעיה נמשכת, ייתכן שצריך לעדכן את כתובת החזרה מהכניסה.',
+    oauthUseWeb: 'כניסה עם Google דורשת את גרסת הדפדפן או גרסת פיתוח מותקנת. פתחו את האפליקציה בדפדפן כדי להיכנס.',
+    captcha: 'השלימו את בדיקת האבטחה ונסו שוב.',
+    passwordWeak: 'בחרו סיסמה חזקה יותר עם שילוב של אותיות, מספרים וסימנים.',
+    emailCooldown: 'המתינו דקה לפני בקשת אימייל נוסף.',
+    notConfigured: "הכניסה עדיין אינה זמינה. נסו שוב מאוחר יותר.",
+    credentials: "האימייל או הסיסמה אינם נכונים.",
+    unconfirmed: "אשרו את כתובת האימייל לפני הכניסה.",
+    emailExists: "נסו להיכנס עם האימייל הזה או לאפס את הסיסמה.",
+    rateLimit: "יותר מדי ניסיונות. המתינו כמה דקות ונסו שוב.",
+    provider: "אפשרות הכניסה הזו אינה זמינה. השתמשו באימייל.",
+    connection: "לא הצלחנו להתחבר. בדקו את החיבור ונסו שוב.",
+    profileLoad: "לא הצלחנו לטעון את פרטי החשבון. נסו שוב.",
+    profileSave: "לא הצלחנו לשמור את השינויים. נסו שוב.",
+    profileInvalid: 'חלק מהתשובות אינן תקינות או ארוכות מדי. בדקו את הפרטים ונסו שוב.',
     emailRequired: 'Enter your email address.',
     email: 'Enter an email address like name@example.com.',
     passwordRequired: 'Enter your password.',
@@ -97,7 +131,6 @@ export const auth = {
     accountLabel: 'Account',
     accountGuest: 'Guest',
     accountGoogle: 'Google account',
-    accountApple: 'Apple account',
   },
 
   a11y: {

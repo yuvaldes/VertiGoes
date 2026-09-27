@@ -6,20 +6,16 @@
  * sheet, two screens, the tab bar, the Menu and the onboarding header — there is no one screen
  * that owns it, and `common` is deliberately kept tiny.
  *
- * Two rules the copy here has to keep. First, nothing may imply an account exists or that a
- * password is protected: every surface that takes input carries a `demo` line, in the voice of
- * `flows.checkout.legal`. Second, no wall mentions Premium — a guest is being asked for one
- * thing, and asking for two at once is how a funnel dies.
+ * Authentication messages describe real Supabase accounts. Premium is a separate flow.
  */
 export const auth = {
   /** The bottom sheet. Its subtitle is whichever `unlock` line the refused tap asked for. */
   sheet: {
     title: 'Sign in to VertiGoes',
     google: 'Continue with Google',
-    apple: 'Continue with Apple',
     email: 'Continue with email',
     signingIn: 'Signing in…',
-    demo: 'Demo - no real account is created. Nothing is sent anywhere, and everything resets when you reload.',
+    demo: "Sign in to save your progress across devices.",
   },
 
   /**
@@ -60,11 +56,12 @@ export const auth = {
     /** Both links open the placeholder screen, which is the honest answer for now. */
     disclaimersTitle: 'Medical and legal disclaimers',
     disclaimersNote:
-      'The medical and legal disclaimers have not been written yet. They will be here before anyone can create a real account.',
+      'The medical and legal disclaimers have not been written yet. They are not available yet.',
     privacyTitle: 'Privacy policy',
     privacyNote:
-      'The privacy policy has not been written yet. It will be here before anyone can create a real account.',
-    demo: "Demo - this form goes nowhere. Your password is not stored, sent or checked. Don't use a real one.",
+      'The privacy policy has not been written yet. It is not available yet.',
+    demo: "You may need to confirm your email before signing in.",
+    confirmation: "Check your email to confirm your account, then sign in.",
     cta: 'Create account',
     switchPrompt: 'Already have an account?',
     switchCta: 'Sign in',
@@ -78,14 +75,48 @@ export const auth = {
     passwordLabel: 'Password',
     passwordPlaceholder: 'Your password',
     /** Also explains why every attempt succeeds, which otherwise reads as a bug. */
-    demo: 'Demo - any email and password will do. Nothing is checked and nothing is stored.',
+    demo: "Use the email and password for your account.",
+    forgot: "Forgot password?",
+    resetSent: "If this address has an account, a password-reset link is on its way.",
     cta: 'Sign in',
     switchPrompt: 'New here?',
     switchCta: 'Create an account',
   },
 
   /** Shown against the field that is wrong, never as a summary at the top. */
+  status: {
+    syncError: 'Some records could not be saved or loaded. Retry before closing the app.',
+    saving: "Saving…",
+    restoring: "Restoring your account…",
+    retry: "Try again",
+  },
+  resetPassword: {
+    title: "Choose a new password",
+    body: "Enter a new password for your account.",
+    cta: "Save password",
+  },
+
+  captcha: {
+    label: 'Security check',
+    failed: 'The security check could not load. Please try again.',
+    useWeb: 'Please use the web app to complete the security check.',
+  },
   error: {
+    oauthReturn: 'Sign-in could not finish. Try again from the same browser. If it keeps happening, the sign-in return address may need updating.',
+    oauthUseWeb: 'Google sign-in needs the web app or an installed development build. Open the web app in your browser to sign in.',
+    captcha: 'Complete the security check and try again.',
+    passwordWeak: 'Choose a stronger password with a mix of letters, numbers, and symbols.',
+    emailCooldown: 'Please wait a minute before requesting another email.',
+    notConfigured: "Sign-in is not available yet. Please try again later.",
+    credentials: "The email or password is incorrect.",
+    unconfirmed: "Confirm your email before signing in.",
+    emailExists: "Try signing in with this email or resetting your password.",
+    rateLimit: "Too many attempts. Please wait a few minutes and try again.",
+    provider: "This sign-in provider is not available. Please use email.",
+    connection: "Could not connect. Check your connection and try again.",
+    profileLoad: "Your account details could not be loaded. Please try again.",
+    profileSave: "Your changes could not be saved. Please try again.",
+    profileInvalid: 'Some answers are invalid or too long. Please check your details and try again.',
     emailRequired: 'Enter your email address.',
     email: 'Enter an email address like name@example.com.',
     passwordRequired: 'Enter your password.',
@@ -116,7 +147,6 @@ export const auth = {
     accountLabel: 'Account',
     accountGuest: 'Guest',
     accountGoogle: 'Google account',
-    accountApple: 'Apple account',
   },
 
   a11y: {

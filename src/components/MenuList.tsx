@@ -45,6 +45,7 @@ type MenuRowProps = {
   label: string;
   /** Trailing detail, e.g. the current language. */
   value?: string;
+  comingSoon?: boolean;
   /**
    * `external` swaps the caret for an out-arrow, telling the user they're about to leave the
    * app. `premium` swaps it for a crown, telling them the row itself is gated behind a plan.
@@ -54,7 +55,7 @@ type MenuRowProps = {
   onPress?: () => void;
 };
 
-export function MenuRow({ icon, label, value, variant = 'push', onPress }: MenuRowProps) {
+export function MenuRow({ icon, label, value, comingSoon = false, variant = 'push', onPress }: MenuRowProps) {
   const t = useT();
   const { isRTL } = useDirection();
   // The caret points at the screen this row opens, which is the other way under RTL.
@@ -66,7 +67,7 @@ export function MenuRow({ icon, label, value, variant = 'push', onPress }: MenuR
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={
-        variant === 'premium'
+        comingSoon ? t('common.menuRow.a11yWithValue', { label, value: t('browse.placeholder.heading') }) : variant === 'premium'
           ? t('common.menuRow.a11yPremium', { label })
           : variant === 'locked'
             ? t('common.menuRow.a11yLocked', { label })
@@ -76,7 +77,10 @@ export function MenuRow({ icon, label, value, variant = 'push', onPress }: MenuR
       }
     >
       <View style={styles.icon}>{icon}</View>
-      <Text style={styles.label}>{label}</Text>
+      <View style={styles.labelBlock}>
+        <Text style={styles.label}>{label}</Text>
+        {comingSoon && <Text style={styles.pending}>{t('browse.placeholder.heading')}</Text>}
+      </View>
       {value !== undefined && <Text style={styles.value}>{value}</Text>}
       {variant === 'external' ? (
         // Phosphor ships no mirrored out-arrow, so this is the one icon here that gets
@@ -101,7 +105,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   row: {
-    height: ROW_HEIGHT,
+    minHeight: ROW_HEIGHT,
+    paddingVertical: 10,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
@@ -113,9 +118,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  label: {
+  labelBlock: {
     flex: 1,
     minWidth: 0,
+  },
+  pending: {
+    fontFamily: font.body,
+    fontSize: 11,
+    lineHeight: 16,
+    color: color.gray500,
+  },
+  label: {
     fontFamily: font.body,
     fontSize: 16,
     lineHeight: 22,

@@ -10,6 +10,7 @@ export const home = {
     title: 'התרגילים של היום',
   },
   status: {
+    welcome: 'ברוכים הבאים',
     greeting: {
       morning: 'בוקר טוב, {firstName}',
       afternoon: 'צהריים טובים, {firstName}',
@@ -32,6 +33,7 @@ export const home = {
   dayDetail: {
     empty: 'לא נרשם דבר ביום הזה.',
     emergencyTitle: 'התקשרת לאיש הקשר לשעת חירום',
+    contactNotRecorded: 'פרטי איש הקשר לא נשמרו ברשומה הזו.',
     emergencyContact: '{name} ({relationship}) - {phone}',
     episodes: {
       one: 'היה לך {count} אירוע',

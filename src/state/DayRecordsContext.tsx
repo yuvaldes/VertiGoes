@@ -2,15 +2,15 @@ import {
   createContext,
   useCallback,
   useContext,
+  useLayoutEffect,
   useMemo,
   useRef,
-  useState,
+  useSyncExternalStore,
   type ReactNode,
 } from 'react';
 
 import {
   emptyRecord,
-  seedHistory,
   toKey,
   type DayRecord,
   type ExerciseSlot,
@@ -18,7 +18,15 @@ import {
   type InAppHelp,
   type SlotProgress,
 } from '../data/dayRecords';
-import { useLocale } from '../i18n';
+import {
+  createDayRecordsStore,
+  createDayRecordsTransport,
+  type DayRecordsSyncStatus,
+} from '../lib/dayRecords';
+import { supabase } from '../lib/supabase';
+import { useAuth } from './AuthContext';
+
+export type { DayRecordsSyncStatus } from '../lib/dayRecords';
 
 type DayRecordsValue = {
   records: Map<string, DayRecord>;
@@ -34,47 +42,58 @@ type DayRecordsValue = {
   recordExerciseSlot: (date: string, slot: ExerciseSlot, progress: SlotProgress) => void;
   /** Written by the Liv chat as the day's conversation grows; read by the calendar. */
   recordLivSummary: (date: string, summary: string) => void;
-  /** Drops today's writes and re-seeds history, so a new account starts from a clean slate. */
+  syncStatus: DayRecordsSyncStatus;
+  /** Retries a failed initial load or pending saves; errors are reported through syncStatus. */
+  retrySync: () => void;
+  /** Clears local history/pending writes. Never deletes cloud records or uploads guest seeds. */
   reset: () => void;
 };
 
 const DayRecordsContext = createContext<DayRecordsValue | null>(null);
 
 /**
- * Holds the calendar's history. Seeded once with mock past days, then updated in place by
- * today's interactions on the Home screen — so the calendar and Home never disagree.
+ * Account-scoped cloud history, or a separate empty guest store. Switching identity replaces the
+ * store during render, so neither records nor captured callbacks can cross accounts.
  */
 export function DayRecordsProvider({ children }: { children: ReactNode }) {
-  // Captured once: a re-render must not move "today" and re-seed a different range.
+  // Captured once: a re-render must not move "today".
   const today = useRef(new Date()).current;
   const todayKey = useMemo(() => toKey(today), [today]);
-  const locale = useLocale();
+  const { account, isAuthed, isRestoring } = useAuth();
+  const userId = !isRestoring && isAuthed ? account?.id ?? null : null;
+  const store = useMemo(() => createDayRecordsStore({
+    // Do not show fictional episodes, calls, or chat history to visitors.
+    initialRecords: new Map(),
+    emptyRecord,
+    transport: userId ? createDayRecordsTransport(supabase, userId) : null,
+    readOnly: isRestoring,
+  }), [userId, isRestoring]);
+  const { records, syncStatus } = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);
 
-  const [records, setRecords] = useState<Map<string, DayRecord>>(() =>
-    seedHistory(locale, today),
-  );
+  useLayoutEffect(() => {
+    store.start();
+    let invalidatedByAuth = false;
+    // Invalidate immediately on SDK sign-out/account replacement, before auth's next render.
+    const subscription = userId ? supabase?.auth.onAuthStateChange((_event, session) => {
+      if (session?.user.id !== userId) {
+        invalidatedByAuth = true;
+        store.stop();
+        store.reset(new Map());
+      } else if (invalidatedByAuth) {
+        // Also handle sign-out/re-entry to the same account batched into one React render.
+        invalidatedByAuth = false;
+        store.start();
+      }
+    }).data.subscription : undefined;
+    return () => {
+      subscription?.unsubscribe();
+      store.stop();
+    };
+  }, [store, userId]);
 
-  /**
-   * The ref is the source of truth; state mirrors it so React re-renders.
-   *
-   * This exists because callers write a record and then immediately read it back in the same
-   * tick — the help flow records a session and asks for a fresh day summary right after. Reading
-   * through `records` there returns the pre-update value, so the summary silently missed the
-   * write. Keeping a synchronous mirror makes write-then-read correct.
-   */
-  const recordsRef = useRef(records);
-
-  /** Copy-on-write so consumers re-render, applying `mutate` to the day's record. */
-  const update = useCallback((date: string, mutate: (record: DayRecord) => DayRecord) => {
-    const base = recordsRef.current;
-    const next = new Map(base);
-    next.set(date, mutate(base.get(date) ?? emptyRecord(date)));
-    // Ref first, so a read later in this tick sees the write; `mutate` runs exactly once.
-    recordsRef.current = next;
-    setRecords(next);
-  }, []);
-
-  const getRecord = useCallback((date: string) => recordsRef.current.get(date), []);
+  // Synchronous snapshot reads retain the existing write-then-read contract for the help flow.
+  const update = store.update;
+  const getRecord = store.getRecord;
 
   const recordEpisode = useCallback(
     (date: string) => update(date, (r) => ({ ...r, episodes: r.episodes + 1 })),
@@ -115,10 +134,9 @@ export function DayRecordsProvider({ children }: { children: ReactNode }) {
   );
 
   const reset = useCallback(() => {
-    const fresh = seedHistory(locale, today);
-    recordsRef.current = fresh;
-    setRecords(fresh);
-  }, [locale, today]);
+    store.reset(new Map());
+  }, [store]);
+  const retrySync = store.retrySync;
 
   const value = useMemo(
     () => ({
@@ -133,6 +151,8 @@ export function DayRecordsProvider({ children }: { children: ReactNode }) {
       recordFeeling,
       recordExerciseSlot,
       recordLivSummary,
+      syncStatus,
+      retrySync,
       reset,
     }),
     [
@@ -147,6 +167,8 @@ export function DayRecordsProvider({ children }: { children: ReactNode }) {
       recordFeeling,
       recordExerciseSlot,
       recordLivSummary,
+      syncStatus,
+      retrySync,
       reset,
     ],
   );

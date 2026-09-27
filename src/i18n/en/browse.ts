@@ -80,6 +80,20 @@ export const browse = {
     bookCta: 'Request an appointment',
   },
   placeholder: {
-    heading: 'Not built yet',
+    heading: 'To be announced',
+    releaseNote: 'A release date has not been announced yet.',
+  },
+  pending: {
+    symptomInsights: 'Symptom tracking and weekly insights will be added later.',
+    liv: 'Liv’s AI chat and voice features are not available yet.',
+    professionals: 'The professional directory is not available yet. Profiles will be added later.',
+    exercises: 'Exercise videos and guided sessions will be added later. No exercises can be completed here yet.',
+    meditation: 'Guided meditation and audio sessions will be added later.',
+    subscription: 'Subscriptions and payments are not available yet.',
+    guidedHelp: 'Guided support is not available yet. This app does not provide emergency assistance.',
+    emergencyContact: 'In-app contact calling is not available yet. Use your phone to contact someone directly.',
+    emergencyNotice: 'For urgent help, contact your local emergency services directly. This app cannot call for you.',
+    diagnosis: 'Diagnostic questions and results are not available yet. You can still record a diagnosis given by your clinician below.',
+    socialAuth: 'This sign-in option is not available yet. You can use email instead.',
   },
 } as const;

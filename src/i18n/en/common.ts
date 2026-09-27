@@ -38,6 +38,10 @@ export const common = {
     tabMenu: 'Menu',
   },
   emergency: {
+    savedContact: 'Your saved emergency contact',
+    addContact: 'Add an emergency contact in your profile',
+    callNamedContact: 'Call {name}',
+    callFailed: 'Could not open the phone app. Call your contact using your phone.',
     title: 'Emergency',
     callTitle: 'Call emergency contact',
     callSubtitle: '{name} ({relationship})',

@@ -1,292 +1,432 @@
 import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
+  createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode,
 } from 'react';
+import { AppState, Platform } from 'react-native';
+import type { Session, User } from '@supabase/supabase-js';
+import { makeRedirectUri } from 'expo-auth-session';
+import * as Linking from 'expo-linking';
+import * as WebBrowser from 'expo-web-browser';
 
 import type { TKey, TParams } from '../i18n';
 import type { OnboardingAnswers } from '../data/onboarding';
-
-/**
- * How long the mock pretends to talk to a server. Without it `authenticating` would never be
- * observable and the provider buttons' spinner would be dead code — which is the state the
- * real thing spends the most time in, so it is the one worth being able to look at.
- */
-export const MOCK_AUTH_DELAY_MS = 600;
+import { supabase } from '../lib/supabase';
+import { CAPTCHA_REQUIRED } from '../lib/authConfig';
 
 export const MIN_PASSWORD_LENGTH = 8;
-
-/**
- * Deliberately loose. A stricter pattern rejects addresses that are perfectly valid (plus
- * tags, new TLDs, unicode locals) and the only thing that can actually confirm an address is
- * a mail round trip, which this mock cannot do.
- */
 const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-
-export type AuthMethod = 'google' | 'apple' | 'email';
-
-/**
- * Three values rather than a boolean, because the shell has to tell "never offered" from
- * "offered and declined": `pending` is its cue to push onboarding exactly once after sign-in,
- * `skipped` its cue to stop pushing and let the Menu's resume card carry it instead.
- */
+export type AuthMethod = 'google' | 'email';
 export type OnboardingStatus = 'pending' | 'skipped' | 'complete';
-
-export type Account = {
-  /** Minted at sign-in and stable for the session. There is nothing behind it. */
-  id: string;
-  /** Null for the wallet providers — the mock never learns an address from them. */
-  email: string | null;
-  method: AuthMethod;
-};
-
+export type Account = { id: string; email: string | null; method: AuthMethod };
 export type AuthSession =
   | { status: 'guest' }
   | { status: 'authenticating'; method: AuthMethod }
   | {
-      status: 'authed';
-      account: Account;
-      onboarding: OnboardingStatus;
-      /** Non-null only when `onboarding === 'complete'`. The two move together. */
-      answers: OnboardingAnswers | null;
-      /** Non-null only when `onboarding === 'skipped'` — how many steps they'd finished. */
-      progressStep: number | null;
+      status: 'authed'; account: Account; onboarding: OnboardingStatus;
+      answers: OnboardingAnswers | null; progressStep: number | null;
     };
-
-/** Which field an error belongs against. `form` is the whole-form fallback. */
 export type AuthField = 'email' | 'password' | 'confirm' | 'consent' | 'form';
-
-/**
- * A key plus its params rather than a bare `TKey`: `auth.error.passwordShort` interpolates
- * `{min}`, and a screen that resolved it with `t(key)` alone would render the placeholder and
- * warn. Carrying the params with the key means no call site has to remember which errors take
- * one — `t(error.key, error.params)` is right for all of them.
- */
 export type AuthError = { key: TKey; params?: TParams };
-
 export type FieldErrors = Partial<Record<AuthField, AuthError>>;
-
-export type AuthResult = { ok: true } | { ok: false; errors: FieldErrors };
-
+export type AuthResult =
+  | { ok: true; confirmationRequired?: boolean; cancelled?: boolean }
+  | { ok: false; errors: FieldErrors };
 export type SignUpForm = {
-  email: string;
-  password: string;
-  confirm: string;
-  acceptedDisclaimers: boolean;
+  email: string; password: string; confirm: string; acceptedDisclaimers: boolean;
+  captchaToken?: string;
 };
+export type SignInForm = { email: string; password: string; captchaToken?: string };
 
-export type SignInForm = { email: string; password: string };
-
-/**
- * Pure and synchronous so a screen can re-validate a field on change without awaiting
- * anything, and so the context can run the very same function as the last gate before it
- * changes state. A refused sign-up is an expected outcome, not an exception.
- */
 export function validateSignUp(form: SignUpForm): FieldErrors {
   const errors: FieldErrors = {};
-
-  if (form.email.trim().length === 0) errors.email = { key: 'auth.error.emailRequired' };
+  if (!form.email.trim()) errors.email = { key: 'auth.error.emailRequired' };
   else if (!EMAIL_SHAPE.test(form.email.trim())) errors.email = { key: 'auth.error.email' };
-
   if (form.password.length < MIN_PASSWORD_LENGTH) {
     errors.password = { key: 'auth.error.passwordShort', params: { min: MIN_PASSWORD_LENGTH } };
   }
-
-  // Against `confirm`, not `password`: the field the user has to change is the second one.
   if (form.confirm !== form.password) errors.confirm = { key: 'auth.error.passwordMismatch' };
-
   if (!form.acceptedDisclaimers) errors.consent = { key: 'auth.error.consent' };
-
   return errors;
 }
 
-/** Shape and presence only. Signing in never asks for the disclaimers again. */
 export function validateSignIn(form: SignInForm): FieldErrors {
   const errors: FieldErrors = {};
-
-  if (form.email.trim().length === 0) errors.email = { key: 'auth.error.emailRequired' };
+  if (!form.email.trim()) errors.email = { key: 'auth.error.emailRequired' };
   else if (!EMAIL_SHAPE.test(form.email.trim())) errors.email = { key: 'auth.error.email' };
-
-  if (form.password.length === 0) errors.password = { key: 'auth.error.passwordRequired' };
-
+  if (!form.password) errors.password = { key: 'auth.error.passwordRequired' };
   return errors;
 }
 
 type AuthValue = {
   session: AuthSession;
-
-  // Derived once here so that no screen re-derives them slightly differently.
   isGuest: boolean;
   isAuthed: boolean;
   isAuthenticating: boolean;
+  isRestoring: boolean;
+  isSavingProfile: boolean;
   account: Account | null;
-  /** Null while guest. */
   onboarding: OnboardingStatus | null;
-  /** True while the medical answers are not in hand — `'pending'` or `'skipped'`. */
   needsOnboarding: boolean;
-
-  signInWithProvider: (method: 'google' | 'apple') => Promise<AuthResult>;
-  /** Validates first. The password is compared, length-checked and dropped on this line. */
+  authError: AuthError | null;
+  recoveringPassword: boolean;
+  retryProfile: () => void;
+  clearAuthError: () => void;
+  signInWithProvider: (method: 'google') => Promise<AuthResult>;
   signUpWithEmail: (form: SignUpForm) => Promise<AuthResult>;
   signInWithEmail: (form: SignInForm) => Promise<AuthResult>;
-
-  completeOnboarding: (answers: OnboardingAnswers) => void;
-  skipOnboarding: (step: number) => void;
-
-  signOut: () => void;
+  requestPasswordReset: (email: string, captchaToken?: string) => Promise<AuthResult>;
+  resendConfirmation: (email: string, captchaToken?: string) => Promise<AuthResult>;
+  updatePassword: (password: string) => Promise<AuthResult>;
+  cancelPasswordRecovery: () => void;
+  completeOnboarding: (answers: OnboardingAnswers) => Promise<AuthResult>;
+  skipOnboarding: (step: number) => Promise<AuthResult>;
+  signOut: () => Promise<boolean>;
 };
 
 const GUEST: AuthSession = { status: 'guest' };
-
 const AuthContext = createContext<AuthValue | null>(null);
 
-let idCounter = 0;
-
-/** Unique within the session, which is as long as anything here lives. */
-function mintId(): string {
-  idCounter += 1;
-  return `acct-${Date.now().toString(36)}-${idCounter}`;
+function errorKey(error: unknown): TKey {
+  const code = (error as { code?: string })?.code;
+  if (code === 'invalid_credentials') return 'auth.error.credentials';
+  if (code === 'captcha_failed') return 'auth.error.captcha';
+  if (code === 'weak_password') return 'auth.error.passwordWeak';
+  if (code === 'email_not_confirmed') return 'auth.error.unconfirmed';
+  if (code === 'user_already_exists' || code === 'email_exists') return 'auth.error.emailExists';
+  if (code === 'over_request_rate_limit' || code === 'over_email_send_rate_limit') {
+    return 'auth.error.rateLimit';
+  }
+  if (code === 'provider_disabled' || code === 'validation_failed') return 'auth.error.provider';
+  return 'auth.error.connection';
 }
 
-function wait(ms: number): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
+function accountFor(user: User): Account {
+  const provider = user.app_metadata.provider;
+  return {
+    id: user.id, email: user.email ?? null,
+    method: provider === 'google' ? provider : 'email',
+  };
 }
 
-function signedIn(account: Account): AuthSession {
-  // Every sign-in lands in `pending`, including sign *in*: nothing persists between reloads,
-  // so a returning user is a fiction this mock cannot honour. Claiming `complete` with no
-  // answers behind it would split the status flag from the data it describes.
-  return { status: 'authed', account, onboarding: 'pending', answers: null, progressStep: null };
+function redirectUri() {
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    return window.location.origin + '/';
+  }
+  return makeRedirectUri({ scheme: 'vertigoes', path: 'auth/callback' });
 }
 
-/**
- * Who is using the app, and whether they have finished the medical questions.
- *
- * Mocked end to end, exactly like `SubscriptionContext`: signing in is a `setTimeout` and a
- * state flip, and everything is gone on reload. It is a context rather than a prop because
- * the answer is read from the tab bar, the Menu, every gate and the emergency writes, and a
- * second copy of it anywhere would drift.
- *
- * It knows nothing about routes or capabilities. It answers "who is this"; `data/access.ts`
- * answers "what may they do", and the shell owns where a refused tap goes.
- *
- * The password is an argument to `signUpWithEmail`/`signInWithEmail` and nothing more. It is
- * never held in state, never returned, never logged, and never reaches `Account` — the same
- * discipline `CheckoutScreen` applies by keeping only a card's last four digits.
- */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<AuthSession>(GUEST);
-
-  // A ref rather than reading `session`, because two taps inside one tick both see the old
-  // state. The screens disable their buttons while authenticating; this is the backstop.
+  const [backendSession, setBackendSession] = useState<Session | null | undefined>(undefined);
+  const [isRestoring, setRestoring] = useState(Boolean(supabase));
+  const [isSavingProfile, setSavingProfile] = useState(false);
+  const [authError, setAuthError] = useState<AuthError | null>(null);
+  const [recoveringPassword, setRecoveringPassword] = useState(false);
+  const [profileAttempt, setProfileAttempt] = useState(0);
   const busy = useRef(false);
+  const profileBusy = useRef(false);
+  const emailRequestBusy = useRef(false);
+  const nextEmailRequestAt = useRef(0);
+  const loadedUser = useRef<string | null>(null);
+  const currentUser = useRef<string | null>(null);
+  const profileSession = useRef<AuthSession>(GUEST);
 
-  const runMockSignIn = useCallback(
-    async (method: AuthMethod, email: string | null): Promise<AuthResult> => {
-      if (busy.current) return { ok: false, errors: { form: { key: 'auth.error.inProgress' } } };
-      busy.current = true;
-
-      setSession({ status: 'authenticating', method });
-      await wait(MOCK_AUTH_DELAY_MS);
-      setSession(signedIn({ id: mintId(), email, method }));
-
-      busy.current = false;
-      return { ok: true };
-    },
-    [],
-  );
-
-  const signInWithProvider = useCallback(
-    (method: 'google' | 'apple') => runMockSignIn(method, null),
-    [runMockSignIn],
-  );
-
-  const signUpWithEmail = useCallback(
-    async (form: SignUpForm): Promise<AuthResult> => {
-      const errors = validateSignUp(form);
-      if (Object.keys(errors).length > 0) return { ok: false, errors };
-      // `form.password` goes no further than the validator above.
-      return runMockSignIn('email', form.email.trim().toLowerCase());
-    },
-    [runMockSignIn],
-  );
-
-  const signInWithEmail = useCallback(
-    async (form: SignInForm): Promise<AuthResult> => {
-      const errors = validateSignIn(form);
-      if (Object.keys(errors).length > 0) return { ok: false, errors };
-      // Any credentials are accepted — there is nothing to check them against, and the screen
-      // says so in `auth.signIn.demo` rather than letting it read as a bug.
-      return runMockSignIn('email', form.email.trim().toLowerCase());
-    },
-    [runMockSignIn],
-  );
-
-  const completeOnboarding = useCallback((answers: OnboardingAnswers) => {
-    setSession((current) =>
-      current.status === 'authed'
-        ? { ...current, onboarding: 'complete', answers, progressStep: null }
-        : current,
-    );
+  const fail = useCallback((key: TKey): AuthResult => {
+    setAuthError({ key });
+    return { ok: false, errors: { form: { key } } };
+  }, []);
+  const clearAuthError = useCallback(() => setAuthError(null), []);
+  const retryProfile = useCallback(() => {
+    loadedUser.current = null;
+    setProfileAttempt((attempt) => attempt + 1);
   }, []);
 
-  /**
-   * `step` is how many of the wizard's steps were already behind them when they backed out —
-   * the Menu's "Personal information" row turns that into a percentage. Answers stay null:
-   * only a finished run hands those over, so resuming from the Menu restarts the wizard
-   * cleanly rather than half-filled.
-   */
-  const skipOnboarding = useCallback((step: number) => {
-    setSession((current) =>
-      current.status === 'authed'
-        ? { ...current, onboarding: 'skipped', answers: null, progressStep: step }
-        : current,
-    );
-  }, []);
-
-  /**
-   * Drops the account only. The rest of the account-shaped state — plan, day records, Liv
-   * threads, today's exercises — is reset by the shell in one explicit handler, because four
-   * effects watching this value would race each other and the provider swap.
-   */
-  const signOut = useCallback(() => {
-    busy.current = false;
-    setSession(GUEST);
-  }, []);
-
-  const value = useMemo<AuthValue>(() => {
-    const onboarding = session.status === 'authed' ? session.onboarding : null;
-    return {
-      session,
-      isGuest: session.status === 'guest',
-      isAuthed: session.status === 'authed',
-      isAuthenticating: session.status === 'authenticating',
-      account: session.status === 'authed' ? session.account : null,
-      onboarding,
-      needsOnboarding: onboarding === 'pending' || onboarding === 'skipped',
-      signInWithProvider,
-      signUpWithEmail,
-      signInWithEmail,
-      completeOnboarding,
-      skipOnboarding,
-      signOut,
+  // Keep auth callbacks synchronous. Supabase requests inside them can deadlock its lock.
+  useEffect(() => {
+    if (!supabase) { setRestoring(false); return; }
+    const client = supabase;
+    let active = true;
+    // URL processing failures are returned by initialize(), not the auth-state event.
+    // Surface them instead of silently returning to a guest session after Google.
+    void client.auth.initialize().then(({ error }) => {
+      if (active && error) { fail('auth.error.oauthReturn'); setRestoring(false); }
+    }).catch(() => {
+      if (active) { fail('auth.error.oauthReturn'); setRestoring(false); }
+    });
+    const { data: { subscription } } = client.auth.onAuthStateChange((event, next) => {
+      if (currentUser.current !== (next?.user.id ?? null)) {
+        loadedUser.current = null;
+        profileSession.current = GUEST;
+        setSession(GUEST);
+        setRestoring(Boolean(next));
+        setAuthError(null);
+        setRecoveringPassword(false);
+      }
+      currentUser.current = next?.user.id ?? null;
+      if (event === 'PASSWORD_RECOVERY') setRecoveringPassword(true);
+      if (event === 'SIGNED_OUT') setRecoveringPassword(false);
+      setBackendSession(next);
+    });
+    const appState = Platform.OS !== 'web'
+      ? AppState.addEventListener('change', (state) => {
+          if (state === 'active') client.auth.startAutoRefresh();
+          else client.auth.stopAutoRefresh();
+        })
+      : null;
+    if (Platform.OS !== 'web' && AppState.currentState === 'active') client.auth.startAutoRefresh();
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+      appState?.remove();
+      if (Platform.OS !== 'web') client.auth.stopAutoRefresh();
     };
-  }, [
-    session,
-    signInWithProvider,
-    signUpWithEmail,
-    signInWithEmail,
-    completeOnboarding,
-    skipOnboarding,
-    signOut,
-  ]);
+  }, [fail]);
 
+  useEffect(() => {
+    if (!supabase || backendSession === undefined) return;
+    if (!backendSession) {
+      loadedUser.current = null;
+      profileSession.current = GUEST;
+      setSession(GUEST);
+      setRestoring(false);
+      return;
+    }
+    const user = backendSession.user;
+    if (loadedUser.current === user.id) return;
+    let cancelled = false;
+    const client = supabase;
+    setRestoring(true);
+    const load = async () => {
+      try {
+        const result = await client.from('profiles').select('*').eq('id', user.id).maybeSingle();
+        if (cancelled || currentUser.current !== user.id) return;
+        if (result.error) throw result.error;
+        let profile = result.data;
+        if (!profile) {
+          const inserted = await client.from('profiles').upsert(
+            { id: user.id }, { onConflict: 'id', ignoreDuplicates: true },
+          );
+          if (cancelled || currentUser.current !== user.id) return;
+          if (inserted.error) throw inserted.error;
+          const reread = await client.from('profiles').select('*').eq('id', user.id).single();
+          if (reread.error) throw reread.error;
+          profile = reread.data;
+        }
+        if (cancelled || currentUser.current !== user.id) return;
+        const next: AuthSession = {
+          status: 'authed', account: accountFor(user),
+          onboarding: profile.onboarding_status,
+          answers: profile.answers,
+          progressStep: profile.progress_step,
+        };
+        loadedUser.current = user.id;
+        profileSession.current = next;
+        setSession(next);
+        setAuthError(null);
+      } catch {
+        if (!cancelled && currentUser.current === user.id) {
+          setSession(GUEST);
+          setAuthError({ key: 'auth.error.profileLoad' });
+        }
+      } finally {
+        if (!cancelled && currentUser.current === user.id) setRestoring(false);
+      }
+    };
+    void load();
+    return () => { cancelled = true; };
+  }, [backendSession, profileAttempt]);
+
+  const acceptNativeCallback = useCallback(async (url: string) => {
+    if (!supabase) return false;
+    // Do not log callback URLs or tokens, and accept only the app's callback path.
+    const expected = redirectUri().split('?')[0];
+    if (url.split(/[?#]/)[0] !== expected) return false;
+    const parsed = new URL(url);
+    const params = new URLSearchParams(parsed.hash.slice(1) || parsed.search.slice(1));
+    if (params.has('error')) { fail('auth.error.connection'); return false; }
+    const access_token = params.get('access_token');
+    const refresh_token = params.get('refresh_token');
+    if (!access_token || !refresh_token) return false;
+    const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+    if (error) { fail(errorKey(error)); return false; }
+    if (params.get('type') === 'recovery') setRecoveringPassword(true);
+    return true;
+  }, [fail]);
+
+  useEffect(() => {
+    if (Platform.OS === 'web' || !supabase) return;
+    const handle = (url: string) => {
+      void acceptNativeCallback(url).catch(() => fail('auth.error.connection'));
+    };
+    const subscription = Linking.addEventListener('url', ({ url }) => handle(url));
+    void Linking.getInitialURL().then((url) => { if (url) handle(url); })
+      .catch(() => fail('auth.error.connection'));
+    return () => subscription.remove();
+  }, [acceptNativeCallback, fail]);
+
+  const begin = (method: AuthMethod): AuthResult | null => {
+    if (!supabase) return fail('auth.error.notConfigured');
+    if (busy.current || isRestoring) return fail('auth.error.inProgress');
+    busy.current = true;
+    setAuthError(null);
+    setSession({ status: 'authenticating', method });
+    return null;
+  };
+  const end = () => {
+    busy.current = false;
+    setSession((value) => value.status === 'authenticating' ? profileSession.current : value);
+  };
+
+  const signInWithEmail = async (form: SignInForm): Promise<AuthResult> => {
+    const errors = validateSignIn(form);
+    if (Object.keys(errors).length) return { ok: false, errors };
+    if (CAPTCHA_REQUIRED && !form.captchaToken) return fail('auth.error.captcha');
+    const refused = begin('email');
+    if (refused || !supabase) return refused!;
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: form.email.trim(), password: form.password,
+        ...(form.captchaToken ? { options: { captchaToken: form.captchaToken } } : {}),
+      });
+      return error ? fail(errorKey(error)) : { ok: true };
+    } catch { return fail('auth.error.connection'); }
+    finally { end(); }
+  };
+
+  const signUpWithEmail = async (form: SignUpForm): Promise<AuthResult> => {
+    const errors = validateSignUp(form);
+    if (Object.keys(errors).length) return { ok: false, errors };
+    if (CAPTCHA_REQUIRED && !form.captchaToken) return fail('auth.error.captcha');
+    const refused = begin('email');
+    if (refused || !supabase) return refused!;
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: form.email.trim(), password: form.password,
+        options: { emailRedirectTo: redirectUri(), ...(form.captchaToken ? { captchaToken: form.captchaToken } : {}) },
+      });
+      return error ? fail(errorKey(error)) : { ok: true, confirmationRequired: !data.session };
+    } catch { return fail('auth.error.connection'); }
+    finally { end(); }
+  };
+
+  const signInWithProvider = async (method: 'google'): Promise<AuthResult> => {
+    const refused = begin(method);
+    if (refused || !supabase) return refused!;
+    try {
+      const redirectTo = redirectUri();
+      if (Platform.OS !== 'web' && /^exps?:\/\//.test(redirectTo)) {
+        return fail('auth.error.oauthUseWeb');
+      }
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: method, options: { redirectTo, skipBrowserRedirect: true },
+      });
+      if (error || !data.url) return fail(error ? errorKey(error) : 'auth.error.provider');
+      if (Platform.OS === 'web') {
+        window.location.assign(data.url);
+        return { ok: true, cancelled: true };
+      }
+      const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+      if (result.type !== 'success') return { ok: true, cancelled: true };
+      const accepted = await acceptNativeCallback(result.url);
+      return accepted ? { ok: true } : fail('auth.error.connection');
+    } catch { return fail('auth.error.connection'); }
+    finally { end(); }
+  };
+
+  const sendAccountEmail = async (kind: 'recovery' | 'signup', email: string, captchaToken?: string): Promise<AuthResult> => {
+    const error = validateSignIn({ email, password: 'unused' }).email;
+    if (error) return { ok: false, errors: { email: error } };
+    if (!supabase) return fail('auth.error.notConfigured');
+    if (CAPTCHA_REQUIRED && !captchaToken) return fail('auth.error.captcha');
+    if (emailRequestBusy.current) return fail('auth.error.inProgress');
+    if (Date.now() < nextEmailRequestAt.current) return fail('auth.error.emailCooldown');
+    emailRequestBusy.current = true;
+    nextEmailRequestAt.current = Date.now() + 60_000;
+    try {
+      const challenge = captchaToken ? { captchaToken } : {};
+      const { error } = kind === 'recovery'
+        ? await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: redirectUri(), ...challenge })
+        : await supabase.auth.resend({ type: 'signup', email: email.trim(), options: { emailRedirectTo: redirectUri(), ...challenge } });
+      // Do not disclose whether an address exists or is already confirmed.
+      if (error && ['user_not_found', 'email_not_confirmed', 'email_already_confirmed'].includes(error.code ?? '')) return { ok: true };
+      return error ? fail(errorKey(error)) : { ok: true };
+    } catch { return fail('auth.error.connection'); }
+    finally { emailRequestBusy.current = false; }
+  };
+  const requestPasswordReset = (email: string, captchaToken?: string) => sendAccountEmail('recovery', email, captchaToken);
+  const resendConfirmation = (email: string, captchaToken?: string) => sendAccountEmail('signup', email, captchaToken);
+
+  const updatePassword = async (password: string): Promise<AuthResult> => {
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      return { ok: false, errors: {
+        password: { key: 'auth.error.passwordShort', params: { min: MIN_PASSWORD_LENGTH } },
+      } };
+    }
+    if (!supabase) return fail('auth.error.notConfigured');
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) return fail(errorKey(error));
+      setRecoveringPassword(false);
+      return { ok: true };
+    } catch { return fail('auth.error.connection'); }
+  };
+
+  const saveProfile = async (
+    onboarding: OnboardingStatus, answers: OnboardingAnswers | null, progressStep: number | null,
+  ): Promise<AuthResult> => {
+    const current = profileSession.current;
+    if (!supabase || current.status !== 'authed') return fail('auth.error.connection');
+    if (profileBusy.current) return fail('auth.error.inProgress');
+    profileBusy.current = true;
+    setSavingProfile(true);
+    try {
+      const { error } = await supabase.from('profiles').upsert({
+        id: current.account.id, onboarding_status: onboarding, answers, progress_step: progressStep,
+      });
+      if (currentUser.current !== current.account.id) {
+        return { ok: false, errors: { form: { key: 'auth.error.connection' } } };
+      }
+      if (error) return fail(error.code === 'PT429' ? 'auth.error.rateLimit' :
+        error.code === '22023' ? 'auth.error.profileInvalid' : 'auth.error.profileSave');
+      const next = { ...current, onboarding, answers, progressStep };
+      profileSession.current = next;
+      setSession(next);
+      setAuthError(null);
+      return { ok: true };
+    } catch {
+      if (currentUser.current !== current.account.id) {
+        return { ok: false, errors: { form: { key: 'auth.error.connection' } } };
+      }
+      return fail('auth.error.profileSave');
+    }
+    finally { profileBusy.current = false; setSavingProfile(false); }
+  };
+
+  const signOut = async () => {
+    if (!supabase) return true;
+    try {
+      const { error } = await supabase.auth.signOut({ scope: 'local' });
+      if (error) { fail('auth.error.connection'); return false; }
+      setAuthError(null);
+      return true;
+    } catch { fail('auth.error.connection'); return false; }
+  };
+
+  const onboarding = session.status === 'authed' ? session.onboarding : null;
+  const value: AuthValue = {
+    session,
+    isGuest: session.status !== 'authed',
+    isAuthed: session.status === 'authed',
+    isAuthenticating: session.status === 'authenticating' || isRestoring,
+    isRestoring, isSavingProfile, authError, recoveringPassword,
+    account: session.status === 'authed' ? session.account : null,
+    onboarding, needsOnboarding: onboarding === 'pending' || onboarding === 'skipped',
+    retryProfile, clearAuthError, signInWithProvider, signUpWithEmail, signInWithEmail,
+    requestPasswordReset, resendConfirmation, updatePassword,
+    cancelPasswordRecovery: () => setRecoveringPassword(false),
+    completeOnboarding: (answers) => saveProfile('complete', answers, null),
+    skipOnboarding: (step) => saveProfile('skipped', null, step),
+    signOut,
+  };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

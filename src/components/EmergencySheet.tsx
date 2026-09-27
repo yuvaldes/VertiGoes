@@ -11,8 +11,8 @@ import {
   View,
 } from 'react-native';
 
-import { emergencyContact } from '../data/home';
 import { useDirection, useDisplayFont, useT } from '../i18n';
+import { SheetPortal } from './SheetHost';
 import { color, font, shadow } from '../theme/tokens';
 
 type Props = {
@@ -20,6 +20,9 @@ type Props = {
   onClose: () => void;
   onCall: () => void;
   onHelp: () => void;
+  contactName?: string;
+  hasContact?: boolean;
+  callError?: boolean;
 };
 
 const SHEET_HEIGHT = 300;
@@ -39,7 +42,7 @@ const USE_NATIVE_DRIVER = Platform.OS !== 'web';
  * window instead of the phone. There it renders in-tree as an absolute overlay so it
  * stays inside the device. Native still gets a real modal.
  */
-export function EmergencySheet({ visible, onClose, onCall, onHelp }: Props) {
+export function EmergencySheet({ visible, onClose, onCall, onHelp, contactName, hasContact, callError }: Props) {
   const t = useT();
   const displayFont = useDisplayFont();
   const { isRTL } = useDirection();
@@ -93,7 +96,7 @@ export function EmergencySheet({ visible, onClose, onCall, onHelp }: Props) {
           >
             <X size={20} color={color.gray900} />
           </Pressable>
-          <Text style={[styles.title, displayFont]}>{t('common.emergency.title')}</Text>
+          <Text pointerEvents="none" style={[styles.title, displayFont]}>{t('common.emergency.title')}</Text>
         </View>
 
         <View style={styles.actions}>
@@ -113,18 +116,16 @@ export function EmergencySheet({ visible, onClose, onCall, onHelp }: Props) {
             badgeColor={color.error400}
             icon={<Phone size={20} weight="fill" color={color.white} />}
             title={t('common.emergency.callTitle')}
-            subtitle={t('common.emergency.callSubtitle', {
-              name: emergencyContact.name,
-              relationship: t(emergencyContact.relationshipKey),
-            })}
+            subtitle={hasContact ? contactName || t('common.emergency.savedContact') : t('common.emergency.addContact')}
           />
+          {callError && <Text accessibilityRole="alert" style={styles.actionSubtitle}>{t('common.emergency.callFailed')}</Text>}
         </View>
       </Animated.View>
     </View>
   );
 
   if (Platform.OS === 'web') {
-    return content;
+    return <SheetPortal>{content}</SheetPortal>;
   }
 
   return (
@@ -226,6 +227,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   close: {
+    zIndex: 1,
     position: 'absolute',
     // The title is centred in this header, so the X belongs on whichever edge reads first.
     start: 0,

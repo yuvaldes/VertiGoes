@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useApplyDirection } from '../i18n';
@@ -18,9 +18,20 @@ import { HomeIndicator, StatusBarChrome } from './DeviceChrome';
  */
 export function PhonePreview({ children }: { children: ReactNode }) {
   const direction = useApplyDirection();
+  const { width, height } = useWindowDimensions();
 
   if (Platform.OS !== 'web') {
     return <NativeShell>{children}</NativeShell>;
+  }
+
+  // Real phone browsers and installed PWAs must fit their viewport, without drawing a
+  // second, fake status bar/home indicator or clipping the bottom navigation.
+  if (width <= 600 || (width <= 1024 && height <= 600)) {
+    return (
+      <View style={styles.native} dir={direction}>
+        <NativeShell>{children}</NativeShell>
+      </View>
+    );
   }
 
   return (
@@ -75,6 +86,7 @@ const styles = StyleSheet.create({
   device: {
     width: frame.width,
     height: frame.height,
+    maxHeight: '100%',
     backgroundColor: color.gray50,
     overflow: 'hidden',
   },

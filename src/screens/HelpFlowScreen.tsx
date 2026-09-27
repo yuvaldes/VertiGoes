@@ -15,7 +15,7 @@ import {
   type HelpAnswer,
   type HelpQuestionNode,
 } from '../data/helpFlow';
-import { emergencyContact, type TabKey } from '../data/home';
+import { type TabKey } from '../data/home';
 import { useDisplayFont, useT } from '../i18n';
 import { color, font, frame, shadow } from '../theme/tokens';
 
@@ -30,6 +30,7 @@ type Props = {
    */
   onAskingChange: (asking: boolean) => void;
   onCallEmergencyContact: () => void;
+  contactName?: string;
   activeTab: TabKey;
   onChangeTab: (tab: TabKey) => void;
 };
@@ -126,6 +127,7 @@ export function HelpFlowScreen({
   onFinish,
   onAskingChange,
   onCallEmergencyContact,
+  contactName,
   activeTab,
   onChangeTab,
 }: Props) {
@@ -326,10 +328,7 @@ export function HelpFlowScreen({
               >
                 <Phone size={18} weight="fill" color={color.white} />
                 <Text style={styles.callLabel}>
-                  {t('flows.help.callContact', {
-                    name: emergencyContact.name,
-                    relationship: t(emergencyContact.relationshipKey),
-                  })}
+                  {contactName ? t('common.emergency.callNamedContact', { name: contactName }) : t('common.emergency.callTitle')}
                 </Text>
               </Pressable>
             )}
@@ -338,7 +337,6 @@ export function HelpFlowScreen({
               <Text style={styles.doneLabel}>{t('flows.help.done')}</Text>
             </Pressable>
 
-            <Text style={styles.recorded}>{t('flows.help.recorded')}</Text>
           </>
         )}
       </ScrollView>

@@ -2,9 +2,10 @@ import { CaretLeft, CaretRight, EnvelopeSimple } from 'phosphor-react-native';
 import type { ReactNode } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { AppleGlyph, GoogleGlyph } from '../../assets/PaymentMarks';
+import { GoogleGlyph } from '../../assets/PaymentMarks';
 import { UNLOCK_LINE, UNLOCK_LINE_GENERIC, type Capability } from '../../data/access';
 import { useDirection, useT } from '../../i18n';
+import { isFeatureReady } from '../../lib/featureAvailability';
 import { useAuth } from '../../state/AuthContext';
 import { color, font } from '../../theme/tokens';
 import { BottomSheet } from '../BottomSheet';
@@ -18,14 +19,13 @@ type Props = {
    */
   capability: Capability | null;
   onClose: () => void;
-  /** Mocked one-tap sign-ins. The shell owns them, exactly as it owns the emergency sheet's. */
+  /** Provider redirects are handled by the shell and the auth provider. */
   onGoogle: () => void;
-  onApple: () => void;
   /** Hands off to the email screen. This one navigates rather than signing anybody in. */
   onEmail: () => void;
 };
 
-/** Cap height of a provider mark. Apple's is set at 86% of it, as `PaymentMarks` itself does. */
+/** Cap height of the Google mark. */
 const GLYPH = 20;
 
 /**
@@ -44,20 +44,19 @@ const GLYPH = 20;
  * colours and neither mark is ever tinted or mirrored — an SVG does not flip under RTL on its
  * own, and nothing here should ask it to.
  */
-export function AuthSheet({ visible, capability, onClose, onGoogle, onApple, onEmail }: Props) {
+export function AuthSheet({ visible, capability, onClose, onGoogle, onEmail }: Props) {
   const t = useT();
   const { isRTL } = useDirection();
-  const { session } = useAuth();
+  const { session, isAuthenticating, authError } = useAuth();
 
-  // Which button is mid-round-trip, so only that one spins while all three refuse a second tap.
+  // Only the active method spins while both buttons refuse a second tap.
   const pending = session.status === 'authenticating' ? session.method : null;
-  const busy = pending !== null;
+  const busy = isAuthenticating;
 
-  // Dismissing mid-flight would clear the pending intent while the mock sign-in carried on
-  // regardless, and the app would then appear to navigate by itself. It holds for the 600ms.
+  // Keep the intent intact while a provider round trip is in progress.
   const close = busy ? noop : onClose;
 
-  // The email row leads somewhere; the two provider rows resolve in place. The caret says which.
+  // The email row opens a form; Google starts a provider redirect.
   const Caret = isRTL ? CaretLeft : CaretRight;
 
   return (
@@ -71,18 +70,9 @@ export function AuthSheet({ visible, capability, onClose, onGoogle, onApple, onE
           glyph={<GoogleGlyph size={GLYPH} />}
           label={t('auth.sheet.google')}
           onPress={onGoogle}
+          unavailable={!isFeatureReady('googleAuth')}
           busy={busy}
           spinning={pending === 'google'}
-          signingInLabel={t('auth.sheet.signingIn')}
-          a11yBusy={t('auth.a11y.signingIn')}
-        />
-
-        <ProviderRow
-          glyph={<AppleGlyph size={GLYPH * 0.86} tint={color.gray900} />}
-          label={t('auth.sheet.apple')}
-          onPress={onApple}
-          busy={busy}
-          spinning={pending === 'apple'}
           signingInLabel={t('auth.sheet.signingIn')}
           a11yBusy={t('auth.a11y.signingIn')}
         />
@@ -101,6 +91,11 @@ export function AuthSheet({ visible, capability, onClose, onGoogle, onApple, onE
 
       {/* Before they choose a method, not after they have used one. */}
       <Text style={styles.demo}>{t('auth.sheet.demo')}</Text>
+      {authError && (
+        <Text style={[styles.demo, { color: color.error500 }]} accessibilityRole="alert">
+          {t(authError.key, authError.params)}
+        </Text>
+      )}
     </BottomSheet>
   );
 }
@@ -114,6 +109,7 @@ function ProviderRow({
   signingInLabel,
   a11yBusy,
   trailing,
+  unavailable = false,
 }: {
   glyph: ReactNode;
   label: string;
@@ -124,24 +120,28 @@ function ProviderRow({
   signingInLabel: string;
   a11yBusy: string;
   trailing?: ReactNode;
+  unavailable?: boolean;
 }) {
+  const t = useT();
   return (
     <Pressable
-      style={[styles.row, busy && !spinning && styles.rowBusy]}
-      onPress={onPress}
-      disabled={busy}
+      style={[styles.row, (unavailable || busy && !spinning) && styles.rowBusy]}
+      onPress={unavailable ? undefined : onPress}
+      disabled={busy || unavailable}
       accessibilityRole="button"
       // Deliberately the row's own label even while it spins: a control that renames itself
       // under focus reads as a new control rather than as the same one working. The `busy`
       // state and the spinner's label carry the change instead.
-      accessibilityLabel={label}
-      accessibilityState={{ disabled: busy, busy: spinning }}
+      accessibilityLabel={unavailable ? `${label}, ${t('browse.placeholder.heading')}` : label}
+      accessibilityState={{ disabled: busy || unavailable, busy: spinning }}
     >
-      {/* A fixed column: Apple's mark is narrower than Google's, and without it the three
-          labels would each start at a different x. */}
+      {/* Keep both labels aligned despite different icon widths. */}
       <View style={styles.glyph}>{glyph}</View>
 
-      <Text style={styles.label}>{spinning ? signingInLabel : label}</Text>
+      <View style={styles.labelBlock}>
+        <Text style={styles.label}>{spinning ? signingInLabel : label}</Text>
+        {unavailable && <Text style={styles.unavailable}>{t('browse.placeholder.heading')}</Text>}
+      </View>
 
       {spinning ? (
         <ActivityIndicator size="small" color={color.gray500} accessibilityLabel={a11yBusy} />
@@ -188,9 +188,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  label: {
+  labelBlock: {
     flex: 1,
     minWidth: 0,
+  },
+  unavailable: {
+    fontFamily: font.body,
+    fontSize: 11,
+    lineHeight: 16,
+    color: color.gray600,
+  },
+  label: {
     fontFamily: font.bodySemiBold,
     fontSize: 15,
     color: color.gray900,

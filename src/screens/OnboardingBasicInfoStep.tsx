@@ -24,6 +24,7 @@ export function OnboardingBasicInfoStep({ answers, patch }: Props) {
           <LabeledInput
             label={t('flows.basicInfo.firstNameLabel')}
             value={answers.firstName}
+            maxLength={100}
             onChangeText={(firstName) => patch({ firstName })}
             placeholder={t('flows.basicInfo.firstNamePlaceholder')}
             autoCapitalize="words"
@@ -33,6 +34,7 @@ export function OnboardingBasicInfoStep({ answers, patch }: Props) {
           <LabeledInput
             label={t('flows.basicInfo.lastNameLabel')}
             value={answers.lastName}
+            maxLength={100}
             onChangeText={(lastName) => patch({ lastName })}
             placeholder={t('flows.basicInfo.lastNamePlaceholder')}
             autoCapitalize="words"
@@ -44,6 +46,7 @@ export function OnboardingBasicInfoStep({ answers, patch }: Props) {
         label={t('flows.basicInfo.ageLabel')}
         required
         value={answers.age}
+        maxLength={3}
         onChangeText={(age) => patch({ age: age.replace(/[^0-9]/g, '') })}
         placeholder={t('flows.basicInfo.agePlaceholder')}
         keyboardType="number-pad"

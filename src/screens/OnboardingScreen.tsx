@@ -17,6 +17,7 @@ import {
   type OnboardingAnswers,
 } from '../data/onboarding';
 import { useT } from '../i18n';
+import { useAuth } from '../state/AuthContext';
 import { color, frame, font } from '../theme/tokens';
 import { OnboardingBasicInfoStep } from './OnboardingBasicInfoStep';
 import { OnboardingDiagnosisStep } from './OnboardingDiagnosisStep';
@@ -66,6 +67,7 @@ export function OnboardingScreen({
   onSkip,
 }: Props) {
   const t = useT();
+  const { isSavingProfile, authError } = useAuth();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<OnboardingAnswers>(
     initialAnswers ?? initialOnboardingAnswers,
@@ -77,6 +79,7 @@ export function OnboardingScreen({
     setAnswers((current) => ({ ...current, ...partial }));
 
   const back = () => {
+    if (isSavingProfile) return;
     if (step > 0) setStep(step - 1);
     // Backing out of the first run is skipping it, whatever control they used to do it —
     // otherwise the status stays `pending` and the shell pushes this screen straight back.
@@ -86,9 +89,11 @@ export function OnboardingScreen({
 
   const isLastStep = step === ONBOARDING_STEP_COUNT - 1;
   // Age is the only field the source spec marks required; everything else is free to skip.
-  const canContinue = step !== 0 || answers.age.trim().length > 0;
+  const canContinue = step !== 0 || (/^[0-9]{1,3}$/.test(answers.age) &&
+    Number(answers.age) >= 1 && Number(answers.age) <= 130);
 
   const continueOrFinish = () => {
+    if (!canContinue || isSavingProfile) return;
     if (isLastStep) onComplete(answers);
     else setStep(step + 1);
   };
@@ -110,7 +115,8 @@ export function OnboardingScreen({
             {canSkip && (
               <Pressable
                 style={styles.skip}
-                onPress={() => onSkip(step)}
+                onPress={() => { if (!isSavingProfile) onSkip(step); }}
+                disabled={isSavingProfile}
                 accessibilityRole="button"
                 accessibilityLabel={t('auth.onboarding.a11ySkip')}
               >
@@ -138,14 +144,21 @@ export function OnboardingScreen({
         </ScrollView>
 
         <View style={styles.gutter}>
+          {authError && (
+            <Text style={{ color: color.error500, fontFamily: font.body, marginBottom: 12 }}
+              accessibilityRole="alert">
+              {t(authError.key, authError.params)}
+            </Text>
+          )}
           <Pressable
-            style={[styles.continueButton, !canContinue && styles.continueButtonDisabled]}
+            style={[styles.continueButton, (!canContinue || isSavingProfile) && styles.continueButtonDisabled]}
             onPress={continueOrFinish}
-            disabled={!canContinue}
+            disabled={!canContinue || isSavingProfile}
             accessibilityRole="button"
           >
             <Text style={styles.continueLabel}>
-              {isLastStep ? t('flows.onboarding.finish') : t('flows.onboarding.continue')}
+              {isSavingProfile ? t('auth.status.saving') :
+                isLastStep ? t('flows.onboarding.finish') : t('flows.onboarding.continue')}
             </Text>
           </Pressable>
         </View>

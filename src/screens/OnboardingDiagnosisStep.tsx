@@ -5,6 +5,7 @@ import { LabeledInput } from '../components/LabeledInput';
 import { YesNoToggle } from '../components/YesNoToggle';
 import { DIAGNOSIS_QUESTIONS, type OnboardingAnswers } from '../data/onboarding';
 import { useDisplayFont, useT } from '../i18n';
+import { isFeatureReady } from '../lib/featureAvailability';
 import { color, font } from '../theme/tokens';
 
 type Props = {
@@ -29,13 +30,13 @@ export function OnboardingDiagnosisStep({ answers, patch }: Props) {
       <Text style={[styles.title, displayFont]}>{t('flows.diagnosis.title')}</Text>
       <Text style={styles.hint}>{t('flows.diagnosis.hint')}</Text>
 
-      {DIAGNOSIS_QUESTIONS.length === 0 ? (
+      {!isFeatureReady('diagnosis') || DIAGNOSIS_QUESTIONS.length === 0 ? (
         <View style={styles.empty}>
           <View style={styles.emptyIcon}>
             <ClipboardText size={24} color={color.gray400} />
           </View>
-          <Text style={[styles.emptyTitle, displayFont]}>{t('flows.diagnosis.emptyTitle')}</Text>
-          <Text style={styles.emptyBody}>{t('flows.diagnosis.emptyBody')}</Text>
+          <Text style={[styles.emptyTitle, displayFont]}>{t('browse.placeholder.heading')}</Text>
+          <Text style={styles.emptyBody}>{t('browse.pending.diagnosis')}</Text>
         </View>
       ) : (
         <View style={styles.list}>
@@ -58,6 +59,7 @@ export function OnboardingDiagnosisStep({ answers, patch }: Props) {
       <LabeledInput
         label={t('flows.diagnosis.manualLabel')}
         value={answers.manualDiagnosis}
+        maxLength={2000}
         onChangeText={(manualDiagnosis) => patch({ manualDiagnosis })}
         placeholder={t('flows.diagnosis.manualPlaceholder')}
       />

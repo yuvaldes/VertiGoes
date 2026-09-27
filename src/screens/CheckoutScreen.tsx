@@ -33,6 +33,7 @@ import {
   type PaymentMethod,
 } from '../data/subscription';
 import { useDisplayFont, useLocale, useT, type TKey } from '../i18n';
+import { ENABLE_DEMO_BILLING } from '../lib/features';
 import { color, font, frame, shadow } from '../theme/tokens';
 
 type Props = {
@@ -111,6 +112,21 @@ export function CheckoutScreen({
   const [expiry, setExpiry] = useState('');
   const [cvc, setCvc] = useState('');
   const [name, setName] = useState('');
+
+  // Never invite real card/CVC input or pretend to activate a paid plan without a provider.
+  if (!ENABLE_DEMO_BILLING) {
+    return (
+      <View style={styles.body}>
+        <View style={styles.gutter}>
+          <AppHeader>
+            <ScreenTitleRow title={t('flows.checkout.unavailableTitle')} onBack={onBack} />
+          </AppHeader>
+          <Text style={styles.updateNote}>{t('flows.checkout.unavailableBody')}</Text>
+        </View>
+        <BottomBarSlot />
+      </View>
+    );
+  }
 
   const price = PREMIUM_PRICE[billing];
   // The wallet's own name, taken from the payment catalogue rather than spelled again here —

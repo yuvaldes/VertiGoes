@@ -17,7 +17,7 @@ import { ChatBubble } from '../components/liv/ChatBubble';
 import { ScreenTitleRow } from '../components/ScreenTitleRow';
 import { SLOT_LABEL_KEY, SLOT_ORDER, fromKey, type ExerciseSlot } from '../data/dayRecords';
 import { helpQuestionById } from '../data/helpFlow';
-import { emergencyContact, type TabKey } from '../data/home';
+import type { TabKey } from '../data/home';
 import { useDateFormat, useDisplayFont, useT } from '../i18n';
 import { useDayRecords } from '../state/DayRecordsContext';
 import { useLivChat } from '../state/LivChatContext';
@@ -87,11 +87,7 @@ export function DayDetailScreen({ date, onBack, activeTab, onChangeTab }: Props)
             title={t('home.dayDetail.emergencyTitle')}
           >
             <Text style={styles.body14}>
-              {t('home.dayDetail.emergencyContact', {
-                name: emergencyContact.name,
-                relationship: t(emergencyContact.relationshipKey),
-                phone: emergencyContact.phone,
-              })}
+              {t('home.dayDetail.contactNotRecorded')}
             </Text>
           </Section>
         )}

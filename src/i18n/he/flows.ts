@@ -33,7 +33,7 @@ export const flows = {
     otherDiagnosisLabel: 'במה אובחנתם?',
     otherDiagnosisPlaceholder: 'תארו זאת במילים שלכם',
     notDiagnosedInfo:
-      'אין בעיה - במסך הבא יש כמה שאלות כן/לא שיכולות לעזור לכוון לאבחנה. זה אופציונלי, כך שתוכלו לדלג ולחזור לזה בכל עת.',
+      'שאלות אבחון ותוצאות יפורסמו בהמשך. ניתן להמשיך ללא אבחנה.',
     medicationQuestion: 'האם אתם נוטלים תרופות הקשורות לסחרחורת?',
     medicationOther: 'משהו אחר',
     medicationNone: 'ללא',
@@ -53,7 +53,7 @@ export const flows = {
 
   emergencyContact: {
     title: 'איש קשר לשעת חירום',
-    hint: 'למי כדאי שנתקשר אם תזדקקו לעזרה במהלך אירוע?',
+    hint: 'אפשר לשמור כאן איש קשר. אפשרות החיוג מהאפליקציה תתווסף בהמשך.',
     nameLabel: 'שם מלא',
     namePlaceholder: 'ג׳ורג׳ לוי',
     phoneLabel: 'מספר טלפון',
@@ -115,6 +115,8 @@ export const flows = {
   },
 
   checkout: {
+    unavailableTitle: 'תשלומים עדיין אינם זמינים',
+    unavailableBody: 'התשלום עדיין אינו מחובר לספק סליקה. אין להזין פרטי תשלום.',
     titleSubscribe: 'תשלום',
     titleUpdate: 'אמצעי תשלום',
 

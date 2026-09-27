@@ -2,6 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import type { WeekBar } from '../../data/dayRecords';
 import { useDisplayFont, useT } from '../../i18n';
+import { isFeatureReady } from '../../lib/featureAvailability';
 import { color, font } from '../../theme/tokens';
 import { Ring } from '../Ring';
 
@@ -46,6 +47,18 @@ function barFor(episodes: number, weekMax: number): BarStyle {
 export function WeeklyStatusCard({ headline, week }: { headline: string; week: WeekBar[] }) {
   const t = useT();
   const displayFont = useDisplayFont();
+  if (!isFeatureReady('symptoms')) {
+    return (
+      <View style={styles.card}>
+        <Text style={styles.eyebrow}>{t('ui.weeklyStatus.eyebrow')}</Text>
+        <Text style={[styles.headline, displayFont]}>{t('browse.placeholder.heading')}</Text>
+        <View style={styles.pendingBody}>
+          <Text style={styles.pendingText}>{t('browse.pending.symptomInsights')}</Text>
+        </View>
+        <Ring radius={16} color={color.gray100} />
+      </View>
+    );
+  }
   const weekMax = week.reduce((max, day) => Math.max(max, day.episodes ?? 0), 0);
 
   return (
@@ -99,6 +112,16 @@ export function WeeklyStatusCard({ headline, week }: { headline: string; week: W
 }
 
 const styles = StyleSheet.create({
+  pendingBody: {
+    minHeight: 56,
+    justifyContent: 'center',
+  },
+  pendingText: {
+    fontFamily: font.body,
+    fontSize: 12,
+    lineHeight: 18,
+    color: color.gray600,
+  },
   card: {
     width: '100%',
     backgroundColor: color.white,

@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -14,6 +15,7 @@ import { SLOT_ORDER, type DayRecord } from '../data/dayRecords';
 import { describeHelpSession } from '../data/helpFlow';
 import { makeMessage, type ChatMessage, type ChatThread, type LivAction } from '../data/livChat';
 import { useLocale } from '../i18n';
+import { isFeatureReady } from '../lib/featureAvailability';
 import { useDayRecords } from './DayRecordsContext';
 
 /** Swap this one binding to move off the scripted mock. */
@@ -69,6 +71,12 @@ export function LivChatProvider({ children }: { children: ReactNode }) {
 
   const [threads, setThreads] = useState<Map<string, ChatThread>>(() => new Map());
   const [isThinking, setIsThinking] = useState(false);
+  const generation = useRef(0);
+  const replyPending = useRef(false);
+  const summaryRequests = useRef(new Map<string, number>());
+
+  // Invalidate work when this provider unmounts as well as when an account is reset.
+  useEffect(() => () => { generation.current += 1; replyPending.current = false; }, []);
 
   // Mirrors `threads` so async callbacks read the latest without being re-created.
   const threadsRef = useRef(threads);
@@ -100,20 +108,34 @@ export function LivChatProvider({ children }: { children: ReactNode }) {
    */
   const refreshDaySummary = useCallback(
     async (date: string) => {
-      const chatSummary = await provider.summarize(messagesFor(date));
-      const help = getRecord(date)?.inAppHelp;
-      const sentences = [chatSummary, help ? describeHelpSession(locale, help.answers) : ''].filter(
-        Boolean,
-      );
-      recordLivSummary(date, sentences.join(' '));
+      if (!isFeatureReady('liv')) return;
+      const ownGeneration = generation.current;
+      const request = (summaryRequests.current.get(date) ?? 0) + 1;
+      summaryRequests.current.set(date, request);
+      try {
+        const chatSummary = await provider.summarize(messagesFor(date));
+        if (generation.current !== ownGeneration || summaryRequests.current.get(date) !== request) return;
+        const help = getRecord(date)?.inAppHelp;
+        const sentences = [chatSummary, help ? describeHelpSession(locale, help.answers) : ''].filter(
+          Boolean,
+        );
+        recordLivSummary(date, sentences.join(' '));
+      } catch {
+        // A failed optional summary must not overwrite the last saved summary or leak an
+        // unhandled rejection. A subsequent conversation update can retry it.
+      }
     },
     [getRecord, locale, messagesFor, recordLivSummary],
   );
 
   const send = useCallback(
     (text: string) => {
+      if (!isFeatureReady('liv')) return;
       const trimmed = text.trim();
-      if (!trimmed || isThinking) return;
+      if (!trimmed || replyPending.current) return;
+      const ownGeneration = generation.current;
+      const isCurrent = () => generation.current === ownGeneration;
+      replyPending.current = true;
 
       const date = todayKey;
       const withUser = [...messagesFor(date), makeMessage('user', trimmed)];
@@ -123,28 +145,33 @@ export function LivChatProvider({ children }: { children: ReactNode }) {
       provider
         .reply(withUser, toDayContext(getRecord(date)))
         .then((reply) => {
+          if (!isCurrent()) return;
           commit(date, [
             ...messagesFor(date),
             makeMessage('liv', reply.text, { action: reply.action }),
           ]);
         })
         .catch(() => {
+          if (!isCurrent()) return;
           commit(date, [
             ...messagesFor(date),
             makeMessage('liv', 'Sorry — I lost that. Could you say it again?'),
           ]);
         })
         .finally(() => {
+          if (!isCurrent()) return;
+          replyPending.current = false;
           setIsThinking(false);
           void refreshDaySummary(date);
         });
     },
-    [commit, getRecord, isThinking, messagesFor, refreshDaySummary, todayKey],
+    [commit, getRecord, messagesFor, refreshDaySummary, todayKey],
   );
 
   /** Runs the action attached to a Liv message, then has her acknowledge it. */
   const acceptAction = useCallback(
     (messageId: string) => {
+      if (!isFeatureReady('liv')) return;
       const date = todayKey;
       const messages = messagesFor(date);
       const target = messages.find((message) => message.id === messageId);
@@ -167,6 +194,9 @@ export function LivChatProvider({ children }: { children: ReactNode }) {
   const getThread = useCallback((date: string) => threads.get(date), [threads]);
 
   const reset = useCallback(() => {
+    generation.current += 1;
+    replyPending.current = false;
+    summaryRequests.current.clear();
     threadsRef.current = new Map();
     setThreads(new Map());
     setIsThinking(false);

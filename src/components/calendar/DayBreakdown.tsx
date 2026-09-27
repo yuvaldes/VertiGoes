@@ -91,7 +91,7 @@ export function DayBreakdown({ record, onOpenConversation, onShowExercises, onOp
       : {
           key: 'no-episodes',
           icon: <CheckCircle size={20} color={color.success500} />,
-          text: t('ui.dayBreakdown.noEpisodes'),
+          text: t(record ? 'ui.dayBreakdown.noRecordedEpisodes' : 'home.dayDetail.empty'),
           tint: color.success500,
         },
   );

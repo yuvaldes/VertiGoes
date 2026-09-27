@@ -1,5 +1,6 @@
 import {
   Brain,
+  Bug,
   Check,
   Briefcase,
   FirstAid,
@@ -26,6 +27,7 @@ import { useCapabilities, type Capability } from '../data/access';
 import type { TabKey } from '../data/home';
 import { ONBOARDING_STEP_COUNT, onboardingPercent } from '../data/onboarding';
 import { useDirection, useDisplayFont, useT } from '../i18n';
+import { isFeatureReady } from '../lib/featureAvailability';
 import { useAuth } from '../state/AuthContext';
 import {
   LANGUAGE_FLAG,
@@ -44,6 +46,7 @@ type Props = {
   onOpenProfessionals: () => void;
   onOpenOnboarding: () => void;
   onOpenSubscription: () => void;
+  onReportBug: () => void;
   onOpenPlaceholder: (title: string, note: string) => void;
   /**
    * Opens the auth sheet. The capability picks the line that says what signing in unlocks;
@@ -82,6 +85,7 @@ export function MenuScreen({
   onOpenProfessionals,
   onOpenOnboarding,
   onOpenSubscription,
+  onReportBug,
   onOpenPlaceholder,
   onRequestSignIn,
   onSignOut,
@@ -114,7 +118,7 @@ export function MenuScreen({
     account === null
       ? t('auth.menu.accountGuest')
       : (account.email ??
-        t(account.method === 'apple' ? 'auth.menu.accountApple' : 'auth.menu.accountGoogle'));
+        t(account.method === 'google' ? 'auth.menu.accountGoogle' : 'auth.menu.accountLabel'));
 
   return (
     <View style={styles.body}>
@@ -154,26 +158,30 @@ export function MenuScreen({
           <MenuRow
             icon={<Brain size={ICON_SIZE} color={color.gray900} />}
             label={t('browse.menu.rowMeditation')}
-            variant={can('useMeditation') ? 'push' : 'locked'}
+            comingSoon={!isFeatureReady('meditation')}
+            variant={!isFeatureReady('meditation') || can('useMeditation') ? 'push' : 'locked'}
             onPress={onOpenMeditationDrills}
           />
           <MenuRow
             icon={<PlayCircle size={ICON_SIZE} color={color.gray900} />}
             label={t('browse.menu.rowExercises')}
-            variant={can('browseExercises') ? 'push' : 'locked'}
+            comingSoon={!isFeatureReady('exercises')}
+            variant={!isFeatureReady('exercises') || can('browseExercises') ? 'push' : 'locked'}
             onPress={onOpenExercises}
           />
           <MenuRow
             icon={<Briefcase size={ICON_SIZE} color={color.gray900} />}
             label={t('browse.menu.rowProfessionals')}
-            variant={can('viewProfessionals') ? 'push' : 'locked'}
+            comingSoon={!isFeatureReady('professionals')}
+            variant={!isFeatureReady('professionals') || can('viewProfessionals') ? 'push' : 'locked'}
             onPress={onOpenProfessionals}
           />
           {/* Directly above Community, per the requested order. */}
           <MenuRow
             icon={<MusicNotes size={ICON_SIZE} color={color.gray900} />}
             label={t('browse.menu.rowPlaylists')}
-            variant={can('viewPlaylists') ? 'external' : 'locked'}
+            comingSoon={!isFeatureReady('playlists')}
+            variant={!isFeatureReady('playlists') ? 'push' : can('viewPlaylists') ? 'external' : 'locked'}
             onPress={() =>
               onOpenPlaceholder(
                 t('browse.menu.rowPlaylists'),
@@ -186,13 +194,16 @@ export function MenuScreen({
           <MenuRow
             icon={<UsersThree size={ICON_SIZE} color={color.gray900} />}
             label={t('browse.menu.rowCommunity')}
+            comingSoon={!isFeatureReady('community')}
             variant={
-              communityLock === 'auth' ? 'locked' : communityLock === 'premium' ? 'premium' : 'push'
+              !isFeatureReady('community') ? 'push' : communityLock === 'auth' ? 'locked' : communityLock === 'premium' ? 'premium' : 'push'
             }
             onPress={
               // The only content row whose destination is decided here rather than by the
               // shell, so it is also the only one that has to open the sheet itself.
-              communityLock === 'auth'
+              !isFeatureReady('community')
+                ? () => onOpenPlaceholder(t('browse.menu.rowCommunity'), t('browse.menu.communityNote'))
+                : communityLock === 'auth'
                 ? () => onRequestSignIn('viewCommunity')
                 : communityLock === 'premium'
                   ? onOpenSubscription
@@ -224,6 +235,7 @@ export function MenuScreen({
             <MenuRow
               icon={<FirstAid size={ICON_SIZE} color={color.gray900} />}
               label={t('browse.menu.rowSymptoms')}
+              comingSoon={!isFeatureReady('symptoms')}
               onPress={() =>
                 onOpenPlaceholder(
                   t('browse.menu.rowSymptoms'),
@@ -260,7 +272,8 @@ export function MenuScreen({
             <MenuRow
               icon={<CrownSimple size={ICON_SIZE} color={color.gray900} />}
               label={t('browse.menu.rowSubscription')}
-              value={isPremium ? t('browse.menu.planPremium') : t('browse.menu.planFree')}
+              comingSoon={!isFeatureReady('subscription')}
+              value={isFeatureReady('subscription') ? (isPremium ? t('browse.menu.planPremium') : t('browse.menu.planFree')) : undefined}
               onPress={onOpenSubscription}
             />
           )}
@@ -269,6 +282,11 @@ export function MenuScreen({
             label={t('browse.menu.rowLanguage')}
             value={LANGUAGE_LABEL[language]}
             onPress={() => setPickingLanguage(true)}
+          />
+          <MenuRow
+            icon={<Bug size={ICON_SIZE} color={color.gray900} />}
+            label={t('feedback.bugReport.title')}
+            onPress={onReportBug}
           />
           {!isGuest && (
             <MenuRow

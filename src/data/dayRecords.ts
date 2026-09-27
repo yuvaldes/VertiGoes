@@ -136,10 +136,10 @@ function exercisesComplete(record: DayRecord): boolean {
 }
 
 /** A day counts toward the streak once all three of Home's tasks are answered. */
-export function isDayComplete(record: DayRecord | undefined): boolean {
+export function isDayComplete(record: DayRecord | undefined, requireExercises = true): boolean {
   if (!record) return false;
   if (record.feeling === null || record.sleepHours === null) return false;
-  return exercisesComplete(record);
+  return !requireExercises || exercisesComplete(record);
 }
 
 /**
@@ -153,10 +153,11 @@ export function streakEndingToday(
   records: Map<string, DayRecord>,
   today: Date,
   todayComplete: boolean,
+  requireExercises = true,
 ): number {
   let streak = todayComplete ? 1 : 0;
   for (let offset = 1; ; offset += 1) {
-    if (!isDayComplete(records.get(toKey(addDays(today, -offset))))) break;
+    if (!isDayComplete(records.get(toKey(addDays(today, -offset))), requireExercises)) break;
     streak += 1;
   }
   return streak;

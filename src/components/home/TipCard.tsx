@@ -14,6 +14,7 @@ type Props = {
   tip: Tip;
   /** Measured off the status card, so every card in the strip is exactly as tall as it is. */
   height: number;
+  width?: number;
 };
 
 /**
@@ -26,13 +27,13 @@ type Props = {
  *
  * Purely informational: unlike the old insight/coach cards, nothing here opens another screen.
  */
-export function TipCard({ tip, height }: Props) {
+export function TipCard({ tip, height, width = CARD_WIDTH }: Props) {
   const t = useT();
   const body = t(tip.bodyKey);
 
   return (
     <View
-      style={[styles.card, { height }, WEB_SNAP_CARD]}
+      style={[styles.card, { height, width }, WEB_SNAP_CARD]}
       accessibilityRole="text"
       accessibilityLabel={`${t('ui.tips.eyebrow.fact')}. ${body}`}
     >
@@ -56,7 +57,6 @@ export function TipCard({ tip, height }: Props) {
 /** Every metric below is the status card's, so the two line up rule for rule. */
 const styles = StyleSheet.create({
   card: {
-    width: CARD_WIDTH,
     backgroundColor: color.white,
     borderRadius: 16,
     paddingTop: 12,

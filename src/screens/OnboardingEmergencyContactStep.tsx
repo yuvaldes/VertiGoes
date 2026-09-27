@@ -22,6 +22,7 @@ export function OnboardingEmergencyContactStep({ answers, patch }: Props) {
       <LabeledInput
         label={t('flows.emergencyContact.nameLabel')}
         value={answers.emergencyContactName}
+        maxLength={100}
         onChangeText={(emergencyContactName) => patch({ emergencyContactName })}
         placeholder={t('flows.emergencyContact.namePlaceholder')}
         autoCapitalize="words"
@@ -29,6 +30,7 @@ export function OnboardingEmergencyContactStep({ answers, patch }: Props) {
       <LabeledInput
         label={t('flows.emergencyContact.phoneLabel')}
         value={answers.emergencyContactPhone}
+        maxLength={40}
         onChangeText={(emergencyContactPhone) => patch({ emergencyContactPhone })}
         placeholder={t('flows.emergencyContact.phonePlaceholder')}
         keyboardType="phone-pad"

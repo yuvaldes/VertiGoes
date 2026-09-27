@@ -14,6 +14,7 @@ export const home = {
     title: 'Today’s exercises',
   },
   status: {
+    welcome: 'Welcome',
     /** The name is inside the string: Hebrew puts the greeting and the name the other way up. */
     greeting: {
       morning: 'Good morning, {firstName}',
@@ -37,6 +38,7 @@ export const home = {
   dayDetail: {
     empty: 'Nothing was recorded on this day.',
     emergencyTitle: 'You called your emergency contact',
+    contactNotRecorded: 'Contact details were not recorded for this entry.',
     emergencyContact: '{name} ({relationship}) - {phone}',
     episodes: {
       one: 'You had {count} episode',

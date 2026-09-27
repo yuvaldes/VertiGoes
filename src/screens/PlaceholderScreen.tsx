@@ -1,5 +1,6 @@
 import { Hammer } from 'phosphor-react-native';
-import { StyleSheet, Text, View } from 'react-native';
+import type { ReactNode } from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { AppHeader } from '../components/AppHeader';
 import { BottomBarSlot } from '../components/BottomBar';
@@ -15,9 +16,10 @@ type Props = {
    */
   title: string;
   note: string;
-  onBack: () => void;
-  activeTab: TabKey;
-  onChangeTab: (tab: TabKey) => void;
+  onBack?: () => void;
+  activeTab?: TabKey;
+  onChangeTab?: (tab: TabKey) => void;
+  illustration?: ReactNode;
 };
 
 /**
@@ -26,7 +28,7 @@ type Props = {
  * One component for all of them, so a menu row navigates honestly instead of doing nothing —
  * a tap that silently fails is worse than a screen that says "not yet".
  */
-export function PlaceholderScreen({ title, note, onBack, activeTab, onChangeTab }: Props) {
+export function PlaceholderScreen({ title, note, onBack, illustration }: Props) {
   const t = useT();
   const displayFont = useDisplayFont();
 
@@ -34,17 +36,19 @@ export function PlaceholderScreen({ title, note, onBack, activeTab, onChangeTab 
     <View style={styles.body}>
       <View style={styles.gutter}>
         <AppHeader>
-          <ScreenTitleRow title={title} onBack={onBack} />
+          {onBack ? <ScreenTitleRow title={title} onBack={onBack} /> :
+            <Text style={[styles.title, displayFont]}>{title}</Text>}
         </AppHeader>
       </View>
 
-      <View style={styles.center}>
-        <View style={styles.badge}>
+      <ScrollView contentContainerStyle={styles.center}>
+        {illustration ?? <View style={styles.badge}>
           <Hammer size={28} color={color.gray400} />
-        </View>
+        </View>}
         <Text style={[styles.heading, displayFont]}>{t('browse.placeholder.heading')}</Text>
         <Text style={styles.note}>{note}</Text>
-      </View>
+        <Text style={styles.note}>{t('browse.placeholder.releaseNote')}</Text>
+      </ScrollView>
 
       <BottomBarSlot />
     </View>
@@ -60,10 +64,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: frame.gutter,
   },
   center: {
-    flex: 1,
+    flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 32,
+    paddingVertical: 24,
     gap: 8,
   },
   badge: {
@@ -78,6 +83,7 @@ const styles = StyleSheet.create({
   heading: {
     fontFamily: font.display,
     fontSize: 20,
+    lineHeight: 28,
     color: color.gray900,
   },
   note: {
@@ -86,5 +92,11 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     color: color.gray500,
     textAlign: 'center',
+  },
+  title: {
+    fontFamily: font.display,
+    fontSize: 24,
+    lineHeight: 32,
+    color: color.black,
   },
 });

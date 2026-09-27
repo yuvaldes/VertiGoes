@@ -35,7 +35,7 @@ export const flows = {
     otherDiagnosisLabel: 'What were you diagnosed with?',
     otherDiagnosisPlaceholder: 'Describe it in your own words',
     notDiagnosedInfo:
-      "No problem - the next screen has a few yes/no questions that can help point toward a diagnosis. It's optional, so you can skip it and come back to it anytime.",
+      'Diagnostic questions and results are to be announced. You can continue without a diagnosis.',
     medicationQuestion: 'Do you take any medication related to vertigo?',
     medicationOther: 'Something else',
     medicationNone: 'None',
@@ -55,7 +55,7 @@ export const flows = {
 
   emergencyContact: {
     title: 'Emergency contact',
-    hint: 'Who should we call if you need help during an episode?',
+    hint: 'You can save a contact here. Calling from the app is to be announced.',
     nameLabel: 'Full name',
     namePlaceholder: 'George Levi',
     phoneLabel: 'Phone number',
@@ -125,6 +125,8 @@ export const flows = {
   },
 
   checkout: {
+    unavailableTitle: 'Payments are not available yet',
+    unavailableBody: 'Checkout is not connected to a payment provider. Please do not enter payment details.',
     titleSubscribe: 'Checkout',
     titleUpdate: 'Payment method',
 

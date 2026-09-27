@@ -52,6 +52,7 @@ export const ui = {
     episodesOne: 'You had {count} episode',
     episodesOther: 'You had {count} episodes',
     noEpisodes: 'You had no episodes',
+    noRecordedEpisodes: 'No episodes recorded',
     inAppHelp: 'You got in-app help',
     a11yOpenDay: '{line}. See everything recorded on this day.',
     livHeading: 'Liv',

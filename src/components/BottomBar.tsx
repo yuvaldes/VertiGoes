@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { TabKey } from '../data/home';
 import { useT } from '../i18n';
+import { isFeatureReady } from '../lib/featureAvailability';
 import { color, font, shadow } from '../theme/tokens';
 import { Ring } from './Ring';
 
@@ -44,6 +45,7 @@ export function BottomBar({
   showEmergency = true,
 }: Props) {
   const t = useT();
+  const emergencyPending = !isFeatureReady('guidedHelp') && !isFeatureReady('emergencyContact');
 
   return (
     <View style={showEmergency ? styles.root : styles.rootMenuOnly}>
@@ -52,9 +54,10 @@ export function BottomBar({
           style={styles.emergencyRow}
           onPress={onOpenEmergency}
           accessibilityRole="button"
-          accessibilityLabel={t('common.bottomBar.a11yOpenEmergency')}
+          accessibilityLabel={emergencyPending ? `${t('common.bottomBar.emergency')}, ${t('browse.placeholder.heading')}` : t('common.bottomBar.a11yOpenEmergency')}
         >
           <Text style={styles.emergencyLabel}>{t('common.bottomBar.emergency')}</Text>
+          {emergencyPending && <Text style={styles.pendingLabel}>{t('browse.placeholder.heading')}</Text>}
           <CaretUp size={16} color={color.error25} />
         </Pressable>
       )}
@@ -127,6 +130,12 @@ function MenuButton({
 }
 
 const styles = StyleSheet.create({
+  pendingLabel: {
+    fontFamily: font.body,
+    fontSize: 10,
+    lineHeight: 14,
+    color: color.error25,
+  },
   root: {
     borderRadius: 24,
     backgroundColor: color.error400,

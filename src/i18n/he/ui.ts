@@ -48,6 +48,7 @@ export const ui = {
     episodesOne: 'היה לך {count} אירוע',
     episodesOther: 'היו לך {count} אירועים',
     noEpisodes: 'לא היו לך אירועים',
+    noRecordedEpisodes: 'לא תועדו אירועים',
     inAppHelp: 'קיבלת עזרה באפליקציה',
     a11yOpenDay: '{line}. צפו בכל מה שנרשם ביום זה.',
     livHeading: 'ליב',

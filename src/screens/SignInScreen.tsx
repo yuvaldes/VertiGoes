@@ -11,6 +11,8 @@ import {
 } from 'react-native';
 
 import { AppHeader } from '../components/AppHeader';
+import { AuthCaptcha } from '../components/auth/AuthCaptcha';
+import { useAuthChallenge } from '../components/auth/useAuthChallenge';
 import { BottomBarSlot } from '../components/BottomBar';
 import { LabeledInput } from '../components/LabeledInput';
 import { ScreenTitleRow } from '../components/ScreenTitleRow';
@@ -42,13 +44,8 @@ const LTR_EMAIL: TextStyle =
     : { direction: 'ltr', textAlign: 'left' };
 
 /**
- * Mock email sign in. Two fields and no legal checkbox — the disclaimers were agreed to at sign
- * up, and asking again would imply they had been recorded somewhere, which they have not.
- *
- * Every attempt succeeds, because there is no store to check credentials against. That would
- * read as a bug, so `auth.signIn.demo` says it outright rather than leaving it to be discovered.
- * The password is an argument to `signInWithEmail` and nothing else: never stored, never logged,
- * and cleared here the moment the call comes back.
+ * Email sign-in and password-reset requests backed by Supabase.
+ * Passwords stay in the form until submission and are cleared after successful sign-in.
  */
 export function SignInScreen({
   onBack,
@@ -58,15 +55,18 @@ export function SignInScreen({
   onChangeTab,
 }: Props) {
   const t = useT();
-  const { signInWithEmail, isAuthenticating } = useAuth();
+  const { signInWithEmail, requestPasswordReset, isAuthenticating } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<FieldErrors>({});
+  const [sendingReset, setSendingReset] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
-  const form: SignInForm = { email, password };
+  const challenge = useAuthChallenge();
+  const form: SignInForm = { email, password, captchaToken: challenge.captchaToken };
   const complete = Object.keys(validateSignIn(form)).length === 0;
-  const disabled = !complete || isAuthenticating;
+  const disabled = !complete || isAuthenticating || sendingReset || !challenge.challengeReady;
 
   /** Blur reveals; nothing complains while a field still has the cursor. */
   const revealOnBlur = (field: AuthField) =>
@@ -80,6 +80,7 @@ export function SignInScreen({
 
   const submit = async () => {
     const result = await signInWithEmail(form);
+    challenge.resetChallenge();
     if (!result.ok) {
       setErrors(result.errors);
       return;
@@ -90,6 +91,16 @@ export function SignInScreen({
   };
 
   const message = (error: AuthError | undefined) => (error ? t(error.key, error.params) : undefined);
+  const forgotPassword = async () => {
+    if (sendingReset || isAuthenticating || !challenge.challengeReady) return;
+    setSendingReset(true);
+    setResetSent(false);
+    const result = await requestPasswordReset(email, challenge.captchaToken);
+    challenge.resetChallenge();
+    setSendingReset(false);
+    if (!result.ok) setErrors(result.errors);
+    else { setErrors({}); setResetSent(true); }
+  };
   const emailError = message(errors.email);
   const passwordError = message(errors.password);
   const formError = message(errors.form);
@@ -156,7 +167,21 @@ export function SignInScreen({
           </View>
         </View>
 
+        <AuthCaptcha onToken={challenge.setCaptchaToken} version={challenge.challengeVersion} />
         <Text style={styles.demo}>{t('auth.signIn.demo')}</Text>
+        <Pressable
+          onPress={forgotPassword}
+          disabled={sendingReset || isAuthenticating || !challenge.challengeReady}
+          accessibilityRole="button"
+          accessibilityState={{ disabled: sendingReset || isAuthenticating || !challenge.challengeReady, busy: sendingReset }}
+        >
+          <Text style={styles.link}>{t('auth.signIn.forgot')}</Text>
+        </Pressable>
+        {resetSent && (
+          <Text style={styles.subtitle} accessibilityLiveRegion="polite">
+            {t('auth.signIn.resetSent')}
+          </Text>
+        )}
 
         {formError ? <Text style={styles.formError}>{formError}</Text> : null}
 

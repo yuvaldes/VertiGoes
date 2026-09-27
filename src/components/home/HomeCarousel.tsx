@@ -21,9 +21,6 @@ import {
 import { TipCard } from './TipCard';
 import { WeeklyStatusCard } from './WeeklyStatusCard';
 
-/** One card plus the gap after it: the distance a single page turn covers. */
-const PAGE = CARD_WIDTH + CARD_GAP;
-
 type Props = {
   headline: string;
   week: WeekBar[];
@@ -59,7 +56,9 @@ export function HomeCarousel({ headline, week, tips }: Props) {
    * languages is to read its height back and hand that to the rest.
    */
   const [cardHeight, setCardHeight] = useState(DEFAULT_CARD_HEIGHT);
+  const [cardWidth, setCardWidth] = useState(CARD_WIDTH);
   const [page, setPage] = useState(0);
+  const pageWidth = cardWidth + CARD_GAP;
 
   const pageCount = tips.length + 1;
 
@@ -68,7 +67,7 @@ export function HomeCarousel({ headline, week, tips }: Props) {
    * the web build snaps in CSS and never fires one.
    */
   const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const next = Math.round(Math.abs(event.nativeEvent.contentOffset.x) / PAGE);
+    const next = Math.round(Math.abs(event.nativeEvent.contentOffset.x) / pageWidth);
     setPage(Math.min(Math.max(next, 0), pageCount - 1));
   };
 
@@ -79,8 +78,12 @@ export function HomeCarousel({ headline, week, tips }: Props) {
         showsHorizontalScrollIndicator={false}
         style={[styles.strip, WEB_SNAP_STRIP]}
         contentContainerStyle={styles.content}
+        onLayout={(event) => {
+          const width = event.nativeEvent.layout.width - frame.gutter * 2;
+          if (width > 0) setCardWidth(width);
+        }}
         // Uniform card widths, so one interval lands every card against the gutter.
-        snapToInterval={PAGE}
+        snapToInterval={pageWidth}
         snapToAlignment="start"
         decelerationRate="fast"
         onScroll={onScroll}
@@ -90,14 +93,14 @@ export function HomeCarousel({ headline, week, tips }: Props) {
         {/* Width fixed on the wrapper rather than in the card: `width: 100%` has nothing to
             resolve against inside a horizontally scrolling row. */}
         <View
-          style={[styles.lead, WEB_SNAP_CARD]}
+          style={[{ width: cardWidth }, WEB_SNAP_CARD]}
           onLayout={(event) => setCardHeight(event.nativeEvent.layout.height)}
         >
           <WeeklyStatusCard headline={headline} week={week} />
         </View>
 
         {tips.map((tip) => (
-          <TipCard key={tip.id} tip={tip} height={cardHeight} />
+          <TipCard key={tip.id} tip={tip} height={cardHeight} width={cardWidth} />
         ))}
       </ScrollView>
 
@@ -128,9 +131,6 @@ const styles = StyleSheet.create({
     // Cards carry their own height, so the row must not stretch them to the tallest - that
     // would defeat the measurement above the moment one card wrapped.
     alignItems: 'flex-start',
-  },
-  lead: {
-    width: CARD_WIDTH,
   },
   dots: {
     flexDirection: 'row',

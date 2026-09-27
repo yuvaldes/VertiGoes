@@ -12,6 +12,8 @@ import {
 } from 'react-native';
 
 import { AppHeader } from '../components/AppHeader';
+import { AuthCaptcha } from '../components/auth/AuthCaptcha';
+import { useAuthChallenge } from '../components/auth/useAuthChallenge';
 import { BottomBarSlot } from '../components/BottomBar';
 import { LabeledInput } from '../components/LabeledInput';
 import { Ring } from '../components/Ring';
@@ -55,9 +57,8 @@ const LTR_EMAIL: TextStyle =
     : { direction: 'ltr', textAlign: 'left' };
 
 /**
- * Mock email sign up, and a sibling of `CheckoutScreen` in both look and honesty: a plain form
- * over a thing that does not exist, saying so in its own copy rather than letting the polish
- * imply otherwise. No account is created and nothing leaves the device.
+ * Supabase email sign-up. Confirmation-required accounts remain on this screen until
+ * the user follows the confirmation email and signs in.
  *
  * The password is held in local state only while it is being typed, is handed to
  * `signUpWithEmail` as an argument, and is cleared on success. It never reaches `Account`, an
@@ -84,10 +85,12 @@ export function SignUpScreen({
   const [confirm, setConfirm] = useState('');
   const [accepted, setAccepted] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
+  const [confirmationRequired, setConfirmationRequired] = useState(false);
 
-  const form: SignUpForm = { email, password, confirm, acceptedDisclaimers: accepted };
+  const challenge = useAuthChallenge();
+  const form: SignUpForm = { email, password, confirm, acceptedDisclaimers: accepted, captchaToken: challenge.captchaToken };
   const complete = Object.keys(validateSignUp(form)).length === 0;
-  const disabled = !complete || isAuthenticating;
+  const disabled = !complete || isAuthenticating || !challenge.challengeReady;
 
   /**
    * Blur is what first reveals an error. Nothing complains while a field still has the cursor,
@@ -122,6 +125,7 @@ export function SignUpScreen({
 
   const submit = async () => {
     const result = await signUpWithEmail(form);
+    challenge.resetChallenge();
     if (!result.ok) {
       setErrors(result.errors);
       return;
@@ -131,6 +135,10 @@ export function SignUpScreen({
     setPassword('');
     setConfirm('');
     setErrors({});
+    if (result.confirmationRequired) {
+      setConfirmationRequired(true);
+      return;
+    }
     onSignedUp();
   };
 
@@ -162,6 +170,11 @@ export function SignUpScreen({
         keyboardShouldPersistTaps="handled"
       >
         <Text style={styles.subtitle}>{t('auth.signUp.subtitle')}</Text>
+        {confirmationRequired && (
+          <Text style={styles.subtitle} accessibilityLiveRegion="polite">
+            {t('auth.signUp.confirmation')}
+          </Text>
+        )}
 
         <View style={styles.fields}>
           <View>
@@ -233,6 +246,7 @@ export function SignUpScreen({
 
         {/* Above the checkbox, not under the button: it has to be read before they type a
             password rather than after they have handed one over. */}
+        <AuthCaptcha onToken={challenge.setCaptchaToken} version={challenge.challengeVersion} />
         <Text style={styles.demo}>{t('auth.signUp.demo')}</Text>
 
         <View style={styles.consent}>

@@ -33,6 +33,10 @@ export const common = {
     tabMenu: 'תפריט',
   },
   emergency: {
+    savedContact: 'איש הקשר ששמרתם לשעת חירום',
+    addContact: 'הוסיפו איש קשר לשעת חירום בפרופיל',
+    callNamedContact: 'התקשרו אל {name}',
+    callFailed: 'לא הצלחנו לפתוח את החייגן. התקשרו לאיש הקשר דרך הטלפון.',
     title: 'חירום',
     callTitle: 'התקשרו לאיש קשר לשעת חירום',
     callSubtitle: '{name} ({relationship})',

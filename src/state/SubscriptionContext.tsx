@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 
 import { TRIAL_DAYS, type BillingPeriod, type PaymentMethod } from '../data/subscription';
+import { ENABLE_DEMO_BILLING } from '../lib/features';
 
 export type PlanId = 'free' | 'premium';
 
@@ -49,6 +50,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<Subscription>(FREE);
 
   const subscribe = useCallback((billing: BillingPeriod, method: PaymentMethod) => {
+    if (!ENABLE_DEMO_BILLING) return;
     // Every new subscription opens on the trial — that is the offer on the screen, and there
     // is no returning-subscriber case to distinguish while this is all in memory.
     setState({
@@ -60,6 +62,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setPaymentMethod = useCallback((method: PaymentMethod) => {
+    if (!ENABLE_DEMO_BILLING) return;
     setState((current) => ({ ...current, paymentMethod: method }));
   }, []);
 
