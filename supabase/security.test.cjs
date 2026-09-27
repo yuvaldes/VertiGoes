@@ -20,7 +20,7 @@ test('security hardening validates input and enforces private atomic quotas', as
   const db = new PGlite();
   t.after(() => db.close());
   await db.exec(`create role anon; create role authenticated; create role service_role bypassrls;
-    create schema auth; create table auth.users(id uuid primary key);
+    create schema auth; create table auth.users(id uuid primary key, created_at timestamptz not null default now());
     create function auth.uid() returns uuid language sql stable as
       $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
     grant usage on schema public, auth to anon, authenticated, service_role;
@@ -229,6 +229,23 @@ test('security hardening validates input and enforces private atomic quotas', as
     for (const table of ['profiles','day_records','bug_reports']) {
       await assert.rejects(db.query('select * from public.' + table), error => error.code === '42501');
     }
+  });
+
+  await t.test('the live two-account audit passes without exposing or changing private data', async () => {
+    await db.exec('reset role');
+    await db.query("select set_config('request.jwt.claim.sub', '', false)");
+    await db.query(`insert into public.profiles(id,onboarding_status,answers)
+      values($1,'complete',$2) on conflict(id) do update set answers=excluded.answers`,
+      [bob, JSON.stringify(profile)]);
+    await db.query(`insert into public.day_records(user_id,record_date,record)
+      values($1,'2026-09-24',$2) on conflict(user_id,record_date) do update set record=excluded.record`,
+      [bob, JSON.stringify(record)]);
+    const output = await db.exec(readFileSync(path.join(__dirname, 'verify_two_account_rls.sql'), 'utf8'));
+    const report = output.find(result => result.rows?.some(row => row.check_name === 'OVERALL'));
+    const overall = report.rows.find(row => row.check_name === 'OVERALL');
+    assert.equal(overall.result, 'PASS');
+    assert.equal(overall.detail, '19/19 checks passed');
+    assert.equal((await db.query("select * from public.day_records where record_date='2099-12-31'")).rows.length, 0);
   });
 
   await t.test('account deletion erases health data and anonymizes retained bug metadata', async () => {
