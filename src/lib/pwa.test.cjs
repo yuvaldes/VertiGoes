@@ -8,7 +8,7 @@ const publicDir = path.resolve(__dirname, '../../public');
 const readPublic = (file) => readFileSync(path.join(publicDir, file), 'utf8');
 
 test('install manifest and HTML support home-screen installation', () => {
-  const manifest = JSON.parse(readPublic('manifest.webmanifest'));
+  const manifest = JSON.parse(readPublic('manifest.json'));
   assert.equal(manifest.name, 'VertiGoes');
   assert.equal(manifest.display, 'standalone');
   assert.equal(manifest.start_url, '/');
@@ -16,7 +16,7 @@ test('install manifest and HTML support home-screen installation', () => {
   assert.equal(manifest.prefer_related_applications, false);
   assert.deepEqual(manifest.icons.map((icon) => icon.sizes), ['192x192', '512x512']);
   const html = readPublic('index.html');
-  assert.match(html, /rel="manifest" href="\/manifest.webmanifest"/);
+  assert.match(html, /rel="manifest" href="\/manifest.json"/);
   assert.match(html, /viewport-fit=cover/);
   assert.match(html, /apple-touch-icon/);
   assert.doesNotMatch(html, /maximum-scale|user-scalable=no/);
