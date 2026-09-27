@@ -52,12 +52,23 @@ type MenuRowProps = {
    * `locked` swaps it for a padlock, telling them the row is gated behind signing in.
    */
   variant?: 'push' | 'external' | 'premium' | 'locked';
+  /** Destructive actions use the error color for both their label and trailing affordance. */
+  tone?: 'default' | 'destructive';
   onPress?: () => void;
 };
 
-export function MenuRow({ icon, label, value, comingSoon = false, variant = 'push', onPress }: MenuRowProps) {
+export function MenuRow({
+  icon,
+  label,
+  value,
+  comingSoon = false,
+  variant = 'push',
+  tone = 'default',
+  onPress,
+}: MenuRowProps) {
   const t = useT();
   const { isRTL } = useDirection();
+  const destructive = tone === 'destructive';
   // The caret points at the screen this row opens, which is the other way under RTL.
   const Caret = isRTL ? CaretLeft : CaretRight;
 
@@ -78,7 +89,7 @@ export function MenuRow({ icon, label, value, comingSoon = false, variant = 'pus
     >
       <View style={styles.icon}>{icon}</View>
       <View style={styles.labelBlock}>
-        <Text style={styles.label}>{label}</Text>
+        <Text style={[styles.label, destructive && styles.labelDestructive]}>{label}</Text>
         {comingSoon && <Text style={styles.pending}>{t('browse.placeholder.heading')}</Text>}
       </View>
       {value !== undefined && <Text style={styles.value}>{value}</Text>}
@@ -86,13 +97,13 @@ export function MenuRow({ icon, label, value, comingSoon = false, variant = 'pus
         // Phosphor ships no mirrored out-arrow, so this is the one icon here that gets
         // flipped rather than swapped. Both the HIG and Material send the arrow out through
         // the leading-away corner in RTL, and the stroke is uniform so mirroring is free.
-        <ArrowSquareOut size={20} color={color.gray400} mirrored={isRTL} />
+        <ArrowSquareOut size={20} color={destructive ? color.error500 : color.gray400} mirrored={isRTL} />
       ) : variant === 'premium' ? (
         <CrownSimple size={18} weight="fill" color={color.brand500} />
       ) : variant === 'locked' ? (
         <LockSimple size={18} weight="fill" color={color.gray400} />
       ) : (
-        <Caret size={20} color={color.gray400} />
+        <Caret size={20} color={destructive ? color.error500 : color.gray400} />
       )}
     </Pressable>
   );
@@ -133,6 +144,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 22,
     color: color.gray900,
+  },
+  labelDestructive: {
+    color: color.error500,
   },
   value: {
     fontFamily: font.body,

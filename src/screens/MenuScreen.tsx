@@ -305,6 +305,7 @@ export function MenuScreen({
             <MenuRow
               icon={<Trash size={ICON_SIZE} color={color.error500} />}
               label={t('auth.deleteAccount.row')}
+              tone="destructive"
               onPress={() => { setDeleteFailed(false); setConfirmingDeletion(true); }}
             />
           )}
