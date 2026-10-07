@@ -108,7 +108,18 @@ export type OnboardingAnswers = {
 
   emergencyContactName: string;
   emergencyContactPhone: string;
+  /** Safety gate and exercise contraindication answers, kept as answers rather than prose. */
+  safetyAnswers: Record<SafetyQuestionId, boolean | null>;
 };
+
+/** The nine emergency red flags plus four exercise contraindications. */
+export const SAFETY_QUESTION_IDS = [
+  'sudden_severe_headache', 'one_sided_weakness', 'speech_difficulty', 'double_vision',
+  'swallowing_difficulty', 'unable_to_walk', 'chest_pain_or_palpitations',
+  'recent_head_or_neck_injury', 'loss_of_consciousness', 'neck_or_back_problem',
+  'heart_or_blood_vessel_condition', 'recent_head_neck_back_or_eye_surgery', 'pregnancy',
+] as const;
+export type SafetyQuestionId = typeof SAFETY_QUESTION_IDS[number];
 
 export const initialOnboardingAnswers: OnboardingAnswers = {
   firstName: '',
@@ -129,6 +140,7 @@ export const initialOnboardingAnswers: OnboardingAnswers = {
 
   emergencyContactName: '',
   emergencyContactPhone: '',
+  safetyAnswers: Object.fromEntries(SAFETY_QUESTION_IDS.map((id) => [id, null])) as Record<SafetyQuestionId, boolean | null>,
 };
 
 /** Basic info, medical history, diagnosis questions, emergency contact. */

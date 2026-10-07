@@ -10,6 +10,7 @@ const profile = {
   firstName: '', lastName: '', age: '42', gender: null, language: 'en',
   diagnosedBefore: null, diagnoses: [], otherDiagnosis: '', medications: [], otherMedication: '',
   diagnosisAnswers: {}, manualDiagnosis: '', emergencyContactName: '', emergencyContactPhone: '',
+  safetyAnswers: { sudden_severe_headache: null, one_sided_weakness: null, speech_difficulty: null, double_vision: null, swallowing_difficulty: null, unable_to_walk: null, chest_pain_or_palpitations: null, recent_head_or_neck_injury: null, loss_of_consciousness: null, neck_or_back_problem: null, heart_or_blood_vessel_condition: null, recent_head_neck_back_or_eye_surgery: null, pregnancy: null },
 };
 const record = {
   date: '2026-09-24', episodes: 0, emergencyCall: false, inAppHelp: null,
@@ -34,7 +35,7 @@ test('security hardening validates input and enforces private atomic quotas', as
     await db.query("select set_config('request.jwt.claim.sub', $1, false)", [id]);
     await db.exec('set role authenticated');
     await db.query(`insert into public.legal_consents(user_id, document_type, document_version)
-      values ($1, 'medical_disclaimer', '1.0'), ($1, 'health_data_processing', '1.0')
+      values ($1, 'terms', '1.0'), ($1, 'privacy', '1.0'), ($1, 'health_data_processing', '1.0')
       on conflict (user_id, document_type, document_version) do nothing`, [id]);
   };
   const clearCounters = async () => {

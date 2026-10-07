@@ -44,6 +44,7 @@ import { useExercises } from '../state/ExercisesContext';
 import { useLivChat } from '../state/LivChatContext';
 import { usePreferences } from '../state/PreferencesContext';
 import { useSubscription } from '../state/SubscriptionContext';
+import { useOnboardingDraft } from '../state/OnboardingDraftContext';
 import { color, font, frame } from '../theme/tokens';
 import { useEdgeSwipeBack } from './useEdgeSwipeBack';
 
@@ -57,7 +58,7 @@ type Pushed =
   | { route: 'calendar' }
   | { route: 'dayDetail'; date: string }
   | { route: 'helpFlow' }
-  | { route: 'onboarding' }
+  | { route: 'onboarding'; guest?: boolean }
   | { route: 'meditationDrills' }
   | { route: 'exerciseLibrary' }
   | { route: 'professionals' }
@@ -162,6 +163,7 @@ function Shell() {
   const t = useT();
   const date = useDateFormat();
   const { isRTL } = useDirection();
+  const { draft, ready: draftReady } = useOnboardingDraft();
 
   /**
    * Where a pushed screen starts and where a popped one goes. Off the trailing edge, which is
@@ -187,6 +189,7 @@ function Shell() {
   const [billing, setBilling] = useState<BillingPeriod>('annual');
   /** Whether the help flow is still on a question — see `fullBleed` below. */
   const [helpAsking, setHelpAsking] = useState(true);
+  const resumedDraft = useRef(false);
 
   const nextId = useRef(0);
 
@@ -198,6 +201,14 @@ function Shell() {
     setStack((current) => [...current, item]);
     animateTo(item.anim, 1, ENTER_DURATION);
   }, []);
+
+  // A durable guest draft always wins over the ordinary guest home on a cold launch.  Do this
+  // only once so closing the wizard remains a deliberate escape hatch.
+  useEffect(() => {
+    if (!draftReady || resumedDraft.current || session.status !== 'guest' || !draft.completed) return;
+    resumedDraft.current = true;
+    push({ route: 'onboarding', guest: true });
+  }, [draftReady, draft.completed, session.status, push]);
 
   const enteredAccount = useRef<string | null>(null);
   useEffect(() => {
@@ -430,7 +441,9 @@ function Shell() {
   /** Not `closeSheet`: the sheet is handing off mid-ask, so the intent has to survive it. */
   const startEmailAuth = () => {
     hideSheet();
-    push({ route: 'signUp' });
+    // Account creation follows the guest questionnaire. Its data remains a device draft
+    // until the consent-backed account write succeeds.
+    push({ route: 'onboarding', guest: true });
   };
 
   /**
@@ -532,6 +545,16 @@ function Shell() {
           />
         );
       case 'onboarding': {
+        if (entry.guest) return (
+          <OnboardingScreen
+            mode="guest"
+            initialAnswers={draft.answers}
+            onBack={pop}
+            onSkip={pop}
+            onComplete={() => undefined}
+            onRequireSignUp={() => push({ route: 'signUp' })}
+          />
+        );
         // Nothing to skip once the answers are in: reopening from the Menu to edit a field is
         // an edit, and offering to abandon it would be offering to lose the edit.
         const unfinished = onboarding !== 'complete';

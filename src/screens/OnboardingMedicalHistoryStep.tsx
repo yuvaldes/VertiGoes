@@ -8,6 +8,7 @@ import {
   KNOWN_MEDICATIONS,
   NONE_OPTION_ID,
   OTHER_OPTION_ID,
+  SAFETY_QUESTION_IDS,
   type OnboardingAnswers,
 } from '../data/onboarding';
 import { useDisplayFont, useT } from '../i18n';
@@ -45,6 +46,15 @@ export function OnboardingMedicalHistoryStep({ answers, patch }: Props) {
     { id: OTHER_OPTION_ID, label: t('flows.medicalHistory.medicationOther') },
     { id: NONE_OPTION_ID, label: t('flows.medicalHistory.medicationNone') },
   ];
+  const safetyLabels: Record<(typeof SAFETY_QUESTION_IDS)[number], string> = {
+    sudden_severe_headache: 'Sudden severe headache', one_sided_weakness: 'New one-sided weakness or numbness',
+    speech_difficulty: 'New difficulty speaking', double_vision: 'Sudden double vision',
+    swallowing_difficulty: 'New difficulty swallowing', unable_to_walk: 'Unable to walk or stand without help',
+    chest_pain_or_palpitations: 'Chest pain or unusual palpitations', recent_head_or_neck_injury: 'Recent head or neck injury',
+    loss_of_consciousness: 'Loss of consciousness or fainting', neck_or_back_problem: 'Neck or back problem',
+    heart_or_blood_vessel_condition: 'Heart or blood-vessel condition',
+    recent_head_neck_back_or_eye_surgery: 'Recent head, neck, back, or eye surgery', pregnancy: 'Pregnancy',
+  };
 
   return (
     <View style={styles.root}>
@@ -80,6 +90,17 @@ export function OnboardingMedicalHistoryStep({ answers, patch }: Props) {
         {answers.diagnosedBefore === false && (
           <Text style={styles.info}>{t('flows.medicalHistory.notDiagnosedInfo')}</Text>
         )}
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.question}>Safety and exercise contraindications</Text>
+        <Text style={styles.hint}>Answer each item so the app can preserve these safety answers with your profile.</Text>
+        {SAFETY_QUESTION_IDS.map((id) => (
+          <View key={id} style={styles.safetyRow}>
+            <Text style={styles.safetyLabel}>{safetyLabels[id]}</Text>
+            <YesNoToggle value={answers.safetyAnswers[id]} onChange={(value) => patch({ safetyAnswers: { ...answers.safetyAnswers, [id]: value } })} />
+          </View>
+        ))}
       </View>
 
       <View style={styles.section}>
@@ -141,4 +162,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 12,
   },
+  safetyRow: { gap: 8 },
+  safetyLabel: { fontFamily: font.body, fontSize: 14, lineHeight: 20, color: color.gray900 },
 });

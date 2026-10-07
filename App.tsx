@@ -18,6 +18,7 @@ import { ExercisesProvider } from './src/state/ExercisesContext';
 import { LivChatProvider } from './src/state/LivChatContext';
 import { PreferencesProvider } from './src/state/PreferencesContext';
 import { SubscriptionProvider } from './src/state/SubscriptionContext';
+import { OnboardingDraftProvider } from './src/state/OnboardingDraftContext';
 import { color } from './src/theme/tokens';
 
 export default function App() {
@@ -52,6 +53,7 @@ export default function App() {
           reset with it. AuthGateProvider, when it lands, goes on this line.
         */}
         <AuthProvider>
+          <OnboardingDraftProvider>
           <SubscriptionProvider>
             <DayRecordsProvider>
               <LivChatProvider>
@@ -63,6 +65,7 @@ export default function App() {
               </LivChatProvider>
             </DayRecordsProvider>
           </SubscriptionProvider>
+          </OnboardingDraftProvider>
         </AuthProvider>
       </PreferencesProvider>
     </SafeAreaProvider>

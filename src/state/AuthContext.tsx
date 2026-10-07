@@ -9,6 +9,7 @@ import * as WebBrowser from 'expo-web-browser';
 
 import type { TKey, TParams } from '../i18n';
 import type { OnboardingAnswers } from '../data/onboarding';
+import type { ConsentAnswers } from './OnboardingDraftContext';
 import { supabase } from '../lib/supabase';
 import { CAPTCHA_REQUIRED } from '../lib/authConfig';
 
@@ -36,7 +37,9 @@ export type AuthResult =
   | { ok: false; errors: FieldErrors };
 export type SignUpForm = {
   email: string; password: string; confirm: string;
-  acceptedMedicalDisclaimer: boolean; acceptedHealthData: boolean;
+  acceptedTerms: boolean; acceptedPrivacy: boolean; acceptedHealthData: boolean;
+  acceptedAiProcessing: boolean; acceptedResearch: boolean; acceptedMarketing: boolean;
+  draftAnswers?: OnboardingAnswers;
   captchaToken?: string;
 };
 export type SignInForm = { email: string; password: string; captchaToken?: string };
@@ -49,7 +52,7 @@ export function validateSignUp(form: SignUpForm): FieldErrors {
     errors.password = { key: 'auth.error.passwordShort', params: { min: MIN_PASSWORD_LENGTH } };
   }
   if (form.confirm !== form.password) errors.confirm = { key: 'auth.error.passwordMismatch' };
-  if (!form.acceptedMedicalDisclaimer || !form.acceptedHealthData) {
+  if (!form.acceptedTerms || !form.acceptedPrivacy || !form.acceptedHealthData) {
     errors.consent = { key: 'auth.error.consent' };
   }
   return errors;
@@ -215,7 +218,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (cancelled || currentUser.current !== user.id) return;
         if (result.error) throw result.error;
         const consentTypes = new Set((consentResult.data ?? []).map((row) => row.document_type));
-        const consentsCurrent = consentTypes.has('medical_disclaimer') && consentTypes.has('health_data_processing');
+        const consentsCurrent = ['terms', 'privacy', 'health_data_processing'].every((type) => consentTypes.has(type));
         let profile = result.data;
         if (!profile) {
           const inserted = await client.from('profiles').upsert(
@@ -320,7 +323,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email: form.email.trim(), password: form.password,
         options: { emailRedirectTo: redirectUri(), ...(form.captchaToken ? { captchaToken: form.captchaToken } : {}) },
       });
-      return error ? fail(errorKey(error)) : { ok: true, confirmationRequired: !data.session };
+      if (error) return fail(errorKey(error));
+      // Email-confirmation flows have no authenticated database session yet. Keep the local
+      // draft; it will be resumed rather than pretending its sensitive data was saved.
+      if (!data.session || !data.user || !form.draftAnswers) return { ok: true, confirmationRequired: !data.session };
+      const accepted: ConsentAnswers = {
+        terms: form.acceptedTerms, privacy: form.acceptedPrivacy,
+        health_data_processing: form.acceptedHealthData, ai_processing: form.acceptedAiProcessing,
+        research: form.acceptedResearch, marketing: form.acceptedMarketing,
+      };
+      const rows = (Object.entries(accepted) as [string, boolean][]).filter(([, value]) => value).map(([document_type]) => ({
+        user_id: data.user!.id, document_type, document_version: LEGAL_VERSION,
+      }));
+      const consentWrite = await supabase.from('legal_consents').insert(rows);
+      if (consentWrite.error && consentWrite.error.code !== '23505') return fail('auth.error.connection');
+      const profileWrite = await supabase.from('profiles').upsert({
+        id: data.user.id, onboarding_status: 'complete', answers: form.draftAnswers, progress_step: null,
+      });
+      if (profileWrite.error) return fail('auth.error.profileSave');
+      return { ok: true };
     } catch { return fail('auth.error.connection'); }
     finally { end(); }
   };
@@ -421,7 +442,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const acceptLegalConsents = async (): Promise<AuthResult> => {
     const current = profileSession.current;
     if (!supabase || current.status !== 'authed') return fail('auth.error.connection');
-    const rows = ['medical_disclaimer', 'health_data_processing'].map((document_type) => ({
+    const rows = ['terms', 'privacy', 'health_data_processing'].map((document_type) => ({
       user_id: current.account.id, document_type, document_version: LEGAL_VERSION,
     }));
     try {

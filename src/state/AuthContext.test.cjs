@@ -256,6 +256,7 @@ function makeShell(authModule, native) {
     '../state/ExercisesContext': { useExercises: () => exercises },
     '../state/PreferencesContext': { usePreferences: () => preferences },
     '../state/SubscriptionContext': { useSubscription: () => subscription },
+    '../state/OnboardingDraftContext': { useOnboardingDraft: () => ({ draft: { step: 0, completed: false, answers: initialOnboardingAnswers }, ready: true, patch: noop, setStep: noop, setCompleted: noop, setConsent: noop, clear: async () => {} }) },
     '../data/home': { emergencyContact: { phone: '', name: '' } },
     '../components/SheetHost': { SheetHostProvider: passthrough },
     './useEdgeSwipeBack': { useEdgeSwipeBack: () => ({ rootRef: null, panHandlers: {} }) },
@@ -268,6 +269,7 @@ function makeShell(authModule, native) {
   const onboardingDependencies = {
     'react-native': rn, '../i18n': i18n, '../theme/tokens': tokens,
     '../state/AuthContext': authModule,
+    '../state/OnboardingDraftContext': { useOnboardingDraft: () => ({ draft: { step: 0, completed: false, answers: initialOnboardingAnswers }, patch: noop, setStep: noop, setCompleted: noop }) },
     '../data/onboarding': { initialOnboardingAnswers, ONBOARDING_STEP_COUNT: 4 },
     '../components/AppHeader': { AppHeader: passthrough },
     '../components/BackButton': { BackButton: host('BackButton') },
@@ -355,8 +357,12 @@ test('confirmation-required signup stays signed out and does not create a profil
   const result = await h.call('signUpWithEmail', {
     ...login,
     confirm: login.password,
-    acceptedMedicalDisclaimer: true,
+    acceptedTerms: true,
+    acceptedPrivacy: true,
     acceptedHealthData: true,
+    acceptedAiProcessing: false,
+    acceptedResearch: false,
+    acceptedMarketing: false,
   });
   assert.equal(result.ok, true);
   assert.equal(result.confirmationRequired, true);

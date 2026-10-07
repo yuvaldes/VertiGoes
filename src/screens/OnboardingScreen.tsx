@@ -18,6 +18,7 @@ import {
 } from '../data/onboarding';
 import { useT } from '../i18n';
 import { useAuth } from '../state/AuthContext';
+import { useOnboardingDraft } from '../state/OnboardingDraftContext';
 import { color, frame, font } from '../theme/tokens';
 import { OnboardingBasicInfoStep } from './OnboardingBasicInfoStep';
 import { OnboardingDiagnosisStep } from './OnboardingDiagnosisStep';
@@ -31,7 +32,7 @@ type Props = {
    * pending rather than dismissed. `edit` is reopening a finished profile from the Menu, where
    * there is nothing to skip — the answers already exist and the user came here on purpose.
    */
-  mode: 'setup' | 'edit';
+  mode: 'guest' | 'setup' | 'edit';
   /** The answers on file, seeding an `edit` run. Absent starts the wizard empty. */
   initialAnswers?: OnboardingAnswers | null;
   onBack: () => void;
@@ -41,6 +42,8 @@ type Props = {
    * step they backed out on, so the Menu can show how far they got.
    */
   onSkip: (step: number) => void;
+  /** Guest completion hands control to account creation; the draft remains durable there. */
+  onRequireSignUp?: () => void;
 };
 
 /**
@@ -65,22 +68,29 @@ export function OnboardingScreen({
   onBack,
   onComplete,
   onSkip,
+  onRequireSignUp,
 }: Props) {
   const t = useT();
   const { isSavingProfile, authError } = useAuth();
-  const [step, setStep] = useState(0);
+  const draftStore = useOnboardingDraft();
+  const isGuest = mode === 'guest';
+  const [step, setStep] = useState(isGuest ? draftStore.draft.step : 0);
   const [answers, setAnswers] = useState<OnboardingAnswers>(
-    initialAnswers ?? initialOnboardingAnswers,
+    isGuest ? draftStore.draft.answers : initialAnswers ?? initialOnboardingAnswers,
   );
 
   const canSkip = mode === 'setup';
 
-  const patch = (partial: Partial<OnboardingAnswers>) =>
+  const patch = (partial: Partial<OnboardingAnswers>) => {
     setAnswers((current) => ({ ...current, ...partial }));
+    if (isGuest) draftStore.patch(partial);
+  };
+
+  const moveTo = (next: number) => { setStep(next); if (isGuest) draftStore.setStep(next); };
 
   const back = () => {
     if (isSavingProfile) return;
-    if (step > 0) setStep(step - 1);
+    if (step > 0) moveTo(step - 1);
     // Backing out of the first run is skipping it, whatever control they used to do it —
     // otherwise the status stays `pending` and the shell pushes this screen straight back.
     else if (canSkip) onSkip(step);
@@ -88,14 +98,17 @@ export function OnboardingScreen({
   };
 
   const isLastStep = step === ONBOARDING_STEP_COUNT - 1;
-  // Age is the only field the source spec marks required; everything else is free to skip.
+  // The onboarding specification sets the minimum age at 18. Other fields remain skippable
+  // so an incomplete run can be resumed from the Menu later.
   const canContinue = step !== 0 || (/^[0-9]{1,3}$/.test(answers.age) &&
-    Number(answers.age) >= 1 && Number(answers.age) <= 130);
+    Number(answers.age) >= 18 && Number(answers.age) <= 130);
 
   const continueOrFinish = () => {
     if (!canContinue || isSavingProfile) return;
-    if (isLastStep) onComplete(answers);
-    else setStep(step + 1);
+    if (isLastStep) {
+      if (isGuest) { draftStore.setCompleted(true); onRequireSignUp?.(); }
+      else onComplete(answers);
+    } else moveTo(step + 1);
   };
 
   return (

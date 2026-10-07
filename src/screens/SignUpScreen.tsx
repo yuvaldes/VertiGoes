@@ -31,6 +31,7 @@ import {
 } from '../state/AuthContext';
 import { color, font, frame, shadow } from '../theme/tokens';
 import type { LegalDocumentKey } from '../data/legal';
+import { useOnboardingDraft } from '../state/OnboardingDraftContext';
 
 type Props = {
   onBack: () => void;
@@ -80,17 +81,22 @@ export function SignUpScreen({
 }: Props) {
   const t = useT();
   const { signUpWithEmail, isAuthenticating } = useAuth();
+  const { draft, setConsent, clear: clearDraft } = useOnboardingDraft();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
-  const [acceptedMedicalDisclaimer, setAcceptedMedicalDisclaimer] = useState(false);
-  const [acceptedHealthData, setAcceptedHealthData] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(draft.consents.terms);
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(draft.consents.privacy);
+  const [acceptedHealthData, setAcceptedHealthData] = useState(draft.consents.health_data_processing);
+  const [acceptedAiProcessing, setAcceptedAiProcessing] = useState(draft.consents.ai_processing);
+  const [acceptedResearch, setAcceptedResearch] = useState(draft.consents.research);
+  const [acceptedMarketing, setAcceptedMarketing] = useState(draft.consents.marketing);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [confirmationRequired, setConfirmationRequired] = useState(false);
 
   const challenge = useAuthChallenge();
-  const form: SignUpForm = { email, password, confirm, acceptedMedicalDisclaimer, acceptedHealthData, captchaToken: challenge.captchaToken };
+  const form: SignUpForm = { email, password, confirm, acceptedTerms, acceptedPrivacy, acceptedHealthData, acceptedAiProcessing, acceptedResearch, acceptedMarketing, draftAnswers: draft.completed ? draft.answers : undefined, captchaToken: challenge.captchaToken };
   const complete = Object.keys(validateSignUp(form)).length === 0;
   const disabled = !complete || isAuthenticating || !challenge.challengeReady;
 
@@ -114,16 +120,21 @@ export function SignUpScreen({
       return revised;
     });
 
-  const toggleConsent = (kind: 'medical' | 'health') => {
-    const nextMedical = kind === 'medical' ? !acceptedMedicalDisclaimer : acceptedMedicalDisclaimer;
+  const toggleConsent = (kind: 'terms' | 'privacy' | 'health' | 'ai' | 'research' | 'marketing') => {
+    const nextTerms = kind === 'terms' ? !acceptedTerms : acceptedTerms;
+    const nextPrivacy = kind === 'privacy' ? !acceptedPrivacy : acceptedPrivacy;
     const nextHealth = kind === 'health' ? !acceptedHealthData : acceptedHealthData;
-    setAcceptedMedicalDisclaimer(nextMedical);
-    setAcceptedHealthData(nextHealth);
+    const nextAi = kind === 'ai' ? !acceptedAiProcessing : acceptedAiProcessing;
+    const nextResearch = kind === 'research' ? !acceptedResearch : acceptedResearch;
+    const nextMarketing = kind === 'marketing' ? !acceptedMarketing : acceptedMarketing;
+    setAcceptedTerms(nextTerms); setAcceptedPrivacy(nextPrivacy); setAcceptedHealthData(nextHealth);
+    setAcceptedAiProcessing(nextAi); setAcceptedResearch(nextResearch); setAcceptedMarketing(nextMarketing);
+    setConsent(kind === 'health' ? 'health_data_processing' : kind === 'ai' ? 'ai_processing' : kind, kind === 'terms' ? nextTerms : kind === 'privacy' ? nextPrivacy : kind === 'health' ? nextHealth : kind === 'ai' ? nextAi : kind === 'research' ? nextResearch : nextMarketing);
     // The one control with no blur of its own. Unticking is the only way to get it wrong, and
     // when the button greys out again it is worth saying which of the two things went missing.
     setErrors((current) => ({
       ...current,
-      consent: validateSignUp({ ...form, acceptedMedicalDisclaimer: nextMedical, acceptedHealthData: nextHealth }).consent,
+      consent: validateSignUp({ ...form, acceptedTerms: nextTerms, acceptedPrivacy: nextPrivacy, acceptedHealthData: nextHealth, acceptedAiProcessing: nextAi, acceptedResearch: nextResearch, acceptedMarketing: nextMarketing }).consent,
     }));
   };
 
@@ -143,6 +154,7 @@ export function SignUpScreen({
       setConfirmationRequired(true);
       return;
     }
+    await clearDraft();
     onSignedUp();
   };
 
@@ -257,23 +269,28 @@ export function SignUpScreen({
           <Text style={styles.consentIntro}>{t('auth.signUp.consentIntro')}</Text>
           <Pressable
             style={styles.consentRow}
-            onPress={() => toggleConsent('medical')}
+            onPress={() => toggleConsent('terms')}
             accessibilityRole="checkbox"
-            accessibilityState={{ checked: acceptedMedicalDisclaimer }}
-            accessibilityLabel={t('auth.signUp.medicalConsent')}
+            accessibilityState={{ checked: acceptedTerms }}
+            accessibilityLabel="I accept the terms and medical disclaimer"
           >
-            <View style={[styles.box, acceptedMedicalDisclaimer && styles.boxChecked]}>
-              {acceptedMedicalDisclaimer ? (
+            <View style={[styles.box, acceptedTerms && styles.boxChecked]}>
+              {acceptedTerms ? (
                 <Check size={14} weight="bold" color={color.white} />
               ) : (
                 <Ring radius={6} color={consentError ? color.error500 : color.gray300} />
               )}
             </View>
-            <Text style={styles.consentLabel}>{t('auth.signUp.medicalConsent')}</Text>
+            <Text style={styles.consentLabel}>I accept the terms and medical disclaimer.</Text>
           </Pressable>
 
           <Pressable onPress={() => onOpenLegal('health')} accessibilityRole="link">
             <Text style={styles.link}>{t('auth.signUp.linkDisclaimers')}</Text>
+          </Pressable>
+
+          <Pressable style={styles.consentRow} onPress={() => toggleConsent('privacy')} accessibilityRole="checkbox" accessibilityState={{ checked: acceptedPrivacy }}>
+            <View style={[styles.box, acceptedPrivacy && styles.boxChecked]}>{acceptedPrivacy ? <Check size={14} weight="bold" color={color.white} /> : <Ring radius={6} color={consentError ? color.error500 : color.gray300} />}</View>
+            <Text style={styles.consentLabel}>I accept the privacy policy.</Text>
           </Pressable>
 
           <Pressable
@@ -292,6 +309,17 @@ export function SignUpScreen({
           <Pressable onPress={() => onOpenLegal('privacy')} accessibilityRole="link">
             <Text style={styles.link}>{t('auth.signUp.linkPrivacy')}</Text>
           </Pressable>
+
+          {([
+            ['ai', acceptedAiProcessing, 'I agree to AI processing of my information.'],
+            ['research', acceptedResearch, 'I agree to optional research use of de-identified information.'],
+            ['marketing', acceptedMarketing, 'I agree to receive optional marketing communications.'],
+          ] as const).map(([kind, checked, label]) => (
+            <Pressable key={kind} style={styles.consentRow} onPress={() => toggleConsent(kind)} accessibilityRole="checkbox" accessibilityState={{ checked }}>
+              <View style={[styles.box, checked && styles.boxChecked]}>{checked ? <Check size={14} weight="bold" color={color.white} /> : <Ring radius={6} color={color.gray300} />}</View>
+              <Text style={styles.consentLabel}>{label}</Text>
+            </Pressable>
+          ))}
 
           {consentError ? <Text style={styles.fieldError}>{consentError}</Text> : null}
 
