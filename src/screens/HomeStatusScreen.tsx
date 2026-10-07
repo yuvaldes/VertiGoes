@@ -15,6 +15,7 @@ import {
   describeSleep,
   episodeTrendKey,
   episodeWeek,
+  hasThreeDifficultMoodDays,
   streakEndingToday,
   type Feeling,
 } from '../data/dayRecords';
@@ -66,6 +67,7 @@ export function HomeStatusScreen({
   const { records, today, todayKey, getRecord, recordFeeling, recordSleep } = useDayRecords();
   const { exercises } = useExercises();
   const { session } = useAuth();
+  const signedIn = session.status === 'authed';
   const firstName = session.status === 'authed' ? session.answers?.firstName.trim() : '';
   const exercisesAvailable = isFeatureReady('exercises');
 
@@ -88,7 +90,7 @@ export function HomeStatusScreen({
     exercises.length === 0 || exercises.every((exercise) => exercise.completed);
 
   const openTasks =
-    (feeling === null ? 1 : 0) + (sleepHours === null ? 1 : 0) + (exercisesAvailable && !exercisesDone ? 1 : 0);
+    (signedIn && feeling === null ? 1 : 0) + (sleepHours === null ? 1 : 0) + (exercisesAvailable && !exercisesDone ? 1 : 0);
   const allDone = openTasks === 0;
 
   /**
@@ -159,12 +161,19 @@ export function HomeStatusScreen({
             </View>
           </View>
 
-          <TaskCard
-            tone="feeling"
-            completed={feeling !== null}
-            title={feeling === null ? t('home.status.feelingOpen') : t('home.status.feelingDone')}
-            onPress={() => setSheet('feeling')}
-          />
+          {signedIn && <TaskCard
+              tone="feeling"
+              completed={feeling !== null}
+              title={feeling === null ? t('home.status.feelingOpen') : t('home.status.feelingDone')}
+              onPress={() => setSheet('feeling')}
+            />}
+
+          {signedIn && hasThreeDifficultMoodDays(records, today) && (
+            <View style={styles.moodSupport}>
+              <Text style={styles.moodSupportText}>The last few days sound difficult. Consider reaching out to a healthcare professional or someone you trust.</Text>
+              <Text onPress={onOpenExercises} accessibilityRole="button" style={styles.moodSupportAction}>Try a short breathing exercise</Text>
+            </View>
+          )}
 
           <TaskCard
             tone="sleep"
@@ -249,6 +258,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
   },
+  moodSupport: { gap: 8, padding: 14, borderRadius: 12, backgroundColor: color.orange100 },
+  moodSupportText: { fontFamily: font.body, fontSize: 13, lineHeight: 19, color: color.gray900 },
+  moodSupportAction: { fontFamily: font.bodySemiBold, fontSize: 13, color: color.brand600 },
   /**
    * The design pairs 24px Cal Sans with a 24 line height. Figma renders that happily, but
    * Android confines the glyphs to the line box and clips whatever hangs outside it — which

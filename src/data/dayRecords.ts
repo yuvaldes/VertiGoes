@@ -20,7 +20,23 @@ export type SlotProgress = { done: number; total: number };
  * Lives here rather than beside the component because the streak needs to know a past day's
  * answer — the original Home kept this in local component state, so it was lost on navigation.
  */
-export type Feeling = 'good' | 'bad';
+export type MoodTag = 'calm' | 'anxious' | 'sad' | 'frustrated' | 'tired' | 'lonely' | 'hopeful';
+export type MoodCheckIn = {
+  score: 1 | 2 | 3 | 4 | 5;
+  tags: MoodTag[];
+  note: string;
+  voiceUri: string | null;
+};
+/** Legacy values remain readable for records saved before the five-level check-in shipped. */
+export type Feeling = 'good' | 'bad' | MoodCheckIn;
+
+export function hasThreeDifficultMoodDays(records: Map<string, DayRecord>, today: Date): boolean {
+  for (let offset = 0; offset < 3; offset += 1) {
+    const feeling = records.get(toKey(addDays(today, -offset)))?.feeling;
+    if (!feeling || typeof feeling === 'string' || feeling.score > 2) return false;
+  }
+  return true;
+}
 
 /**
  * A completed in-app help session. Stores the answers themselves, not a rendered summary, so

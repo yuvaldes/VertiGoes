@@ -24,7 +24,13 @@
     },
     "plugins": [
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Allow VertiGoes to record an optional voice note for your daily mood check-in."
+        }
+      ]
     ]
   }
 }

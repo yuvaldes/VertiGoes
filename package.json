@@ -9,6 +9,7 @@
     "@sentry/browser": "^11.0.0",
     "@supabase/supabase-js": "^2.117.1",
     "expo": "^57.0.20",
+    "expo-audio": "~57.0.5",
     "expo-auth-session": "~57.0.13",
     "expo-blur": "~57.0.2",
     "expo-crypto": "~57.0.3",
