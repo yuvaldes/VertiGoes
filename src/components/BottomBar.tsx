@@ -72,7 +72,7 @@ export function BottomBar({
           active={false}
           action
           onPress={onOpenEmergency ?? (() => undefined)}
-          icon={<FirstAid size={24} weight="regular" color={color.error400} />}
+          icon={<FirstAid size={24} weight="regular" color={color.gray900} />}
         />
         <MenuButton
           label={t('common.bottomBar.tabMenu')}
