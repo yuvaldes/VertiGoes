@@ -33,6 +33,9 @@ test('security hardening validates input and enforces private atomic quotas', as
     await db.exec('reset role');
     await db.query("select set_config('request.jwt.claim.sub', $1, false)", [id]);
     await db.exec('set role authenticated');
+    await db.query(`insert into public.legal_consents(user_id, document_type, document_version)
+      values ($1, 'medical_disclaimer', '1.0'), ($1, 'health_data_processing', '1.0')
+      on conflict (user_id, document_type, document_version) do nothing`, [id]);
   };
   const clearCounters = async () => {
     await db.exec('reset role; delete from vertigoes_private.write_limits');

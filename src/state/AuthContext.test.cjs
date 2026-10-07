@@ -108,13 +108,25 @@ function makeBackend(initial = null) {
     },
     from(table) {
       assert.equal(insideAuthCallback, false, 'Do not query Supabase inside its auth callback');
-      assert.equal(table, 'profiles');
+      assert.ok(table === 'profiles' || table === 'legal_consents');
       let id;
+      const isConsentQuery = table === 'legal_consents';
       const query = {
         select() { return query; },
-        eq(column, value) { assert.equal(column, 'id'); id = value; return query; },
+        eq(column, value) {
+          assert.ok(isConsentQuery ? column === 'user_id' || column === 'document_version' : column === 'id');
+          if (column === 'id' || column === 'user_id') id = value;
+          return query;
+        },
         maybeSingle() { calls.reads.push(id); return backend.read(id); },
         single() { calls.reads.push(id); return backend.read(id); },
+        then(resolve, reject) {
+          if (!isConsentQuery) return Promise.resolve().then(resolve, reject);
+          return Promise.resolve(success([
+            { document_type: 'medical_disclaimer', document_version: '1.0' },
+            { document_type: 'health_data_processing', document_version: '1.0' },
+          ])).then(resolve, reject);
+        },
         upsert(row, options) {
           calls.writes.push({ row, options, actor: backend.current?.user.id ?? null });
           return backend.write(row, options);
@@ -340,7 +352,12 @@ test('invalid form and missing configuration never contact the backend', async (
 
 test('confirmation-required signup stays signed out and does not create a profile', async (t) => {
   const h = await mountAuth(t);
-  const result = await h.call('signUpWithEmail', { ...login, confirm: login.password, acceptedDisclaimers: true });
+  const result = await h.call('signUpWithEmail', {
+    ...login,
+    confirm: login.password,
+    acceptedMedicalDisclaimer: true,
+    acceptedHealthData: true,
+  });
   assert.equal(result.ok, true);
   assert.equal(result.confirmationRequired, true);
   assert.equal(h.value.isAuthed, false);

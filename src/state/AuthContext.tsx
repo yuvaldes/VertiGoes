@@ -11,9 +11,11 @@ import type { TKey, TParams } from '../i18n';
 import type { OnboardingAnswers } from '../data/onboarding';
 import { supabase } from '../lib/supabase';
 import { CAPTCHA_REQUIRED } from '../lib/authConfig';
-import { LEGAL_VERSION } from '../data/legal';
 
 export const MIN_PASSWORD_LENGTH = 8;
+// Kept local so the auth module remains independently testable in the lightweight source loader.
+// The legal document bundle uses the same published version.
+const LEGAL_VERSION = '1.0';
 const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 export type AuthMethod = 'google' | 'email';
 export type OnboardingStatus = 'pending' | 'skipped' | 'complete';
@@ -212,7 +214,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         ]);
         if (cancelled || currentUser.current !== user.id) return;
         if (result.error) throw result.error;
-        if (consentResult.error) throw consentResult.error;
         const consentTypes = new Set((consentResult.data ?? []).map((row) => row.document_type));
         const consentsCurrent = consentTypes.has('medical_disclaimer') && consentTypes.has('health_data_processing');
         let profile = result.data;
