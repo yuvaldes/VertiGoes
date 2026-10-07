@@ -1,9 +1,8 @@
-import { CaretUp, House, List, Sparkle } from 'phosphor-react-native';
+import { FirstAid, House, List, Sparkle } from 'phosphor-react-native';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { TabKey } from '../data/home';
 import { useT } from '../i18n';
-import { isFeatureReady } from '../lib/featureAvailability';
 import { color, font, shadow } from '../theme/tokens';
 import { Ring } from './Ring';
 
@@ -18,9 +17,8 @@ type Props = {
   showEmergency?: boolean;
 };
 
-/** Height of the tab pill, and of the Emergency drawer that sits above it on some screens. */
+/** Height of the tab pill. */
 export const BOTTOM_BAR_HEIGHT = 60;
-export const EMERGENCY_ROW_HEIGHT = 40;
 
 /**
  * Reserves the space the fixed bar occupies, the way `AppHeader` does for the brand row.
@@ -29,12 +27,8 @@ export const EMERGENCY_ROW_HEIGHT = 40;
  * the note there. Screens render this instead, so their content still stops above the bar
  * without them having to know it moved out from under them.
  */
-export function BottomBarSlot({ showEmergency = false }: { showEmergency?: boolean }) {
-  return (
-    <View
-      style={{ height: showEmergency ? EMERGENCY_ROW_HEIGHT + BOTTOM_BAR_HEIGHT : BOTTOM_BAR_HEIGHT }}
-    />
-  );
+export function BottomBarSlot({ showEmergency: _showEmergency = false }: { showEmergency?: boolean }) {
+  return <View style={{ height: BOTTOM_BAR_HEIGHT }} />;
 }
 
 /** Figma node 7338:214900 "Frame 45" — 361 x 92, or 60 without the drawer. */
@@ -42,26 +36,12 @@ export function BottomBar({
   activeTab,
   onChangeTab,
   onOpenEmergency,
-  showEmergency = true,
+  showEmergency: _showEmergency = true,
 }: Props) {
   const t = useT();
-  const emergencyPending = !isFeatureReady('guidedHelp') && !isFeatureReady('emergencyContact');
 
   return (
-    <View style={showEmergency ? styles.root : styles.rootMenuOnly}>
-      {showEmergency && (
-        <Pressable
-          style={styles.emergencyRow}
-          onPress={onOpenEmergency}
-          accessibilityRole="button"
-          accessibilityLabel={emergencyPending ? `${t('common.bottomBar.emergency')}, ${t('browse.placeholder.heading')}` : t('common.bottomBar.a11yOpenEmergency')}
-        >
-          <Text style={styles.emergencyLabel}>{t('common.bottomBar.emergency')}</Text>
-          {emergencyPending && <Text style={styles.pendingLabel}>{t('browse.placeholder.heading')}</Text>}
-          <CaretUp size={16} color={color.error25} />
-        </Pressable>
-      )}
-
+    <View style={styles.rootMenuOnly}>
       <View style={styles.mainMenu}>
         <MenuButton
           label={t('common.bottomBar.tabHome')}
@@ -88,6 +68,13 @@ export function BottomBar({
           }
         />
         <MenuButton
+          label={t('common.bottomBar.emergency')}
+          active={false}
+          action
+          onPress={onOpenEmergency ?? (() => undefined)}
+          icon={<FirstAid size={24} weight="regular" color={color.error400} />}
+        />
+        <MenuButton
           label={t('common.bottomBar.tabMenu')}
           active={activeTab === 'menu'}
           onPress={() => onChangeTab('menu')}
@@ -110,18 +97,20 @@ function MenuButton({
   icon,
   active,
   onPress,
+  action = false,
 }: {
   label: string;
   icon: React.ReactNode;
   active: boolean;
   onPress: () => void;
+  action?: boolean;
 }) {
   return (
     <Pressable
       style={[styles.menuButton, active && styles.menuButtonActive]}
       onPress={onPress}
-      accessibilityRole="tab"
-      accessibilityState={{ selected: active }}
+      accessibilityRole={action ? 'button' : 'tab'}
+      accessibilityState={action ? undefined : { selected: active }}
     >
       {icon}
       <Text style={[styles.menuLabel, active && styles.menuLabelActive]}>{label}</Text>
@@ -130,33 +119,9 @@ function MenuButton({
 }
 
 const styles = StyleSheet.create({
-  pendingLabel: {
-    fontFamily: font.body,
-    fontSize: 10,
-    lineHeight: 14,
-    color: color.error25,
-  },
-  root: {
-    borderRadius: 24,
-    backgroundColor: color.error400,
-  },
   /** No red drawer behind it, so no tinted surface to show through. */
   rootMenuOnly: {
     borderRadius: 24,
-  },
-  emergencyRow: {
-    height: 40,
-    paddingHorizontal: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    overflow: 'hidden',
-  },
-  emergencyLabel: {
-    fontFamily: font.bodySemiBold,
-    fontSize: 12,
-    color: color.error25,
   },
   mainMenu: {
     height: 60,
@@ -166,7 +131,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 12,
+    gap: 4,
     overflow: 'hidden',
     ...shadow.xxl,
   },
@@ -174,7 +139,7 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
     paddingVertical: 8,
-    paddingHorizontal: 24,
+    paddingHorizontal: 8,
     borderRadius: 20,
     alignItems: 'center',
     overflow: 'hidden',

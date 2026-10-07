@@ -14,6 +14,7 @@ import {
 
 import { useDisplayFont, useT } from '../i18n';
 import { color, font, shadow } from '../theme/tokens';
+import { useExpandableSheet } from './useExpandableSheet';
 
 type Props = {
   visible: boolean;
@@ -40,6 +41,7 @@ export function YearPickerSheet({ visible, years, selected, onClose, onSelect }:
   const displayFont = useDisplayFont();
   const slide = useRef(new Animated.Value(0)).current;
   const [mounted, setMounted] = useState(visible);
+  const expandable = useExpandableSheet(visible);
 
   useEffect(() => {
     if (visible) setMounted(true);
@@ -62,7 +64,7 @@ export function YearPickerSheet({ visible, years, selected, onClose, onSelect }:
   });
 
   const content = (
-    <View style={styles.root}>
+    <View style={styles.root} onLayout={expandable.onRootLayout}>
       <Animated.View style={[styles.backdrop, { opacity: slide }]}>
         <Pressable
           style={styles.backdropPress}
@@ -71,8 +73,11 @@ export function YearPickerSheet({ visible, years, selected, onClose, onSelect }:
         />
       </Animated.View>
 
-      <Animated.View style={[styles.sheet, { transform: [{ translateY }] }]}>
-        <View style={styles.handleArea}>
+      <Animated.View
+        style={[styles.sheet, expandable.expandedStyle, { transform: [{ translateY }] }]}
+        onLayout={expandable.onSheetLayout}
+      >
+        <View style={styles.handleArea} {...expandable.panHandlers}>
           <View style={styles.handle} />
         </View>
 

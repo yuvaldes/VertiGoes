@@ -13,6 +13,7 @@ import {
 import { useDisplayFont, useT } from '../i18n';
 import { color, font, shadow } from '../theme/tokens';
 import { SheetPortal } from './SheetHost';
+import { useExpandableSheet } from './useExpandableSheet';
 
 type Props = {
   visible: boolean;
@@ -50,6 +51,7 @@ export function BottomSheet({ visible, onClose, title, children }: Props) {
    * would either leave a gap under a tall sheet or overshoot a short one.
    */
   const [height, setHeight] = useState(FALLBACK_HEIGHT);
+  const expandable = useExpandableSheet(visible);
 
   useEffect(() => {
     if (visible) setMounted(true);
@@ -69,7 +71,7 @@ export function BottomSheet({ visible, onClose, title, children }: Props) {
   const translateY = slide.interpolate({ inputRange: [0, 1], outputRange: [height, 0] });
 
   const content = (
-    <View style={styles.root}>
+    <View style={styles.root} onLayout={expandable.onRootLayout}>
       <Animated.View style={[styles.backdrop, { opacity: slide }]}>
         <Pressable
           style={styles.backdropPress}
@@ -79,10 +81,13 @@ export function BottomSheet({ visible, onClose, title, children }: Props) {
       </Animated.View>
 
       <Animated.View
-        style={[styles.sheet, { transform: [{ translateY }] }]}
-        onLayout={(event) => setHeight(event.nativeEvent.layout.height)}
+        style={[styles.sheet, expandable.expandedStyle, { transform: [{ translateY }] }]}
+        onLayout={(event) => {
+          setHeight(event.nativeEvent.layout.height);
+          expandable.onSheetLayout(event);
+        }}
       >
-        <View style={styles.handleArea}>
+        <View style={styles.handleArea} {...expandable.panHandlers}>
           <View style={styles.handle} />
         </View>
 

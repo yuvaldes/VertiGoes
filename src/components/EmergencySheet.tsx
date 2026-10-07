@@ -14,6 +14,7 @@ import {
 import { useDirection, useDisplayFont, useT } from '../i18n';
 import { SheetPortal } from './SheetHost';
 import { color, font, shadow } from '../theme/tokens';
+import { useExpandableSheet } from './useExpandableSheet';
 
 type Props = {
   visible: boolean;
@@ -49,6 +50,7 @@ export function EmergencySheet({ visible, onClose, onCall, onHelp, contactName, 
   const slide = useRef(new Animated.Value(0)).current;
   // Kept mounted through the close animation so the slide-out is actually visible.
   const [mounted, setMounted] = useState(visible);
+  const expandable = useExpandableSheet(visible);
 
   useEffect(() => {
     if (visible) setMounted(true);
@@ -74,15 +76,18 @@ export function EmergencySheet({ visible, onClose, onCall, onHelp, contactName, 
   const Caret = isRTL ? CaretLeft : CaretRight;
 
   const content = (
-    <View style={styles.root}>
+    <View style={styles.root} onLayout={expandable.onRootLayout}>
       <AnimatedBackdrop
         opacity={slide}
         onPress={onClose}
         label={t('common.emergency.a11yDismiss')}
       />
 
-      <Animated.View style={[styles.sheet, { transform: [{ translateY }] }]}>
-        <View style={styles.handleArea}>
+      <Animated.View
+        style={[styles.sheet, expandable.expandedStyle, { transform: [{ translateY }] }]}
+        onLayout={expandable.onSheetLayout}
+      >
+        <View style={styles.handleArea} {...expandable.panHandlers}>
           <View style={styles.handle} />
         </View>
 

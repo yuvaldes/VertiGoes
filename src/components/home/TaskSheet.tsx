@@ -3,7 +3,6 @@ import {
   Animated,
   Easing,
   Modal,
-  PanResponder,
   Platform,
   Pressable,
   StyleSheet,
@@ -13,14 +12,14 @@ import {
 
 import { useDisplayFont, useT } from '../../i18n';
 import { color, font, shadow } from '../../theme/tokens';
+import { SheetPortal } from '../SheetHost';
+import { useExpandableSheet } from '../useExpandableSheet';
 
 /** react-native-web has no native animated module; asking for it only logs a warning. */
 const USE_NATIVE_DRIVER = Platform.OS !== 'web';
 
 /** Fallback slide distance, used only until the sheet has measured itself once. */
 const ASSUMED_HEIGHT = 320;
-/** How far down the user must drag before the release dismisses instead of springing back. */
-const DISMISS_AFTER = 80;
 
 type Props = {
   visible: boolean;
@@ -46,21 +45,14 @@ export function TaskSheet({ visible, title, canSubmit, onSubmit, onDismiss, chil
   const t = useT();
   const displayFont = useDisplayFont();
   const slide = useRef(new Animated.Value(0)).current;
-  const drag = useRef(new Animated.Value(0)).current;
   // Kept mounted through the close animation so the slide-out is actually visible.
   const [mounted, setMounted] = useState(visible);
   const [height, setHeight] = useState(ASSUMED_HEIGHT);
-
-  // Held in a ref so the responder — created once — always sees the live handler.
-  const onDismissRef = useRef(onDismiss);
-  useEffect(() => {
-    onDismissRef.current = onDismiss;
-  }, [onDismiss]);
+  const expandable = useExpandableSheet(visible, onDismiss);
 
   useEffect(() => {
     if (visible) {
       setMounted(true);
-      drag.setValue(0);
     }
 
     Animated.timing(slide, {
@@ -71,39 +63,14 @@ export function TaskSheet({ visible, title, canSubmit, onSubmit, onDismiss, chil
     }).start(({ finished }) => {
       if (finished && !visible) setMounted(false);
     });
-  }, [visible, slide, drag]);
-
-  const responder = useRef(
-    PanResponder.create({
-      // Only a downward drag takes over; taps still reach the controls underneath.
-      onMoveShouldSetPanResponder: (_event, gesture) => gesture.dy > 4,
-      onPanResponderMove: (_event, gesture) => {
-        drag.setValue(Math.max(0, gesture.dy));
-      },
-      onPanResponderRelease: (_event, gesture) => {
-        if (gesture.dy > DISMISS_AFTER) {
-          onDismissRef.current();
-          return;
-        }
-        Animated.timing(drag, {
-          toValue: 0,
-          duration: 160,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: USE_NATIVE_DRIVER,
-        }).start();
-      },
-    }),
-  ).current;
+  }, [visible, slide]);
 
   if (!mounted) return null;
 
-  const translateY = Animated.add(
-    slide.interpolate({ inputRange: [0, 1], outputRange: [height, 0] }),
-    drag,
-  );
+  const translateY = slide.interpolate({ inputRange: [0, 1], outputRange: [height, 0] });
 
   const content = (
-    <View style={styles.root}>
+    <View style={styles.root} onLayout={expandable.onRootLayout}>
       <Animated.View style={[styles.backdrop, { opacity: slide }]}>
         <Pressable
           style={styles.backdropPress}
@@ -113,10 +80,13 @@ export function TaskSheet({ visible, title, canSubmit, onSubmit, onDismiss, chil
       </Animated.View>
 
       <Animated.View
-        style={[styles.sheet, { transform: [{ translateY }] }]}
-        onLayout={(event) => setHeight(event.nativeEvent.layout.height)}
+        style={[styles.sheet, expandable.expandedStyle, { transform: [{ translateY }] }]}
+        onLayout={(event) => {
+          setHeight(event.nativeEvent.layout.height);
+          expandable.onSheetLayout(event);
+        }}
       >
-        <View style={styles.grabberArea} {...responder.panHandlers}>
+        <View style={styles.grabberArea} {...expandable.panHandlers}>
           <View style={styles.grabber} />
         </View>
 
@@ -142,7 +112,7 @@ export function TaskSheet({ visible, title, canSubmit, onSubmit, onDismiss, chil
   );
 
   if (Platform.OS === 'web') {
-    return content;
+    return <SheetPortal>{content}</SheetPortal>;
   }
 
   return (
