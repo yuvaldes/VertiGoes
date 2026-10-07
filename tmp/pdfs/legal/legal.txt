@@ -1,0 +1,625 @@
+
+
+===== PAGE 1 =====
+מסמכים משפטיים
+VertiGoesלאפליקציית
+1.0 גרסה·  2026 בספטמבר27עדכון אחרון
+. 1הערות למפתח
+. 2הצהרת פרטיות
+. 3הצהרת בריאות וכתב ויתור רפואי
+. 4הצהרת נגישות
+כל מסמך מופיע קודם בעברית ואחריו באנגלית.
+vertigoesmaya@gmail . com ·בעלת המאגר ורכזת הנגישות: מיה כספי
+
+===== PAGE 2 =====
+הערות למפתח
+איפה כל מסמך יושב באפליקציה, ומה חייב להיות ממומש במסך ההסכמה.
+איפה כל מסמך מופיע באפליקציה
+שלושת המסמכים צריכים להיות נגישים מתוך האפליקציה עצמה, בלי לצאת לדפדפן. השפה נבחרת לפי שפת הממשק של
+המשתמש.
+מסמךאיפה המשתמש צריך לפגוש אותו
+הצהרת פרטיותקישור ליד תיבת הסימון של המידע הרפואי במסך ההסכמה, וגם בתפריט
+הצהרת בריאות וכתב ויתור רפואיקישור ליד תיבת הסימון הרפואית במסך ההסכמה, וגם בתפריט
+הצהרת נגישותבתפריט
+ צריך גם קישור ציבורי להצהרת הפרטיות, כי שתי החנויות דורשות כתובתGoogle  Play ולApp  Storeכשתגיע ההגשה ל
+שניתן לפתוח מדף האפליקציה. אפשר לפרסם אז את אותו טקסט בדיוק, בלי לגעת באתר הקיים.
+מסך ההסכמה: מה חייב להיות ממומש שם
+זה החלק שבלעדיו המסמכים לא שווים הרבה. מידע על מצב בריאותי הוא מידע רגיש לפי חוק הגנת הפרטיות וקטגוריה
+, ולכן אי אפשר לשמור אותו על בסיס הסכמה שבשתיקה או אישור כולל אחד.GDPR ל9מיוחדת לפי סעיף
+במסך ההסכמה, לפני שנשמר על המשתמש משהו:
+. לא תיבה אחתSupabase, אחת לכתב הוויתור הרפואי ואחת לשמירת המידע הרפואי בשתי תיבות סימון נפרדות
+שמכסה על הכל.
+ המשתמש צריך לסמן אותן בעצמו.אף תיבה אינה מסומנת מראש.
+ עד ששתיהן מסומנות.כפתור ההמשך נעול
+, כך שאפשר לקרוא לפני שמסכימים.קישור למסמך המלא ליד כל תיבה
+הנוסח המדויק לשתי התיבות, בעברית ובאנגלית, נמצא בסוף הצהרת הפרטיות.
+מה לשמור בצד השרת
+כל אישור נרשם כשורה בטבלת הסכמות, עם שתי גרסאות נפרדות וחותמת זמן: גרסת כתב הוויתור הרפואי, וגרסת ההסכמה
+לשמירת המידע הרפואי. שורות ההסכמה נוספות בלבד ולעולם לא מעודכנות, כי הן הראיה שההסכמה ניתנה.
+שינוי מהותי בנוסח של אחד המסמכים מחייב לעלות את מספר הגרסה, ואז להציג את מסך ההסכמה מחדש לכל
+המשתמשים. זה לא מטרד, זו הדרישה.
+, כך שכל משתמש מגיע רק לשורות שלו. זהRow  Level  Securityגישה לשורות במסד הנתונים צריכה להיות נעולה ב
+מופיע כהבטחה מפורשת בהצהרת הפרטיות, ולכן זו התחייבות שצריך לעמוד בה.
+פתוח לפני שזה עולה
+
+===== PAGE 3 =====
+ הנוסחים מפורטים ומבוססים על ההצהרות שכבר קיימות באתר, אבל מאגר שמחזיק מידע רפואי ראויאישור עורך דין.
+שיעבור עין משפטית.
+ רשימת המצבים שדורשים התייעצות לפני תרגיל )צוואר, לב, כלי דם, עיניים,.2אימות רפואי להצהרת הבריאות, סעיף
+ניתוחים, היריון( היא תוכן רפואי וצריכה אישור של איש מקצוע.
+ ההצהרה מצהירה שהשרתים באיחוד האירופי. צריך לוודא את זה בדשבורד של הפרויקט, ולאשר.Supabaseאזור ה
+. אם האזור בפועל אחר, צריך לתקן את הסעיף לפני השחרור.Supabase( מולDPAאת הסכם עיבוד המידע
+הממצאים שמאחורי הצהרת הנגישות
+27 שבוצעה בapp . vertigoes . coסעיף המגבלות הידועות בהצהרת הנגישות אינו נוסח גנרי. הוא מבוסס על בדיקה של
+:2026בספטמבר
+מה נבדקמה נמצא
+ניגודיות צבעים(,1.72:1״ בטורקיזNOT  COMPLETED. החמורים: ״AA מקטעי הטקסט הגלויים נכשלים ברמה24 מתוך9
+(2.89:1״ בכתוםday  streak 0(, ״2.41:1״ באפורSTATUS(, ״1.85:1״ בכחולTo  be  announced״
+מבנה סמנטי( במסך הראשי. אין קישור דילוג לתוכןmain , nav , header , footer( ואפס אזורי תוכןh 4 עדh 1אפס כותרות
+גודל טקסט12 px ושבעה ב10 pxתשעה אלמנטים ב
+שמות נגישים
+לכפתורים
+?״NOT  COMPLETEDHow  are  you  feeling  currentlyנקראים כמחרוזת אחת, למשל ״
+אזורי מגע המומלצים44, שניהם מתחת ל40 px בגובהEmergency וכפתור ה28 px״ בגובהSeptember  27 th״
+שפה וכיוון, ואין מחלף שפה. אין עדיין עבריתltr", כיווןlang =" en
+תנועה אנימציות מוגדרות. אין תוכן מהבהב11 מולprefers - reduced - motionקיים כלל אחד של
+הגדלת תצוגה אינו חוסם זוםviewportתקין. ה
+הבדיקה אוטומטית וחלקית, והיא אינה מחליפה בדיקה של מורשה נגישות. כשהמפתח מתקן ליקוי מהרשימה, צריך למחוק
+אותו גם מסעיף המגבלות בהצהרה, כדי שההצהרה תמשיך להיות נכונה.
+
+===== PAGE 4 =====
+עברית
+הצהרת פרטיות
+1.0 גרסה·  2026 בספטמבר27 עדכון אחרון·  VertiGoesאפליקציית
+בקצרה, לפני הפרטים
+כדי להשתמש באפליקציה צריך חשבון, והאפליקציה שומרת עליכם פרטים אישיים ומידע על הבריאות שלכם. המידע נשמר ב-
+, ספק תשתית מסד נתונים, בשרתים שממוקמים באזור האיחוד האירופי. כל שורה במסד הנתונים נעולה לחשבוןSupabase
+שלכם ברמת מסד הנתונים עצמו, כך שמשתמש אחד לא יכול לראות מידע של אחר. איננו מוכרים מידע, איננו סוחרים בו
+ואיננו מעבירים אותו למפרסמים. אתם יכולים לבקש למחוק את כל המידע בכל רגע, ואנחנו נמחק.
+מידע על מצב בריאותי הוא מידע רגיש במיוחד. לכן איננו שומרים אותו על בסיס הסכמה שבשתיקה. מסך ההסכמה
+, ואי אפשר להשתמש באפליקציהSupabaseבאפליקציה מבקש מכם הסכמה מפורשת ונפרדת לכך שמידע רפואי יישמר ב
+בלי לסמן אותה. ההסכמה נרשמת עם גרסה ועם חותמת זמן, ואפשר לחזור ממנה.
+מי אחראי על המידע
+, היא מיה כספי,GDPR( לפי הData  Controllerבעלת האפליקציה ובעלת המאגר, והגורם שנחשב בעל השליטה במידע
+.vertigoesmaya@gmail . com. לכל שאלה, בקשה או תלונה בנושא פרטיותVertiGoesמייסדת
+איזה מידע האפליקציה אוספת
+זו הרשימה המלאה. כל פריט מופיע עם המטרה שלו, ועם ציון האם הוא נחוץ או אופציונלי.
+ בצורה מוצפנת חדSupabase כתובת אימייל וסיסמה. הסיסמה נשמרת אצל שירות ההזדהות שלפרטי חשבון )נחוץ(.
+( בלבד, ואנחנו לא רואים אותה ולא יכולים לשחזר אותה. האימייל משמש לזיהוי, להתחברות ולשחזורhashכיוונית
+סיסמה.
+ שם או כינוי שתבחרו, מגדר, ושפת הממשק המועדפת. השם משמש רק כדי לפנות אליכםפרופיל אישי )אופציונלי(.
+בשמכם בתוך האפליקציה. אין חובה למסור שם אמיתי.
+(; ובגרסאות הבאות שלBPPV האם אובחנתם עם ורטיגו תנוחתימידע על מצב בריאותי )אופציונלי, ורגיש(.
+האפליקציה גם יומן ההתקפים שלכם, התסמינים שתיעדתם, מועדיהם ועוצמתם, ואילו תרגילים או תמרונים ביצעתם ומתי.
+זה המידע הרגיש ביותר שהאפליקציה שומרת, והוא מוגן בהסכמה מפורשת נפרדת.
+ שם וטלפון של אדם שתבחרו, כדי שנוכל להציג אותו לכם בלחיצה אחת בזמן התקף.איש קשר לשעת חירום )אופציונלי(.
+שימו לב: אלה פרטים של אדם אחר. אנא ודאו שהוא יודע שמסרתם אותם. הפרטים משמשים רק לחיוג מהמכשיר שלכם,
+ואיננו יוצרים איתו קשר בעצמנו מעולם.
+ גרסת ההסכמה שסימנתם ומועד הסימון המדויק. זה נשמר בטבלה נפרדת, והוא נדרש לנו כדיתיעוד הסכמה )נחוץ(.
+להוכיח שההסכמה ניתנה, כפי שהחוק מחייב.
+ האפליקציה שומרת עותק של הפרופיל, ההסכמה ואסימון ההתחברות בזיכרון המקומיעותק מקומי על המכשיר )נחוץ(.
+של המכשיר, כדי שהיא תעבוד גם בלי חיבור לאינטרנט ולא תדרוש התחברות מחדש בכל פתיחה. העותק הזה נשאר על
+המכשיר שלכם, ונמחק כשמתנתקים או כשמסירים את האפליקציה.
+
+===== PAGE 5 =====
+ומה האפליקציה לא עושה: אין בה מודעות ואין בה כלי פרסום, אין בה מזהי פרסום, היא אינה מבקשת גישה למיקום, לאנשי
+הקשר שלכם, לתמונות, למצלמה או למיקרופון, והיא אינה עוקבת אחריכם באפליקציות או באתרים אחרים.
+, וההסכמה המפורשת שלכםSupabaseמידע רפואי
+, ומוגדר באיחוד האירופי כקטגוריה מיוחדת של1981מידע על מצב בריאותי מוגן בישראל לפי חוק הגנת הפרטיות, התשמ״א
+. עיבוד של מידע כזה אסור, אלא אם קיים אחד מהחריגים שבחוק. החריג שאנחנו מסתמכים עליוGDPR ל9מידע לפי סעיף
+.GDPR()א( ל2)9הוא ההסכמה המפורשת שלכם, לפי סעיף
+בפועל זה עובד כך. בפתיחה הראשונה של האפליקציה, לפני שנשמר עליכם משהו, מוצג מסך הסכמה. במסך הזה אתם
+מסמנים בנפרד, כל אחד בפני עצמו:
+שקראתם והבנתם את כתב הוויתור הרפואי, ושהאפליקציה אינה אבחנה, אינה תחליף לרופא ואינה מיועדת לחירום.
+שאתם מסכימים מפורשות לכך שמידע על מצב הבריאות שלכם, לרבות אבחנה, תסמינים, התקפים ותרגילים שתיעדתם,
+ בשרתים שבאיחוד האירופי, למטרה אחת: להפעיל עבורכם אתSupabaseיישמר ויעובד במסד הנתונים שלנו אצל
+האפליקציה.
+שתי ההסכמות נדרשות כדי להשתמש באפליקציה, כי בלעדיהן אין לנו בסיס חוקי לשמור את המידע שהאפליקציה בנויה
+סביבו. הן אינן מסומנות מראש. ברגע שסימנתם, נרשמת בטבלה נפרדת שורה עם גרסת ההסכמה ועם המועד המדויק.
+כשנעדכן את נוסח ההסכמה, נבקש אותה מחדש.
+אתם יכולים לחזור מההסכמה בכל רגע, בלי לתת סיבה, בכתיבה אלינו למייל. חזרה מההסכמה משמעותה שאיננו יכולים
+להמשיך להפעיל עבורכם את האפליקציה, ולכן היא מטופלת כבקשה למחיקת החשבון והמידע. חזרה מהסכמה אינה פוגעת
+בחוקיות העיבוד שנעשה לפניה.
+שאר המידע באפליקציה, שאינו רפואי, מעובד על בסיס קיום החוזה שבינינו, כלומר אספקת השירות שביקשתם.
+איפה המידע נשמר, ומי עוד יכול להגיע אליו
+( עבורנוData  Processor, שהוא ספק התשתית שלנו ומשמש כמעבד מידעSupabaseהמידע נשמר במסד נתונים אצל
+ מחוייבת כלפינו בהסכםSupabaseבלבד, ולא לצרכיו. הפרויקט שלנו מאוחסן בשרתים שממוקמים באזור האיחוד האירופי
+(, ואינה רשאית להשתמש במידע שלכם למטרות שלה.DPAעיבוד מידע
+, שנועד לוודא שכל שורה נגישה רק לחשבון שיצרRow  Level  Securityבתוך מסד הנתונים מופעל מנגנון אבטחה בשם
+אותה. בפועל: גם אם משתמש אחר ינסה לבקש את המידע שלכם, מסד הנתונים עצמו יסרב. זה לא מתבסס על קוד
+האפליקציה, אלא על כלל שמוגדר בשכבת הנתונים.
+, אין כרגע ספק נוסף שמקבל את המידע האישי או הרפואי שלכם. אין באפליקציה כלי מדידה או ניתוחSupabaseמלבד
+התנהגות של צד שלישי. נמסור מידע לגורם נוסף רק אם נחויב בצו שיפוטי או על פי דין, ואם יתווסף בעתיד ספק חדש, נעדכן
+את ההצהרה לפני ולא אחרי.
+Supabaseשתי הערות על העברת מידע מחוץ לגבולות. ראשית, אחסון המידע עצמו הוא באיחוד האירופי. שנית, חברת
+רשומה בארצות הברית, ולכן ייתכן שצוות התמיכה שלה יוכל לגשת למידע לצורכי תחזוקה ותמיכה טכנית מחוץ לאיחוד
+( של האיחוד האירופי. אנחנו עצמנו פועליםSCCהאירופי. גישה כזו כפופה להסכם עיבוד המידע ולתניות החוזיות התקניות
+מישראל, שהוכרה על ידי האיחוד האירופי כמדינה בעלת רמת הגנה נאותה.
+
+===== PAGE 6 =====
+ולבסוף, דבר שתלוי בכם: אם תשתמשו באפשרות לייצא את היומן שלכם ולשלוח אותו לרופא, המידע עובר לידיים שבחרתם
+ויוצא מהשליטה שלנו. זו פעולה שאתם יוזמים, ואנחנו ממליצים לחשוב רגע לאן היא נשלחת.
+כמה זמן המידע נשמר
+המידע בחשבון שלכם נשמר כל עוד החשבון קיים, כי זה כל תפקידו: לאפשר לכם לראות את ההיסטוריה שלכם לאורך זמן
+ יום לכל היותר.30ולהראות אותה לרופא. כשתבקשו למחוק את החשבון, המידע האישי והרפואי יימחק ממסד הנתונים תוך
+תיעוד ההסכמה, כלומר הגרסה והמועד, נשמר גם לאחר מכן לתקופה נוספת, כי הוא הראיה שלנו לכך שההסכמה ניתנה כדין,
+ובלעדיו לא נוכל להגן על עצמנו בטענה שעיבדנו מידע ללא רשות. תיעוד זה אינו כולל מידע על התסמינים או על הבריאות
+שלכם. עותקי גיבוי של מסד הנתונים עשויים להכיל את המידע עוד זמן קצר לאחר המחיקה, עד שהגיבוי עצמו מתחלף.
+הזכויות שלכם, ואיך ממשים אותן
+, עומדות לכם הזכויות הבאות:GDPR, ולמשתמשים מהאיחוד האירופי גם לפי ה1981לפי חוק הגנת הפרטיות, התשמ״א
+לעיין במידע שנשמר עליכם; לבקש לתקן אותו אם הוא שגוי או לא מעודכן; לבקש למחוק אותו; להתנגד לעיבוד או להגביל
+אותו; לקבל את המידע בפורמט קריא ונייד; ולחזור מכל הסכמה שנתתם, לרבות ההסכמה לשמירת מידע רפואי.
+חלק מהזכויות אפשר לממש ישירות באפליקציה: כל פרט בפרופיל ניתן לעריכה או למחיקה בעצמכם, ואפשר להתנתק בכל
+ מהכתובת שאיתה נרשמתם.vertigoesmaya@gmail . comרגע. למחיקה מלאה של החשבון ולכל בקשה אחרת, כתבו ל
+ יום. השירות הזה חינם.30נאשר את קבלת הבקשה, ונשיב לגופה תוך
+אם אתם סבורים שהמידע שלכם לא טופל כראוי, אתם רשאים להגיש תלונה לרשות להגנת הפרטיות במשרד המשפטים, ואם
+אתם באיחוד האירופי, לרשות הפיקוח במדינתכם.
+אבטחת מידע, בכנות
+, סיסמאותSupabase(, המידע מוצפן גם באחסון בשרתיTLSכל התקשורת בין האפליקציה למסד הנתונים מוצפנת
+ ולא כטקסט, הגישה לשורות שלכם נעולה ברמת מסד הנתונים, ומפתחות הניהול של הפרויקט אינם נמצאיםhashנשמרות כ
+באפליקציה שמותקנת אצלכם.
+יחד עם זאת, ואנחנו אומרים את זה במפורש: שום מערכת אינה חסינה. איננו יכולים להבטיח אבטחה מוחלטת, ואם יקרה
+אירוע אבטחה שעלול לפגוע בזכויות שלכם, נודיע לכם ולרשויות הנדרשות בהקדם. חשוב גם מצד המכשיר: מי שיש לו גישה
+למכשיר הפתוח שלכם יוכל לראות את המידע הרפואי שבאפליקציה, ולכן שווה להגן על המכשיר בקוד או בזיהוי ביומטרי.
+קטינים
+, ואיננו אוספים ביודעין מידע מקטינים. אם אתם הורים או16האפליקציה אינה מיועדת לשימוש על ידי מי שטרם מלאו לו
+אחראים וגיליתם שילד/ה בחסותכם יצר/ה חשבון, כתבו לנו ונמחק את החשבון ואת כל המידע שבו.
+שינויים בהצהרה
+נעדכן הצהרה זו כשהאפליקציה תתפתח, ותאריך העדכון ומספר הגרסה יופיעו תמיד בראש המסך. אם שינוי יגדיל את היקף
+המידע הרפואי שאנחנו שומרים או ישנה את מטרת השמירה, לא נסתפק בעדכון המסך: נבקש מכם הסכמה מפורשת חדשה
+
+===== PAGE 7 =====
+בתוך האפליקציה לפני שהשינוי ייכנס לתוקף
+נוסח שתי תיבות הסימון במסך ההסכמה
+הטקסט שמופיע לפני התיבות:
+כדי להפעיל עבורכם את האפליקציה אנחנו שומרים פרטים אישיים ומידע על הבריאות שלכם, ובכלל זה האבחנה,
+, בשרתיםSupabaseההתקפים והתסמינים שתתעדו, והתרגילים שתבצעו. המידע נשמר במסד הנתונים שלנו אצל
+שבאיחוד האירופי, וכל שורה נעולה לחשבון שלכם בלבד. איננו מוכרים אותו ואיננו מעבירים אותו למפרסמים.
+תיבה ראשונה:
+ אינה אבחנה, אינה תחליף לרופא ואינה מיועדת למצבי חירום, ואני משתמש/ת בה מרצוניVertiGoesקראתי והבנתי ש
+ועל אחריותי
+תיבה שנייה:
+אני מסכים/ה מפורשות לכך שמידע על מצב הבריאות שלי, לרבות אבחנה, תסמינים, התקפים ותרגילים, יישמר ויעובד
+ באיחוד האירופי, לצורך הפעלת האפליקציה עבוריSupabase אצלVertiGoesבמסד הנתונים של
+הפרטיות
+מתחת לשתי התיבות:
+שני האישורים נדרשים, כי בלעדיהם אין לנו בסיס חוקי לשמור את המידע שהאפליקציה בנויה סביבו. אפשר לחזור
+, ואז נמחק את החשבון ואת כל המידע שבו.vertigoesmaya@gmail . comמההסכמה בכל רגע בכתיבה ל
+
+===== PAGE 8 =====
+English
+Privacy Statement
+VertiGoes app · Last updated: 27 September 2026 · Version 1.0
+The short version, before the detail
+Using the app requires an account, and the app stores personal details about you as well as information
+about your health. That information is stored with Supabase, a database infrastructure provider, on
+servers located in the European Union. Every row in the database is locked to your own account at the
+database level, so one user cannot see another user's information. We do not sell your information, we
+do not trade in it, and we do not pass it to advertisers. You can ask us to delete everything at any time,
+and we will.
+Health information is especially sensitive. That is why we do not store it on the basis of implied consent.
+The app's consent screen asks you for separate, explicit consent to your health information being stored
+in Supabase, and the app cannot be used without ticking it. That consent is recorded with a version and
+a timestamp, and you can withdraw it.
+Who is responsible for your information
+The owner of the app and of the database, and the party considered the Data Controller under the
+GDPR, is Maya Caspy, founder of VertiGoes. For any question, request or complaint about privacy:
+vertigoesmaya@gmail.com.
+What the app collects
+This is the full list. Each item appears with the purpose it serves, and whether it is required or optional.
+Account details (required). Email address and password. The password is held by Supabase's
+authentication service as a one way hash only. We never see it and cannot recover it. The email is
+used to identify you, to sign you in, and to reset your password.
+Personal proﬁle (optional). A name or nickname of your choosing, gender, and your preferred
+interface language. The name is used only to address you inside the app. You are not required to give
+a real name.
+Health information (optional, and sensitive). Whether you have been diagnosed with positional
+vertigo (BPPV); and, in later versions of the app, your episode diary, the symptoms you log, when they
+happened and how severe they were, and which exercises or manoeuvres you carried out and when.
+This is the most sensitive information the app stores, and it is protected by separate explicit consent.
+Emergency contact (optional). The name and phone number of a person you choose, so we can
+show them to you in one tap during an episode. Please note: these are another person's details.
+
+===== PAGE 9 =====
+Please make sure they know you have given them. The details are used only to dial from your own
+device, and we never contact that person ourselves.
+Consent record (required). The version of the consent you accepted and the exact time you
+accepted it. This is kept in a separate table, and we need it in order to demonstrate that consent was
+given, as the law requires.
+A local copy on your device (required). The app keeps a copy of your proﬁle, your consent record
+and your login token in the device's own storage, so it works without a connection and does not ask
+you to sign in every time you open it. That copy stays on your device, and is removed when you sign
+out or uninstall the app.
+And what the app does not do: it carries no advertising and no advertising tooling, it uses no advertising
+identiﬁers, it does not request access to your location, your contacts, your photos, your camera or your
+microphone, and it does not track you across other apps or websites.
+Health information, Supabase, and your explicit consent
+Health information is protected in Israel under the Privacy Protection Law, 1981, and is deﬁned in the
+European Union as a special category of data under Article 9 of the GDPR. Processing such data is
+prohibited unless one of the exceptions in the law applies. The exception we rely on is your explicit
+consent, under Article 9(2)(a) of the GDPR.
+In practice it works like this. The ﬁrst time you open the app, before anything is stored about you, a
+consent screen appears. On that screen you tick, separately, one at a time:
+that you have read and understood the medical disclaimer, and that the app is not a diagnosis, not a
+substitute for a doctor, and not for emergencies.
+that you explicitly consent to information about your health, including diagnosis, symptoms, episodes
+and exercises you log, being stored and processed in our database at Supabase on servers in the
+European Union, for one purpose: to run the app for you.
+Both consents are required in order to use the app, because without them we have no lawful basis to
+store the information the app is built around. Neither is ticked in advance. The moment you tick them, a
+row is written to a separate table recording the consent version and the exact time. When we change the
+wording of the consent, we will ask for it again.
+You can withdraw your consent at any time, without giving a reason, by writing to us. Withdrawing it
+means we can no longer run the app for you, so we treat it as a request to delete your account and your
+information. Withdrawing consent does not aﬀect the lawfulness of processing carried out beforehand.
+The rest of the information in the app, the part that is not health related, is processed on the basis of
+performing our contract with you, that is, providing the service you asked for.
+Where your information is stored, and who else can reach it
+
+===== PAGE 10 =====
+Your information is stored in a database at Supabase, which is our infrastructure provider and acts as a
+Data Processor for us alone, not for its own purposes. Our project is hosted on servers located in the
+European Union. Supabase is bound to us by a Data Processing Agreement, and is not permitted to use
+your information for its own ends.
+Inside the database we use a mechanism called Row Level Security, designed to ensure each row is
+reachable only by the account that created it. In practice: even if another user asks the database for your
+information, the database itself refuses. This does not depend on the app's own code, it is a rule
+enforced in the data layer.
+Apart from Supabase, no other provider currently receives your personal or health information. The app
+contains no third party analytics or behaviour tracking tools. We will disclose information to anyone else
+only if compelled by a court order or by law, and if a new provider is added in future, we will update this
+statement before it happens, not after.
+Two notes on transfers across borders. First, the storage of the data itself is in the European Union.
+Second, Supabase is a company registered in the United States, so its support staﬀ may be able to
+access data for maintenance and technical support from outside the European Union. Such access is
+subject to the Data Processing Agreement and to the European Union's Standard Contractual Clauses.
+We ourselves operate from Israel, which the European Union has recognised as providing an adequate
+level of protection.
+And ﬁnally, something that rests with you: if you use the option to export your diary and send it to a
+doctor, that information passes to hands you chose and leaves our control. This is an action you initiate,
+and we suggest taking a moment to think about where it is going.
+How long we keep your information
+The information in your account is kept for as long as the account exists, because that is its entire
+purpose: to let you see your own history over time and show it to a doctor. When you ask us to delete
+your account, your personal and health information is removed from the database within 30 days at
+most.
+The consent record, meaning the version and the timestamp, is retained for a further period after that,
+because it is our evidence that consent was properly given, and without it we could not defend ourselves
+against a claim that we processed data without permission. That record contains nothing about your
+symptoms or your health. Backup copies of the database may still contain your information for a short
+time after deletion, until the backup itself is rotated.
+Your rights, and how to exercise them
+Under the Israeli Privacy Protection Law, 1981, and for users in the European Union also under the
+GDPR, you have the following rights: to see the information stored about you; to ask for it to be
+corrected if it is wrong or out of date; to ask for it to be deleted; to object to or restrict processing; to
+
+===== PAGE 11 =====
+receive your information in a readable, portable format; and to withdraw any consent you gave, including
+your consent to the storage of health information.
+Some of these you can exercise directly in the app: every detail in your proﬁle can be edited or cleared
+by you, and you can sign out at any time. For full deletion of your account, and for any other request,
+write to vertigoesmaya@gmail.com from the address you registered with. We will acknowledge your
+request and answer it in substance within 30 days. There is no charge for this.
+If you believe your information has not been handled properly, you may complain to the Israeli Privacy
+Protection Authority at the Ministry of Justice, or, if you are in the European Union, to your national
+supervisory authority.
+Security, honestly
+All traﬃc between the app and the database is encrypted in transit (TLS), the data is also encrypted at
+rest on Supabase's servers, passwords are stored as hashes rather than text, access to your rows is
+locked at the database level, and the project's administrative keys are not present in the app installed on
+your device.
+That said, and we want to say it plainly: no system is immune. We cannot guarantee absolute security,
+and if a security incident occurs that is likely to aﬀect your rights, we will notify you and the relevant
+authorities promptly. The device side matters too: anyone with access to your unlocked device can see
+the health information in the app, so it is worth protecting the device with a passcode or biometrics.
+Minors
+The app is not intended for use by anyone under the age of 16, and we do not knowingly collect
+information from minors. If you are a parent or guardian and discover that a child in your care has created
+an account, write to us and we will delete the account and everything in it.
+Changes to this statement
+We will update this statement as the app develops, and the date of the update together with the version
+number will always appear at the top of this screen. If a change widens the health information we store or
+alters the purpose we store it for, we will not simply update the screen: we will ask you for fresh explicit
+consent inside the app before the change takes eﬀect.
+Wording for the two consent checkboxes
+The text shown above the checkboxes:
+To run the app for you, we store personal details and information about your health, including your
+diagnosis, the episodes and symptoms you log, and the exercises you do. It is stored in our
+
+===== PAGE 12 =====
+database at Supabase, on servers in the European Union, and every row is locked to your account
+alone. We do not sell it and we do not pass it to advertisers.
+First checkbox:
+I have read and understood that VertiGoes is not a diagnosis, not a substitute for a doctor and not
+for emergencies, and I use it voluntarily and at my own risk. [Read the health statement]
+Second checkbox:
+I explicitly agree that information about my health, including diagnosis, symptoms, episodes and
+exercises, will be stored and processed in the VertiGoes database at Supabase in the European
+Union, in order to run the app for me. [Read the privacy statement]
+Below both checkboxes:
+Both are required, because without them we have no lawful basis to store what the app is built
+around. You can withdraw your consent at any time by writing to vertigoesmaya@gmail.com, and we
+will delete your account and everything in it.
+
+===== PAGE 13 =====
+עברית
+הצהרת בריאות וכתב ויתור רפואי
+1.0 גרסה·  2026 בספטמבר27 עדכון אחרון·  VertiGoesאפליקציית
+במצב חירום
+אם אתם חווים כאב ראש פתאומי וחזק, קושי בדיבור, צניחת פנים, חולשה או חוסר תחושה בצד אחד של הגוף, ראייה
+ מיד, או פנו לחדר101כפולה או אובדן ראייה, בלבול, כאב חזה או אובדן הכרה, סגרו את האפליקציה וחייגו למד״א
+ שבה.SOSהמיון הקרוב. אל תסתמכו על האפליקציה הזו במצב חירום, וגם לא על כפתור ה
+. מה האפליקציה הזו, ומה היא איננה1
+ נועדה ללוות אנשים שחיים עם סחרחורת, ורטיגו והפרעות שיווי משקל: להסביר, לתת כלים לרגעיםVertiGoesאפליקציית
+קשים, לאפשר תיעוד מסודר של מה שקורה לכם, ולעזור להגיע מוכנים לשיחה עם איש מקצוע. זה מה שהיא באה לעשות, וזה
+הרבה.
+(, לא עברה אישור רגולטורי של משרד הבריאות, של ה-Medical  Deviceמה שהיא איננה: האפליקציה אינה מכשיר רפואי
+ רפואי. היא אינה מאבחנת, אינה קובעת מאיזו אוזן או מאיזו תעלה מגיעהCE או של גוף מקביל, ואינה נושאת סימוןFDA
+הבעיה, אינה מתאימה טיפול אישי, ואינה תחליף לבדיקה גופנית, לאבחון מוסמך או לתוכנית שיקום שנקבעה על ידי רופא/ה
+מורשה או פיזיותרפיסט/ית וסטיבולרי/ת מוסמך/ת.
+השימוש באפליקציה, צפייה בתכנים, מילוי שאלונים, תיעוד תסמינים או פנייה אלינו אינם יוצרים, במישרין או בעקיפין, יחסי
+רופא ומטופל או מטפל ומטופל, ואינם יוצרים חובת סודיות רפואית או חיסיון רפואי מהסוג שקיים מול גורם מטפל.
+. תמרונים ותרגילים, הסעיף החשוב ביותר כאן2
+האפליקציה מציגה תמרונים טיפוליים ותרגילי שיקום וסטיבולרי. חשוב שתבינו את המגבלה המרכזית שלהם: יעילותו של
+תמרון תלויה בכך שהוא מבוצע לאוזן הנכונה ולתעלה הנכונה, וזיהוי זה נעשה בבדיקה קלינית אצל איש מקצוע, לא
+באפליקציה ולא בכוחות עצמכם. תמרון שמבוצע לצד הלא נכון עלול שלא לעזור, ולעיתים אף להעביר גבישים לתעלה אחרת
+ולהחמיר את המצב.
+לכן: התייעצו עם רופא/ה או עם פיזיותרפיסט/ית וסטיבולרי/ת לפני שאתם מתחילים, ובמיוחד אם יש לכם בעיות בצוואר, בלב,
+בכלי הדם, בעיניים או בשיווי המשקל, אם עברתם ניתוח בראש, בצוואר, בגב או בעיניים, או אם אתם בהיריון. הבדיקה הזו
+היא לא פורמליות, היא מה שהופך את התרגיל מניחוש לטיפול.
+התרגילים כוללים תנועות מהירות של הראש והגוף, ומטבעם עלולים לגרום לסחרחורת, לבחילה, להקאה, לאובדן שיווי משקל
+ולנפילה. בצעו אותם רק כשאתם במקום בטוח, רצוי על מיטה רחבה ולא על כיסא או בעמידה, עם מרחב פנוי סביב הראש,
+ועדיף כשיש מישהו בבית. אל תנהגו, אל תפעילו מכונות ואל תעלו במדרגות בסמוך לביצוע תרגיל, ותנו לעצמכם זמן להתייצב.
+הפסיקו מיד אם מופיעים כאב חד, כאב בצוואר או בגב, דפיקות לב חריגות, כאב בחזה, קוצר נשימה, עילפון או תחושת
+התעלפות, או כל תסמין שנראה לכם שונה מהרגיל, ופנו לייעוץ רפואי.
+. סימני אזהרה שדורשים בדיקה, לא אפליקציה3
+
+===== PAGE 14 =====
+סחרחורת וחוסר שיווי משקל הם תסמינים, לא אבחנה, ובמקרים מסוימים הם מעידים על מצב רפואי דחוף כגון אירוע מוחי
+ רק מפני שהאפליקציה עוסקתBPPVדימום תוך גולגולתי, זיהום חריף או בעיה לבבית. אל תניחו שמה שאתם מרגישים הוא
+בו. אם התסמינים חדשים, פתאומיים, שונים מהרגיל, מלווים בסימנים שמפורטים בראש המסך, או פשוט מדאיגים אתכם, פנו
+לבדיקה רפואית לפני שאתם מבצעים תרגיל כלשהו.
+ ואיש קשר לשעת חירוםSOS. כפתור4
+ ופרטי איש הקשר לשעת חירום נועדו לחסוך לכם חיפוש ברגע שבו קשה להתרכז, ותו לא. אלה קיצורי דרךSOSכפתור ה
+לחיוג מהמכשיר שלכם. האפליקציה אינה שירות ניטור, אינה מזעיקה עזרה בשמכם, אינה מנטרת את מצבכם, ואינה מיידעת
+101אף אחד כשאתם מתעדים התקף. אם אתם זקוקים לעזרה, מישהו צריך לחייג, ובמצב חירום אמיתי המספר הנכון הוא
+ולא איש הקשר שלכם.
+. יומן התסמינים, הדוח לרופא ושאר הכלים5
+היומן והדוח שאפשר לייצא ממנו הם תיעוד של מה שאתם דיווחתם, ולא ניתוח רפואי שלו. הם נועדו לסדר את המחשבה
+ולתת לרופא/ה תמונה מסודרת של התקופה האחרונה, במקום להיזכר במרפאה. הם אינם מבצעים דיאגנוזה, אינם מחליפים
+בירור קליני, ואינם מהווים אישור או שלילה של מחלה כלשהי. כל הסתמכות על תוכן היומן או על הדוח נעשית על אחריות
+המשתמש.
+התכנים בספרייה, לרבות מאמרים, הסברים, מדיטציות ותרגילי הרגעה, נועדו לידע ולהעשרה בלבד. הופעת אנשי מקצוע או
+מרפאות באפליקציה נועדה לנוחותכם ואינה המלצה, אישור רישוי או ערובה לטיב השירות. באחריותכם לבדוק באופן עצמאי
+את רישיונו והכשרתו של כל מטפל במאגרי משרד הבריאות.
+. אחריות המשתמש והגבלת אחריות6
+השימוש באפליקציה הוא מרצון, על דעתכם ועל אחריותכם הבלעדית. אתם נושאים באחריות המלאה לכל פעולה גופנית
+שאתם מבצעים בעקבות תוכן שראיתם כאן, ולכל החלטה רפואית שאתם מקבלים. אל תשנו טיפול, מינון או תרופה על סמך
+משהו שקראתם באפליקציה בלי לדבר עם הרופא/ה שלכם.
+האפליקציה, בעליה, מפעיליה, כותביה וכל מי שפועל מטעמם לא יישאו באחריות בנזיקין )לרבות עוולת הרשלנות(, בחוזים או
+בכל עילה אחרת, לכל נזק, פציעה, נכות, החמרה במצב רפואי, עוגמת נפש או הפסד, ישיר, עקיף, תוצאתי או מיוחד, הנובע
+במישרין או בעקיפין מהשימוש באפליקציה, מאי היכולת להשתמש בה, מטעויות או השמטות בתוכן, או מהסתמכות על תכניה.
+״(, ללא מצג או התחייבות, מפורשים אוAS  AVAILABLE״( וכפי שהם זמינים )״AS  ISהתוכן והשירות מסופקים כמות שהם )״
+משתמעים. אין באמור כדי לגרוע מאחריות שלא ניתן להגבילה לפי דין.
+. ההסכמה שלכם, דין וסמכות שיפוט7
+בפתיחה הראשונה של האפליקציה תתבקשו לאשר שקראתם והבנתם את ההצהרה הזו, ושאתם משתמשים באפליקציה
+מרצונכם ועל אחריותכם. האישור נרשם אצלנו עם מספר גרסה ועם מועד, כמפורט בהצהרת הפרטיות. כשנעדכן את ההצהרה
+בצורה מהותית, נבקש את אישורכם מחדש.
+הדין החל הוא הדין הישראלי, וסמכות השיפוט נתונה לבתי המשפט המוסמכים במחוז תל אביב יפו. האפליקציה פונה גם
+לקהל בינלאומי, והתוכן בה אינו מותאם לרגולציה, לזמינות טיפולים או לשמות מסחריים של תרופות בכל מדינה.
+
+===== PAGE 15 =====
+.vertigoesmaya@gmail . comלשאלות על ההצהרה הזו
+
+===== PAGE 16 =====
+English
+Health Statement & Medical Disclaimer
+VertiGoes app · Last updated: 27 September 2026 · Version 1.0
+In an emergency
+If you experience a sudden severe headache, diﬃculty speaking, facial drooping, one sided
+weakness or numbness, double vision or vision loss, confusion, chest pain, or loss of
+consciousness, close the app and call emergency services immediately (101 in Israel, 911 in the
+US), or go to the nearest emergency department. Do not rely on this app in an emergency, and do
+not rely on its SOS button either.
+1. What this app is, and what it is not
+The VertiGoes app exists to accompany people living with dizziness, vertigo and balance disorders: to
+explain, to oﬀer tools for the hard moments, to let you keep an orderly record of what is happening to
+you, and to help you arrive prepared for a conversation with a professional. That is what it sets out to do,
+and it is a lot.
+What it is not: the app is not a medical device, has not been cleared or approved by the Israeli Ministry of
+Health, by the FDA or by any equivalent body, and does not carry a medical CE mark. It does not
+diagnose, it does not determine which ear or which canal your problem comes from, it does not tailor
+treatment to you personally, and it is not a substitute for a physical examination, a qualiﬁed diagnosis, or
+a rehabilitation plan set by a licensed physician or a qualiﬁed vestibular physiotherapist.
+Using the app, viewing its content, ﬁlling in questionnaires, logging symptoms or contacting us does not
+create, directly or indirectly, a doctor and patient or therapist and patient relationship, and does not
+create medical conﬁdentiality or medical privilege of the kind that exists with a treating professional.
+2. Manoeuvres and exercises, the most important section here
+The app presents therapeutic manoeuvres and vestibular rehabilitation exercises. It is important that you
+understand their central limitation: whether a manoeuvre works depends on it being performed on the
+correct ear and the correct canal, and identifying that is done through a clinical examination by a
+professional, not in an app and not by you alone. A manoeuvre performed on the wrong side may fail to
+help, and can in some cases move crystals into another canal and make things worse.
+So: talk to a physician or a vestibular physiotherapist before you start, and especially if you have
+problems with your neck, your heart, your blood vessels, your eyes or your balance, if you have had
+surgery on your head, neck, back or eyes, or if you are pregnant. That consultation is not a formality, it is
+what turns an exercise from a guess into treatment.
+
+===== PAGE 17 =====
+The exercises involve rapid movements of the head and body, and by their nature may cause dizziness,
+nausea, vomiting, loss of balance and falls. Do them only somewhere safe, preferably on a wide bed
+rather than on a chair or standing, with clear space around your head, and ideally when someone else is
+at home. Do not drive, operate machinery or climb stairs soon after an exercise, and give yourself time to
+settle.
+Stop immediately if you develop sharp pain, neck or back pain, an abnormal heartbeat, chest pain,
+shortness of breath, fainting or a feeling that you are about to faint, or any symptom that strikes you as
+diﬀerent from your usual, and seek medical advice.
+3. Warning signs that need a clinician, not an app
+Dizziness and imbalance are symptoms, not a diagnosis, and in some cases they point to an urgent
+medical condition such as a stroke, an intracranial bleed, an acute infection or a cardiac problem. Do not
+assume that what you are feeling is BPPV simply because that is what the app is about. If your
+symptoms are new, sudden, diﬀerent from your usual pattern, accompanied by any of the signs listed at
+the top of this screen, or simply worrying you, get medical assessment before performing any exercise.
+4. The SOS button and your emergency contact
+The SOS button and your emergency contact details are there to save you a search at a moment when it
+is hard to concentrate, and nothing more. They are shortcuts for dialling from your own device. The app
+is not a monitoring service, it does not summon help on your behalf, it does not monitor your condition,
+and it does not inform anyone when you log an episode. If you need help, someone has to dial, and in a
+genuine emergency the right number is 101, not your contact.
+5. The symptom diary, the doctor's report and the other tools
+The diary, and the report you can export from it, are a record of what you reported, not a medical analysis
+of it. They exist to organise your thinking and give your clinician an orderly picture of the recent period,
+instead of trying to remember it in the consulting room. They do not diagnose, they do not replace
+clinical investigation, and they neither conﬁrm nor rule out any condition. Any reliance on the diary or the
+report is at the user's own responsibility.
+The content in the library, including articles, explanations, meditations and calming exercises, is for
+information and general knowledge only. Listing professionals or clinics in the app is for your
+convenience and is not a recommendation, a veriﬁcation of licensing, or a guarantee of the quality of
+their service. It is your responsibility to check independently, in the Ministry of Health's registers, that any
+practitioner is licensed and qualiﬁed.
+6. User responsibility and limitation of liability
+
+===== PAGE 18 =====
+Use of the app is voluntary, at your own discretion and at your sole responsibility. You bear full
+responsibility for any physical action you take as a result of content you saw here, and for any medical
+decision you make. Do not change a treatment, a dose or a medication on the basis of something you
+read in the app without speaking to your own physician.
+The app, its owner, its operators, its writers and anyone acting on their behalf shall bear no liability in tort
+(including negligence), in contract or on any other ground, for any damage, injury, disability, worsening of
+a medical condition, distress or loss, whether direct, indirect, consequential or special, arising directly or
+indirectly from use of the app, from inability to use it, from errors or omissions in the content, or from
+reliance on it. The content and the service are provided "AS IS" and "AS AVAILABLE", without any
+representation or warranty, express or implied. Nothing here limits liability that cannot be limited by law.
+7. Your acceptance, governing law and jurisdiction
+The ﬁrst time you open the app you will be asked to conﬁrm that you have read and understood this
+statement, and that you are using the app voluntarily and at your own risk. That conﬁrmation is recorded
+with a version number and a timestamp, as described in the privacy statement. When we make a
+material change to this statement, we will ask you to conﬁrm again.
+Israeli law applies, and jurisdiction lies with the competent courts of the Tel Aviv Jaﬀa district. The app
+also addresses an international audience, and its content is not adapted to the regulation, treatment
+availability or medication brand names of every country.
+Questions about this statement: vertigoesmaya@gmail.com.
+
+===== PAGE 19 =====
+עברית
+הצהרת נגישות
+1.0 גרסה·  2026 בספטמבר27 עדכון אחרון·  VertiGoesאפליקציית
+המחויבות שלנו
+האפליקציה הזו נבנתה בשביל אנשים שחיים עם סחרחורת, ורטיגו והפרעות שיווי משקל. כמעט כל מי שישתמש בה יעשה
+זאת לפעמים ברגע הגרוע ביותר שלו: כשהחדר מסתובב, כשקשה למקד את המבט, כשתנועה על המסך מחמירה את
+הבחילה, וכשהיד רועדת. לכן נגישות באפליקציה הזו היא לא סעיף שצריך לסמן, היא תנאי לכך שהיא בכלל תעבוד.
+, ולתקנות שוויון זכויות לאנשים1998אנחנו פועלים להנגיש אותה בהתאם לחוק שוויון זכויות לאנשים עם מוגבלות, התשנ״ח
+.2013עם מוגבלות )התאמות נגישות לשירות(, התשע״ג
+רמת הנגישות, ומה מצבה היום
+.Google ושלApple, לצד הנחיות הנגישות שלAA ברמהWCAG  2.1היעד שלנו הוא הנחיות
+האפליקציה נמצאת בפיתוח ועדיין אינה עומדת ברמהנאמר את זה בפשטות, כי זה מה שאנחנו מצפים לקבל מאחרים: 
+ היא טרם נבדקה על ידי מורשה נגישות מוסמך, ואין לה אישור נגישות פורמלי. אנחנו מתכוונים להשלים בדיקה מקצועית.AA
+חיצונית ולתקן את הליקויים לפני ההפצה הרחבה, ולעדכן את ההצהרה הזו בהתאם
+עד אז, אם משהו באפליקציה חוסם בפניכם את הדרך, אנחנו רוצים לדעת ונעשה את ההתאמה שצריכה. הפרטים לפנייה
+מופיעים בסוף ההצהרה.
+מה כבר קיים באפליקציה
+ אין באפליקציה תוכן מהבהב, אין וידאו שמתנגן מעצמו ואין אנימציות רקע רציפות. זוממשק שקט ונטול הבהובים.
+החלטת עיצוב מכוונת עבור אנשים עם רגישות וסטיבולרית לתנועה על מסך.
+ האפליקציה מכילה התייחסות להגדרת הפחתת התנועה של מערכת ההפעלה.התחשבות בהעדפת הפחתת תנועה.
+אנחנו מרחיבים את הכיסוי שלה לכל המעברים באפליקציה.
+ האפליקציה אינה חוסמת את הזום של המכשיר, וניתן להגדיל את התוכן.אפשר להגדיל את התצוגה.
+ כל מסך מבקש דבר אחד, הטקסטים קצרים, והניסוח נמנע מז׳רגון רפואי מיותר. זו התאמהמסכים קצרים ושפה פשוטה.
+לאנשים עם קושי בריכוז, עייפות קוגניטיבית או ערפול מחשבתי, שהם תסמינים נפוצים מאוד בעולם הוסטיבולרי.
+ כפתור חירום מופיע במסך הראשי, נגיש בלחיצה אחת ברגע שבו קשה לחפש.כפתור חירום קבוע.
+מגבלות ידועות, ומה אנחנו עושים בנוגע אליהן
+אלה הליקויים שאנחנו מודעים להם כרגע. אנחנו מעדיפים לכתוב אותם כאן ולא לחכות שתגלו אותם לבד:
+ חלק מהטקסטים באפליקציה, ובעיקר התוויות הקטנות בראש הכרטיסים וטקסטי משנה, אינם עומדיםניגודיות צבעים.
+ דורשת. אנחנו מכהים את הגוונים האלה.AA שרמה4.5:1ביחס הניגודיות של
+
+===== PAGE 20 =====
+ חלק מהטקסטים קטנים מדי עבור אנשים שמתקשים למקד את המבט בזמן התקף. אנחנו מגדילים אותםגודל טקסט.
+ובודקים את האפליקציה מול הגדלת גופן קיצונית בהגדרות המכשיר.
+ המסכים עדיין חסרים מבנה כותרות סדור וסימון של אזורי תוכן וניווט, ולכן משתמש בקורא מסךמבנה לקוראי מסך.
+יתקשה לנווט בהם ולהבין מהיכן להתחיל. זה הליקוי המשמעותי ביותר שאנחנו מכירים, והוא ראשון בסדר העדיפויות
+שלנו.
+ חלק מהכפתורים מוקראים על ידי קורא המסך כרצף של מילים בלי הפרדה ברורה. אנחנו מתקניםתיאור קולי לכפתורים.
+את התיווג שלהם.
+ נקודות, מה שמקשה על שימוש ביד לא יציבה.44 חלק מהכפתורים נמוכים מהמינימום המומלץ שלגודל אזורי מגע.
+אנחנו מגדילים אותם.
+ האפליקציה מוצגת כרגע באנגלית ובכיוון משמאל לימין בלבד. הגרסה העברית, כולל היפוךעברית וכיוון מימין לשמאל.
+מלא של הפריסה וסימון שפה תקין עבור קוראי מסך, נמצאת בעבודה.
+ מצב כהה טרם הושלם. עבור חלק מהאנשים עם רגישות לאור זו התאמה משמעותית, ואנחנו יודעים את זה.מצב כהה.
+נתקלתם בבעיה? ספרו לנו
+אם היה מסך, כפתור או תוכן שלא הצלחתם להשתמש בו, אנחנו רוצים לדעת. זה עוזר לנו לתקן, וזה עוזר לכל מי שיגיע
+אחריכם. כדי שנוכל לטפל מהר, כדאי לכתוב לנו באיזה מסך מדובר, מה ניסיתם לעשות, איזה מכשיר ומערכת הפעלה יש
+לכם, ואם השתמשתם בטכנולוגיה מסייעת, איזו.
+ מיה כספירכזת הנגישות:
+vertigoesmaya@gmail . com דוא״ל
+ ימי עסקים, ולתקן ליקויים בהקדם האפשרי.14 אנחנו משתדלים להשיב לכל פנייה תוךזמן מענה:
+פנייה לנציבות
+אם פניתם אלינו ולא קיבלתם מענה מספק, אתם רשאים לפנות לנציבות שוויון זכויות לאנשים עם מוגבלות במשרד המשפטים,
+.gov . ilדרך עמודי הנציבות באתר
+
+===== PAGE 21 =====
+English
+Accessibility Statement
+VertiGoes app · Last updated: 27 September 2026 · Version 1.0
+Our commitment
+This app was built for people living with dizziness, vertigo and balance disorders. Almost everyone who
+uses it will sometimes do so at their worst moment: when the room is spinning, when focusing the eyes
+is hard, when movement on screen makes the nausea worse, and when their hand is shaking. So
+accessibility in this app is not a box to tick, it is the condition for it working at all.
+We work to make it accessible in line with the Israeli Equal Rights for Persons with Disabilities Law, 1998,
+and the Equal Rights for Persons with Disabilities Regulations (Accessibility Adjustments to Service),
+2013.
+The accessibility level, and where it stands today
+Our target is the WCAG 2.1 level AA guidelines, alongside Apple's and Google's own accessibility
+guidance.
+We will say it plainly, because it is what we would want to be told: the app is in development and does
+not yet meet level AA. It has not been reviewed by a certiﬁed accessibility professional and holds no
+formal accessibility certiﬁcation. We intend to complete an external professional review and ﬁx what it
+ﬁnds before wide release, and to update this statement accordingly.
+Until then, if anything in the app blocks your way, we want to know, and we will make the adjustment you
+need. Contact details are at the end of this statement.
+What is already in the app
+A quiet interface with no ﬂashing. There is no ﬂashing content, no video that plays by itself and no
+continuous background animation. This is a deliberate design decision for people whose vestibular
+symptoms are triggered by movement on a screen.
+Respect for the reduce motion preference. The app carries handling for the operating system's
+reduce motion setting. We are extending that cover to every transition in the app.
+The display can be enlarged. The app does not block device zoom, so content can be made bigger.
+Short screens and plain language. Each screen asks for one thing, the text is short, and the wording
+avoids unnecessary medical jargon. This is an adjustment for people with diﬃculty concentrating,
+cognitive fatigue or brain fog, all of them very common in the vestibular world.
+A permanent emergency button. An emergency button sits on the main screen, one tap away at the
+moment when searching is hard.
+
+===== PAGE 22 =====
+Known limitations, and what we are doing about them
+These are the failures we are currently aware of. We would rather write them here than wait for you to
+discover them:
+Colour contrast. Some of the text in the app, mainly the small labels at the top of cards and
+secondary text, does not meet the 4.5:1 contrast ratio that level AA requires. We are darkening those
+shades.
+Text size. Some text is too small for people who struggle to focus their eyes during an episode. We
+are enlarging it and testing the app against extreme font enlargement in the device settings.
+Structure for screen readers. The screens still lack an ordered heading structure and marked
+content and navigation regions, so someone using a screen reader will ﬁnd them hard to navigate and
+hard to start from. This is the most signiﬁcant failure we know of, and it is ﬁrst on our list.
+Spoken descriptions for buttons. Some buttons are read by the screen reader as a run of words
+with no clear separation. We are ﬁxing their labelling.
+Touch target size. Some buttons are below the recommended minimum of 44 points, which makes
+them harder to use with an unsteady hand. We are enlarging them.
+Hebrew and right to left. The app is currently presented in English and left to right only. The Hebrew
+version, including a full ﬂip of the layout and correct language markup for screen readers, is in
+progress.
+Dark mode. Dark mode is not ﬁnished. For some people with light sensitivity this is a meaningful
+adjustment, and we are aware of that.
+Found a problem? Tell us
+If there was a screen, a button or a piece of content you could not use, we want to know. It helps us ﬁx it,
+and it helps everyone who comes after you. To let us deal with it quickly, please tell us which screen it
+was, what you were trying to do, which device and operating system you have, and, if you were using
+assistive technology, which one.
+Accessibility coordinator: Maya Caspy
+Email: vertigoesmaya@gmail.com
+Response time: We aim to reply to every report within 14 business days, and to ﬁx issues as soon as
+we can.
+Contacting the Commission
+If you have contacted us and did not receive a satisfactory response, you may contact the Commission
+for Equal Rights of Persons with Disabilities at the Israeli Ministry of Justice, through the Commission's
+pages on gov.il.

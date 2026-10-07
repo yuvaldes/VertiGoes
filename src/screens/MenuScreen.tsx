@@ -239,16 +239,6 @@ export function MenuScreen({
           />
         </MenuGroup>
 
-        <View>
-          <Text style={styles.groupTitle}>{t('legal.menuTitle')}</Text>
-          <MenuGroup>
-            <MenuRow icon={<FileText size={ICON_SIZE} color={color.gray900} />} label={t('legal.privacy.title')} onPress={() => onOpenLegal('privacy')} />
-            <MenuRow icon={<FileText size={ICON_SIZE} color={color.gray900} />} label={t('legal.terms.title')} onPress={() => onOpenLegal('terms')} />
-            <MenuRow icon={<FileText size={ICON_SIZE} color={color.gray900} />} label={t('legal.health.title')} onPress={() => onOpenLegal('health')} />
-            <MenuRow icon={<FileText size={ICON_SIZE} color={color.gray900} />} label={t('legal.accessibility.title')} onPress={() => onOpenLegal('accessibility')} />
-          </MenuGroup>
-        </View>
-
         {/* Nothing here describes a guest: these two rows edit a profile, and a guest has none.
             A locked row would be a row about an account that does not exist. */}
         {!isGuest && (
@@ -310,17 +300,6 @@ export function MenuScreen({
               onPress={onOpenSubscription}
             />
           )}
-          <MenuRow
-            icon={<Translate size={ICON_SIZE} color={color.gray900} />}
-            label={t('browse.menu.rowLanguage')}
-            value={LANGUAGE_LABEL[language]}
-            onPress={() => setPickingLanguage(true)}
-          />
-          <MenuRow
-            icon={<Bug size={ICON_SIZE} color={color.gray900} />}
-            label={t('feedback.bugReport.title')}
-            onPress={onReportBug}
-          />
           {!isGuest && (
             <MenuRow
               icon={<SignOut size={ICON_SIZE} color={color.gray900} />}
@@ -328,15 +307,33 @@ export function MenuScreen({
               onPress={onSignOut}
             />
           )}
-          {!isGuest && (
-            <MenuRow
-              icon={<Trash size={ICON_SIZE} color={color.error500} />}
-              label={t('auth.deleteAccount.row')}
-              tone="destructive"
-              onPress={() => { setDeleteFailed(false); setConfirmingDeletion(true); }}
-            />
-          )}
         </MenuGroup>
+
+        <View>
+          <Text style={styles.groupTitle}>{t('legal.otherTitle')}</Text>
+          <MenuGroup>
+            <MenuRow icon={<FileText size={ICON_SIZE} color={color.gray900} />} label={t('legal.privacy.title')} onPress={() => onOpenLegal('privacy')} />
+            <MenuRow icon={<FileText size={ICON_SIZE} color={color.gray900} />} label={t('legal.terms.title')} onPress={() => onOpenLegal('terms')} />
+            <MenuRow icon={<FileText size={ICON_SIZE} color={color.gray900} />} label={t('legal.health.title')} onPress={() => onOpenLegal('health')} />
+            <MenuRow icon={<FileText size={ICON_SIZE} color={color.gray900} />} label={t('legal.accessibility.title')} onPress={() => onOpenLegal('accessibility')} />
+            <MenuRow icon={<Bug size={ICON_SIZE} color={color.gray900} />} label={t('feedback.bugReport.title')} onPress={onReportBug} />
+            <MenuRow icon={<Translate size={ICON_SIZE} color={color.gray900} />} label={t('browse.menu.rowLanguage')} value={LANGUAGE_LABEL[language]} onPress={() => setPickingLanguage(true)} />
+          </MenuGroup>
+        </View>
+
+        {!isGuest && (
+          <View>
+            <Text style={[styles.groupTitle, styles.dangerTitle]}>{t('legal.dangerZoneTitle')}</Text>
+            <MenuGroup>
+              <MenuRow
+                icon={<Trash size={ICON_SIZE} color={color.error500} />}
+                label={t('auth.deleteAccount.row')}
+                tone="destructive"
+                onPress={() => { setDeleteFailed(false); setConfirmingDeletion(true); }}
+              />
+            </MenuGroup>
+          </View>
+        )}
 
         {restartRequired && (
           <View style={styles.notice}>
@@ -493,6 +490,9 @@ const styles = StyleSheet.create({
     fontFamily: font.bodySemiBold,
     fontSize: 13,
     color: color.gray600,
+  },
+  dangerTitle: {
+    color: color.error500,
   },
   prompt: {
     flexDirection: 'row',

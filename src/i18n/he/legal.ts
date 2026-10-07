@@ -6,4 +6,6 @@ export const legal = {
   health: { title: 'הצהרת בריאות וכתב ויתור רפואי' },
   accessibility: { title: 'הצהרת נגישות' },
   menuTitle: 'מסמכים משפטיים',
+  otherTitle: 'אחר',
+  dangerZoneTitle: 'אזור מסוכן',
 } satisfies NamespaceOf<'legal'>;

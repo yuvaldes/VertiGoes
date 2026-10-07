@@ -4,4 +4,6 @@ export const legal = {
   health: { title: 'Health Statement & Medical Disclaimer' },
   accessibility: { title: 'Accessibility Statement' },
   menuTitle: 'Legal',
+  otherTitle: 'Other',
+  dangerZoneTitle: 'Danger Zone',
 } as const;
