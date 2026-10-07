@@ -26,6 +26,7 @@ import { ExerciseVideosScreen } from '../screens/ExerciseVideosScreen';
 import { HelpFlowScreen } from '../screens/HelpFlowScreen';
 import { HomeStatusScreen } from '../screens/HomeStatusScreen';
 import { LivScreen } from '../screens/LivScreen';
+import { LegalDocumentScreen } from '../screens/LegalDocumentScreen';
 import { MeditationDrillsScreen } from '../screens/MeditationDrillsScreen';
 import { MenuScreen } from '../screens/MenuScreen';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
@@ -36,6 +37,7 @@ import { SignInScreen } from '../screens/SignInScreen';
 import { SignUpScreen } from '../screens/SignUpScreen';
 import { SubscriptionScreen } from '../screens/SubscriptionScreen';
 import { useAuth } from '../state/AuthContext';
+import type { LegalDocumentKey } from '../data/legal';
 import { AuthGateProvider, useGate } from '../state/AuthGateContext';
 import { useDayRecords } from '../state/DayRecordsContext';
 import { useExercises } from '../state/ExercisesContext';
@@ -72,6 +74,7 @@ type Pushed =
   | { route: 'signUp' }
   | { route: 'signIn' }
   | { route: 'bugReport' }
+  | { route: 'legal'; document: LegalDocumentKey }
   | { route: 'comingSoon'; feature: PendingFeature }
   | { route: 'placeholder'; title: string; note: string };
 
@@ -627,7 +630,7 @@ function Shell() {
             onBack={pop}
             onSignedUp={onAuthenticated}
             onSwitchToSignIn={() => push({ route: 'signIn' })}
-            onOpenPlaceholder={openPlaceholder}
+            onOpenLegal={(document) => push({ route: 'legal', document })}
             activeTab={activeTab}
             onChangeTab={changeTab}
           />
@@ -644,6 +647,8 @@ function Shell() {
         );
       case 'bugReport':
         return <BugReportScreen onBack={pop} onRequestSignIn={() => push({ route: 'signIn' })} />;
+      case 'legal':
+        return <LegalDocumentScreen document={entry.document} onBack={pop} />;
       case 'placeholder':
         return (
           <PlaceholderScreen
@@ -688,6 +693,7 @@ function Shell() {
             onOpenOnboarding={gate('manageProfile', () => push({ route: 'onboarding' }))}
             onOpenSubscription={openSubscription}
             onReportBug={() => push({ route: 'bugReport' })}
+            onOpenLegal={(document) => push({ route: 'legal', document })}
             onOpenPlaceholder={openPlaceholder}
             onRequestSignIn={(capability) =>
               capability ? promptAuth(capability) : promptSignIn()

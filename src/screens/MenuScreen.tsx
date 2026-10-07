@@ -4,6 +4,7 @@ import {
   Check,
   Briefcase,
   FirstAid,
+  FileText,
   MusicNotes,
   PlayCircle,
   CrownSimple,
@@ -27,6 +28,7 @@ import { Ring } from '../components/Ring';
 import { useCapabilities, type Capability } from '../data/access';
 import type { TabKey } from '../data/home';
 import { ONBOARDING_STEP_COUNT, onboardingPercent } from '../data/onboarding';
+import type { LegalDocumentKey } from '../data/legal';
 import { useDirection, useDisplayFont, useT } from '../i18n';
 import { isFeatureReady } from '../lib/featureAvailability';
 import { useAuth } from '../state/AuthContext';
@@ -48,6 +50,7 @@ type Props = {
   onOpenOnboarding: () => void;
   onOpenSubscription: () => void;
   onReportBug: () => void;
+  onOpenLegal: (document: LegalDocumentKey) => void;
   onOpenPlaceholder: (title: string, note: string) => void;
   /**
    * Opens the auth sheet. The capability picks the line that says what signing in unlocks;
@@ -65,6 +68,18 @@ type Props = {
 
 const ICON_SIZE = 24;
 const LANGUAGES: Language[] = ['en', 'he'];
+
+/** Keep the account row stable on narrow phones while preserving a useful part of the address. */
+function truncateEmail(value: string, maxLength = 27): string {
+  if (value.length <= maxLength) return value;
+  const at = value.lastIndexOf('@');
+  if (at > 0 && at < value.length - 1) {
+    const domain = value.slice(at);
+    const available = maxLength - domain.length - 1;
+    if (available > 2) return `${value.slice(0, available)}…${domain}`;
+  }
+  return `${value.slice(0, Math.max(1, maxLength - 1))}…`;
+}
 
 /**
  * The Menu tab — everything the app offers beyond the daily loop, plus the account settings
@@ -88,6 +103,7 @@ export function MenuScreen({
   onOpenOnboarding,
   onOpenSubscription,
   onReportBug,
+  onOpenLegal,
   onOpenPlaceholder,
   onRequestSignIn,
   onSignOut,
@@ -125,6 +141,7 @@ export function MenuScreen({
       ? t('auth.menu.accountGuest')
       : (account.email ??
         t(account.method === 'google' ? 'auth.menu.accountGoogle' : 'auth.menu.accountLabel'));
+  const accountDisplayValue = account?.email ? truncateEmail(accountValue) : accountValue;
 
   return (
     <View style={styles.body}>
@@ -222,6 +239,16 @@ export function MenuScreen({
           />
         </MenuGroup>
 
+        <View>
+          <Text style={styles.groupTitle}>{t('legal.menuTitle')}</Text>
+          <MenuGroup>
+            <MenuRow icon={<FileText size={ICON_SIZE} color={color.gray900} />} label={t('legal.privacy.title')} onPress={() => onOpenLegal('privacy')} />
+            <MenuRow icon={<FileText size={ICON_SIZE} color={color.gray900} />} label={t('legal.terms.title')} onPress={() => onOpenLegal('terms')} />
+            <MenuRow icon={<FileText size={ICON_SIZE} color={color.gray900} />} label={t('legal.health.title')} onPress={() => onOpenLegal('health')} />
+            <MenuRow icon={<FileText size={ICON_SIZE} color={color.gray900} />} label={t('legal.accessibility.title')} onPress={() => onOpenLegal('accessibility')} />
+          </MenuGroup>
+        </View>
+
         {/* Nothing here describes a guest: these two rows edit a profile, and a guest has none.
             A locked row would be a row about an account that does not exist. */}
         {!isGuest && (
@@ -266,9 +293,9 @@ export function MenuScreen({
               <View style={styles.accountIcon}>
                 <UserCircle size={ICON_SIZE} color={color.gray900} />
               </View>
-              <Text style={styles.accountLabel}>{t('auth.menu.accountLabel')}</Text>
-              <Text style={styles.accountValue} numberOfLines={1}>
-                {accountValue}
+              <Text style={styles.accountLabel} numberOfLines={1}>{t('auth.menu.accountLabel')}</Text>
+              <Text style={styles.accountValue} numberOfLines={1} ellipsizeMode="tail">
+                {accountDisplayValue}
               </Text>
             </View>
           )}
@@ -461,6 +488,12 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
     gap: 24,
   },
+  groupTitle: {
+    marginBottom: 8,
+    fontFamily: font.bodySemiBold,
+    fontSize: 13,
+    color: color.gray600,
+  },
   prompt: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -508,15 +541,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   accountLabel: {
-    flex: 1,
-    minWidth: 0,
+    flexShrink: 0,
+    maxWidth: 86,
     fontFamily: font.body,
     fontSize: 16,
     lineHeight: 22,
     color: color.gray900,
   },
   accountValue: {
-    // Truncates rather than wraps or pushes: an email is longer than the slot a plan name left.
+    flex: 1,
+    minWidth: 0,
     flexShrink: 1,
     fontFamily: font.body,
     fontSize: 16,

@@ -11,6 +11,7 @@ import type { TKey, TParams } from '../i18n';
 import type { OnboardingAnswers } from '../data/onboarding';
 import { supabase } from '../lib/supabase';
 import { CAPTCHA_REQUIRED } from '../lib/authConfig';
+import { LEGAL_VERSION } from '../data/legal';
 
 export const MIN_PASSWORD_LENGTH = 8;
 const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -23,6 +24,7 @@ export type AuthSession =
   | {
       status: 'authed'; account: Account; onboarding: OnboardingStatus;
       answers: OnboardingAnswers | null; progressStep: number | null;
+      consentsCurrent: boolean;
     };
 export type AuthField = 'email' | 'password' | 'confirm' | 'consent' | 'form';
 export type AuthError = { key: TKey; params?: TParams };
@@ -31,7 +33,8 @@ export type AuthResult =
   | { ok: true; confirmationRequired?: boolean; cancelled?: boolean }
   | { ok: false; errors: FieldErrors };
 export type SignUpForm = {
-  email: string; password: string; confirm: string; acceptedDisclaimers: boolean;
+  email: string; password: string; confirm: string;
+  acceptedMedicalDisclaimer: boolean; acceptedHealthData: boolean;
   captchaToken?: string;
 };
 export type SignInForm = { email: string; password: string; captchaToken?: string };
@@ -44,7 +47,9 @@ export function validateSignUp(form: SignUpForm): FieldErrors {
     errors.password = { key: 'auth.error.passwordShort', params: { min: MIN_PASSWORD_LENGTH } };
   }
   if (form.confirm !== form.password) errors.confirm = { key: 'auth.error.passwordMismatch' };
-  if (!form.acceptedDisclaimers) errors.consent = { key: 'auth.error.consent' };
+  if (!form.acceptedMedicalDisclaimer || !form.acceptedHealthData) {
+    errors.consent = { key: 'auth.error.consent' };
+  }
   return errors;
 }
 
@@ -66,6 +71,7 @@ type AuthValue = {
   account: Account | null;
   onboarding: OnboardingStatus | null;
   needsOnboarding: boolean;
+  needsLegalConsent: boolean;
   authError: AuthError | null;
   recoveringPassword: boolean;
   retryProfile: () => void;
@@ -81,6 +87,7 @@ type AuthValue = {
   skipOnboarding: (step: number) => Promise<AuthResult>;
   signOut: () => Promise<boolean>;
   deleteAccount: () => Promise<AuthResult>;
+  acceptLegalConsents: () => Promise<AuthResult>;
 };
 
 const GUEST: AuthSession = { status: 'guest' };
@@ -198,9 +205,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setRestoring(true);
     const load = async () => {
       try {
-        const result = await client.from('profiles').select('*').eq('id', user.id).maybeSingle();
+        const [result, consentResult] = await Promise.all([
+          client.from('profiles').select('*').eq('id', user.id).maybeSingle(),
+          client.from('legal_consents').select('document_type,document_version')
+            .eq('user_id', user.id).eq('document_version', LEGAL_VERSION),
+        ]);
         if (cancelled || currentUser.current !== user.id) return;
         if (result.error) throw result.error;
+        if (consentResult.error) throw consentResult.error;
+        const consentTypes = new Set((consentResult.data ?? []).map((row) => row.document_type));
+        const consentsCurrent = consentTypes.has('medical_disclaimer') && consentTypes.has('health_data_processing');
         let profile = result.data;
         if (!profile) {
           const inserted = await client.from('profiles').upsert(
@@ -218,6 +232,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           onboarding: profile.onboarding_status,
           answers: profile.answers,
           progressStep: profile.progress_step,
+          consentsCurrent,
         };
         loadedUser.current = user.id;
         profileSession.current = next;
@@ -402,6 +417,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     finally { profileBusy.current = false; setSavingProfile(false); }
   };
 
+  const acceptLegalConsents = async (): Promise<AuthResult> => {
+    const current = profileSession.current;
+    if (!supabase || current.status !== 'authed') return fail('auth.error.connection');
+    const rows = ['medical_disclaimer', 'health_data_processing'].map((document_type) => ({
+      user_id: current.account.id, document_type, document_version: LEGAL_VERSION,
+    }));
+    try {
+      const { error } = await supabase.from('legal_consents').insert(rows);
+      if (error && error.code !== '23505') return fail('auth.error.connection');
+      const next = { ...current, consentsCurrent: true };
+      profileSession.current = next;
+      setSession(next);
+      return { ok: true };
+    } catch { return fail('auth.error.connection'); }
+  };
+
   const signOut = async () => {
     if (!supabase) return true;
     try {
@@ -436,12 +467,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isRestoring, isSavingProfile, authError, recoveringPassword,
     account: session.status === 'authed' ? session.account : null,
     onboarding, needsOnboarding: onboarding === 'pending' || onboarding === 'skipped',
+    needsLegalConsent: session.status === 'authed' && !session.consentsCurrent,
     retryProfile, clearAuthError, signInWithProvider, signUpWithEmail, signInWithEmail,
     requestPasswordReset, resendConfirmation, updatePassword,
     cancelPasswordRecovery: () => setRecoveringPassword(false),
     completeOnboarding: (answers) => saveProfile('complete', answers, null),
     skipOnboarding: (step) => saveProfile('skipped', null, step),
-    signOut, deleteAccount,
+    signOut, deleteAccount, acceptLegalConsents,
   };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

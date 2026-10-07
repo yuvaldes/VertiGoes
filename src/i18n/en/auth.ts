@@ -51,8 +51,12 @@ export const auth = {
      * order, and a label that is partly a link makes "read the policy" toggle the box.
      */
     consent: 'I agree to the medical and legal disclaimers and the privacy policy.',
-    linkDisclaimers: 'Read the medical and legal disclaimers',
-    linkPrivacy: 'Read the privacy policy',
+    consentIntro: 'To run the app for you, we store personal details and health information in Supabase. Each row is locked to your account. We do not sell it or pass it to advertisers.',
+    medicalConsent: 'I have read and understood that VertiGoes is not a diagnosis, not a substitute for a doctor and not for emergencies, and I use it voluntarily and at my own risk.',
+    healthDataConsent: 'I explicitly agree that my health information, including diagnosis, symptoms, episodes and exercises, will be stored and processed to run the app for me.',
+    consentFootnote: 'Both confirmations are required. You can withdraw consent at any time by writing to vertigoesmaya@gmail.com; we will then delete your account and its information.',
+    linkDisclaimers: 'Read the health statement',
+    linkPrivacy: 'Read the privacy statement',
     /** Both links open the placeholder screen, which is the honest answer for now. */
     disclaimersTitle: 'Medical and legal disclaimers',
     disclaimersNote:

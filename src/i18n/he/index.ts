@@ -7,6 +7,7 @@ import { data } from './data';
 import { feedback } from './feedback';
 import { flows } from './flows';
 import { home } from './home';
+import { legal } from './legal';
 import { ui } from './ui';
 
 /**
@@ -25,5 +26,6 @@ export const he = {
   feedback,
   flows,
   home,
+  legal,
   ui,
 } satisfies PartialTranslations;

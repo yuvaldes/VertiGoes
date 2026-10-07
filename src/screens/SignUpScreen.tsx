@@ -30,6 +30,7 @@ import {
   type SignUpForm,
 } from '../state/AuthContext';
 import { color, font, frame, shadow } from '../theme/tokens';
+import type { LegalDocumentKey } from '../data/legal';
 
 type Props = {
   onBack: () => void;
@@ -40,7 +41,7 @@ type Props = {
    * The two legal documents. Same signature as the Menu's, because they land on the same
    * `PlaceholderScreen` — which is the honest answer while neither document has been written.
    */
-  onOpenPlaceholder: (title: string, note: string) => void;
+  onOpenLegal: (document: LegalDocumentKey) => void;
   activeTab: TabKey;
   onChangeTab: (tab: TabKey) => void;
 };
@@ -73,7 +74,7 @@ export function SignUpScreen({
   onBack,
   onSignedUp,
   onSwitchToSignIn,
-  onOpenPlaceholder,
+  onOpenLegal,
   activeTab,
   onChangeTab,
 }: Props) {
@@ -83,12 +84,13 @@ export function SignUpScreen({
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
-  const [accepted, setAccepted] = useState(false);
+  const [acceptedMedicalDisclaimer, setAcceptedMedicalDisclaimer] = useState(false);
+  const [acceptedHealthData, setAcceptedHealthData] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [confirmationRequired, setConfirmationRequired] = useState(false);
 
   const challenge = useAuthChallenge();
-  const form: SignUpForm = { email, password, confirm, acceptedDisclaimers: accepted, captchaToken: challenge.captchaToken };
+  const form: SignUpForm = { email, password, confirm, acceptedMedicalDisclaimer, acceptedHealthData, captchaToken: challenge.captchaToken };
   const complete = Object.keys(validateSignUp(form)).length === 0;
   const disabled = !complete || isAuthenticating || !challenge.challengeReady;
 
@@ -112,14 +114,16 @@ export function SignUpScreen({
       return revised;
     });
 
-  const toggleConsent = () => {
-    const next = !accepted;
-    setAccepted(next);
+  const toggleConsent = (kind: 'medical' | 'health') => {
+    const nextMedical = kind === 'medical' ? !acceptedMedicalDisclaimer : acceptedMedicalDisclaimer;
+    const nextHealth = kind === 'health' ? !acceptedHealthData : acceptedHealthData;
+    setAcceptedMedicalDisclaimer(nextMedical);
+    setAcceptedHealthData(nextHealth);
     // The one control with no blur of its own. Unticking is the only way to get it wrong, and
     // when the button greys out again it is worth saying which of the two things went missing.
     setErrors((current) => ({
       ...current,
-      consent: validateSignUp({ ...form, acceptedDisclaimers: next }).consent,
+      consent: validateSignUp({ ...form, acceptedMedicalDisclaimer: nextMedical, acceptedHealthData: nextHealth }).consent,
     }));
   };
 
@@ -250,48 +254,48 @@ export function SignUpScreen({
         <Text style={styles.demo}>{t('auth.signUp.demo')}</Text>
 
         <View style={styles.consent}>
+          <Text style={styles.consentIntro}>{t('auth.signUp.consentIntro')}</Text>
           <Pressable
             style={styles.consentRow}
-            onPress={toggleConsent}
+            onPress={() => toggleConsent('medical')}
             accessibilityRole="checkbox"
-            accessibilityState={{ checked: accepted }}
-            accessibilityLabel={t('auth.a11y.consentCheckbox')}
+            accessibilityState={{ checked: acceptedMedicalDisclaimer }}
+            accessibilityLabel={t('auth.signUp.medicalConsent')}
           >
-            <View style={[styles.box, accepted && styles.boxChecked]}>
-              {accepted ? (
+            <View style={[styles.box, acceptedMedicalDisclaimer && styles.boxChecked]}>
+              {acceptedMedicalDisclaimer ? (
                 <Check size={14} weight="bold" color={color.white} />
               ) : (
                 <Ring radius={6} color={consentError ? color.error500 : color.gray300} />
               )}
             </View>
-            <Text style={styles.consentLabel}>{t('auth.signUp.consent')}</Text>
+            <Text style={styles.consentLabel}>{t('auth.signUp.medicalConsent')}</Text>
           </Pressable>
 
-          {consentError ? <Text style={styles.fieldError}>{consentError}</Text> : null}
-
-          {/* Separate links under the sentence rather than pressable spans inside it: spans
-              cannot survive Hebrew word order, and a label that is partly a link makes
-              "read the policy" toggle the box. */}
-          <Pressable
-            onPress={() =>
-              onOpenPlaceholder(
-                t('auth.signUp.disclaimersTitle'),
-                t('auth.signUp.disclaimersNote'),
-              )
-            }
-            accessibilityRole="link"
-          >
+          <Pressable onPress={() => onOpenLegal('health')} accessibilityRole="link">
             <Text style={styles.link}>{t('auth.signUp.linkDisclaimers')}</Text>
           </Pressable>
 
           <Pressable
-            onPress={() =>
-              onOpenPlaceholder(t('auth.signUp.privacyTitle'), t('auth.signUp.privacyNote'))
-            }
-            accessibilityRole="link"
+            style={styles.consentRow}
+            onPress={() => toggleConsent('health')}
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: acceptedHealthData }}
+            accessibilityLabel={t('auth.signUp.healthDataConsent')}
           >
+            <View style={[styles.box, acceptedHealthData && styles.boxChecked]}>
+              {acceptedHealthData ? <Check size={14} weight="bold" color={color.white} /> : <Ring radius={6} color={consentError ? color.error500 : color.gray300} />}
+            </View>
+            <Text style={styles.consentLabel}>{t('auth.signUp.healthDataConsent')}</Text>
+          </Pressable>
+
+          <Pressable onPress={() => onOpenLegal('privacy')} accessibilityRole="link">
             <Text style={styles.link}>{t('auth.signUp.linkPrivacy')}</Text>
           </Pressable>
+
+          {consentError ? <Text style={styles.fieldError}>{consentError}</Text> : null}
+
+          <Text style={styles.consentFootnote}>{t('auth.signUp.consentFootnote')}</Text>
         </View>
 
         {formError ? <Text style={styles.formError}>{formError}</Text> : null}
@@ -408,6 +412,8 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     color: color.gray700,
   },
+  consentIntro: { fontFamily: font.body, fontSize: 13, lineHeight: 19, color: color.gray700 },
+  consentFootnote: { fontFamily: font.body, fontSize: 12, lineHeight: 18, color: color.gray600 },
   link: {
     fontFamily: font.bodySemiBold,
     fontSize: 13,

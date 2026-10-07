@@ -5,6 +5,7 @@ import { data } from './data';
 import { feedback } from './feedback';
 import { flows } from './flows';
 import { home } from './home';
+import { legal } from './legal';
 import { ui } from './ui';
 
 /**
@@ -22,5 +23,6 @@ export const en = {
   feedback,
   flows,
   home,
+  legal,
   ui,
 } as const;
