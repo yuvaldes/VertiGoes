@@ -47,7 +47,7 @@ begin
   end loop;
   if not vertigoes_private.bounded_text(value -> 'age', 3, 1) then return false; end if;
   if (value ->> 'age') !~ '^[0-9]{1,3}$' then return false; end if;
-  if (value ->> 'age')::integer not between 1 and 130 then return false; end if;
+  if (value ->> 'age')::integer not between 18 and 130 then return false; end if;
   if (value -> 'gender') not in ('null'::jsonb, '"female"'::jsonb, '"male"'::jsonb, '"other"'::jsonb)
     or (value -> 'language') not in ('"en"'::jsonb, '"he"'::jsonb)
     or jsonb_typeof(value -> 'diagnosedBefore') not in ('boolean', 'null') then return false; end if;

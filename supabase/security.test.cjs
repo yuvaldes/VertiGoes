@@ -51,6 +51,22 @@ test('security hardening validates input and enforces private atomic quotas', as
   const report = () => db.query(`insert into public.bug_reports(user_id,description,platform,locale,app_version)
     values($1,'Local security test','web','en','1.0.0')`, [alice]);
 
+  await t.test('pilot data keeps the health subject separate and AI requires its own consent', async () => {
+    await asUser(alice);
+    const subject = (await db.query(`insert into public.health_subjects(user_id) values($1) returning id`, [alice])).rows[0].id;
+    await db.query(`insert into public.health_profiles(subject_id, age_group, diagnosis, contraindications, app_version)
+      values($1, '25_34', '{}', '{}', '1.0.0')`, [subject]);
+    await assert.rejects(db.query(`insert into public.ai_conversations(subject_id,prompt,response,app_version)
+      values($1,'question','answer','1.0.0')`, [subject]), /AI processing consent is required/);
+    await db.query(`insert into public.legal_consents(user_id,document_type,document_version) values($1,'ai_processing','1.0')`, [alice]);
+    await db.query(`insert into public.ai_conversations(subject_id,prompt,response,app_version)
+      values($1,'question','answer','1.0.0')`, [subject]);
+    await asUser(bob);
+    assert.equal((await db.query('select * from public.health_profiles')).rows.length, 0);
+    await assert.rejects(db.query(`insert into public.health_profiles(subject_id,diagnosis,contraindications,app_version)
+      values($1,'{}','{}','1.0.0')`, [subject]), /row-level security/);
+  });
+
   await t.test('real app-shaped onboarding and calendar data are accepted', async () => {
     await asUser();
     await saveProfile(profile);

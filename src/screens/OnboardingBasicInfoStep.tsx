@@ -14,6 +14,7 @@ type Props = {
 export function OnboardingBasicInfoStep({ answers, patch }: Props) {
   const t = useT();
   const displayFont = useDisplayFont();
+  const isUnder18 = answers.age !== '' && Number(answers.age) < 18;
 
   return (
     <View style={styles.root}>
@@ -51,6 +52,7 @@ export function OnboardingBasicInfoStep({ answers, patch }: Props) {
         placeholder={t('flows.basicInfo.agePlaceholder')}
         keyboardType="number-pad"
       />
+      {isUnder18 ? <Text style={styles.ageError} accessibilityRole="alert">{t('flows.basicInfo.ageUnder18')}</Text> : null}
 
       <View style={styles.field}>
         <Text style={styles.label}>{t('flows.basicInfo.genderLabel')}</Text>
@@ -99,5 +101,12 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
     color: color.gray700,
+  },
+  ageError: {
+    marginTop: -12,
+    fontFamily: font.body,
+    fontSize: 13,
+    lineHeight: 18,
+    color: color.error500,
   },
 });
