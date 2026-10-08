@@ -1,4 +1,6 @@
 -- Accept structured daily mood check-ins while retaining legacy good/bad values.
+-- This migration intentionally has its own version: 202610070001 was already used by the
+-- onboarding consent expansion before mood check-ins shipped.
 create or replace function vertigoes_private.valid_day_record(value jsonb, expected_date date)
 returns boolean language plpgsql immutable set search_path = '' as $$
 declare

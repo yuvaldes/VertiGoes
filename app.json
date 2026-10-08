@@ -11,6 +11,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.vertigoes.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -28,9 +29,18 @@
       [
         "expo-audio",
         {
-          "microphonePermission": "Allow VertiGoes to record an optional voice note for your daily mood check-in."
+          "microphonePermission": "Allow VertiGoes to record an optional voice note for your daily mood check-in.",
+          "enableBackgroundPlayback": false,
+          "enableBackgroundRecording": false
         }
-      ]
-    ]
+      ],
+      "expo-asset"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "39f46f57-2cb9-4440-acbb-8dc05d9e88d3"
+      }
+    },
+    "owner": "yuvaldes"
   }
 }

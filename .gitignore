@@ -2,6 +2,7 @@
 
 # dependencies
 node_modules/
+store/google-play/*.aab
 
 # Expo
 .expo/
