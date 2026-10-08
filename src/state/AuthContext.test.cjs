@@ -55,7 +55,7 @@ const profileFor = (id, onboarding = 'complete') => ({
 
 function makeBackend(initial = null) {
   const listeners = new Set();
-  const calls = { reads: [], writes: [], auth: [], functions: [] };
+  const calls = { reads: [], writes: [], auth: [], functions: [], rpcs: [] };
   const profiles = new Map(['alice', 'bob'].map(id => [id, profileFor(id)]));
   let insideAuthCallback = false;
   const backend = {
@@ -93,6 +93,10 @@ function makeBackend(initial = null) {
     },
   };
   const client = {
+    async rpc(name, args) {
+      calls.rpcs.push({ name, args });
+      return success(name === 'export_my_data' ? { account: {} } : null);
+    },
     auth: {
       onAuthStateChange(callback) {
         listeners.add(callback);

@@ -104,10 +104,18 @@ export function createDayRecordsTransport(
     },
     save: (record, signal) => serializeWrite(userId, async () => {
       const { db, authorization } = await authorize(signal);
+      // A recording is transient input. Supabase receives the check-in text and score, never
+      // a device-local file URI (or the audio itself).
+      const persistedRecord: DayRecord = {
+        ...record,
+        feeling: record.feeling && typeof record.feeling === 'object'
+          ? { ...record.feeling, voiceUri: null }
+          : record.feeling,
+      };
       const { error } = await db.from('day_records').upsert({
         user_id: userId,
         record_date: record.date,
-        record,
+        record: persistedRecord,
       }, { onConflict: 'user_id,record_date' }).setHeader('Authorization', authorization);
       // updated_at is owned by the DB trigger. Do not cancel a dispatched write: awaiting
       // its result keeps later snapshots from overtaking it. Its UI result can be ignored.

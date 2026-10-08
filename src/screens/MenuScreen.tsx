@@ -5,6 +5,7 @@ import {
   Briefcase,
   FirstAid,
   FileText,
+  DownloadSimple,
   MusicNotes,
   PlayCircle,
   CrownSimple,
@@ -17,7 +18,7 @@ import {
   UsersThree,
 } from 'phosphor-react-native';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 
 import { AppHeader } from '../components/AppHeader';
 import { BottomBarSlot } from '../components/BottomBar';
@@ -114,12 +115,13 @@ export function MenuScreen({
   const { restartRequired } = useDirection();
   const { language, setLanguage } = usePreferences();
   const { isPremium } = useSubscription();
-  const { isGuest, account, needsOnboarding, session } = useAuth();
+  const { isGuest, account, needsOnboarding, session, exportMyData } = useAuth();
   const { can, reasonFor } = useCapabilities();
   const [pickingLanguage, setPickingLanguage] = useState(false);
   const [confirmingDeletion, setConfirmingDeletion] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteFailed, setDeleteFailed] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   /**
    * Auth outranks premium, so the crown only survives for a signed-in free user. A guest shown
@@ -318,6 +320,29 @@ export function MenuScreen({
             <MenuRow icon={<FileText size={ICON_SIZE} color={color.gray900} />} label={t('legal.accessibility.title')} onPress={() => onOpenLegal('accessibility')} />
             <MenuRow icon={<Bug size={ICON_SIZE} color={color.gray900} />} label={t('feedback.bugReport.title')} onPress={onReportBug} />
             <MenuRow icon={<Translate size={ICON_SIZE} color={color.gray900} />} label={t('browse.menu.rowLanguage')} value={LANGUAGE_LABEL[language]} onPress={() => setPickingLanguage(true)} />
+            {!isGuest && (
+              <MenuRow
+                icon={<DownloadSimple size={ICON_SIZE} color={color.gray900} />}
+                label={t(exporting ? 'auth.menu.exporting' : 'auth.menu.exportData')}
+                onPress={async () => {
+                  if (exporting) return;
+                  setExporting(true);
+                  const result = await exportMyData();
+                  if (result.ok) {
+                    const json = JSON.stringify(result.data, null, 2);
+                    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+                      const url = URL.createObjectURL(new Blob([json], { type: 'application/json' }));
+                      const link = document.createElement('a');
+                      link.href = url; link.download = 'vertigoes-data.json'; link.click();
+                      URL.revokeObjectURL(url);
+                    } else {
+                      await Share.share({ message: json, title: t('auth.menu.exportData') });
+                    }
+                  }
+                  setExporting(false);
+                }}
+              />
+            )}
           </MenuGroup>
         </View>
 

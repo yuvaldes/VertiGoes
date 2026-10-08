@@ -35,6 +35,7 @@ export type FieldErrors = Partial<Record<AuthField, AuthError>>;
 export type AuthResult =
   | { ok: true; confirmationRequired?: boolean; cancelled?: boolean }
   | { ok: false; errors: FieldErrors };
+export type DataExportResult = { ok: true; data: unknown } | { ok: false; errors: FieldErrors };
 export type SignUpForm = {
   email: string; password: string; confirm: string;
   acceptedTerms: boolean; acceptedPrivacy: boolean; acceptedHealthData: boolean;
@@ -93,6 +94,7 @@ type AuthValue = {
   signOut: () => Promise<boolean>;
   deleteAccount: () => Promise<AuthResult>;
   acceptLegalConsents: () => Promise<AuthResult>;
+  exportMyData: () => Promise<DataExportResult>;
 };
 
 const GUEST: AuthSession = { status: 'guest' };
@@ -326,21 +328,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) return fail(errorKey(error));
       // Email-confirmation flows have no authenticated database session yet. Keep the local
       // draft; it will be resumed rather than pretending its sensitive data was saved.
-      if (!data.session || !data.user || !form.draftAnswers) return { ok: true, confirmationRequired: !data.session };
+      if (!data.session || !data.user) return { ok: true, confirmationRequired: true };
       const accepted: ConsentAnswers = {
         terms: form.acceptedTerms, privacy: form.acceptedPrivacy,
         health_data_processing: form.acceptedHealthData, ai_processing: form.acceptedAiProcessing,
         research: form.acceptedResearch, marketing: form.acceptedMarketing,
       };
-      const rows = (Object.entries(accepted) as [string, boolean][]).filter(([, value]) => value).map(([document_type]) => ({
-        user_id: data.user!.id, document_type, document_version: LEGAL_VERSION,
-      }));
-      const consentWrite = await supabase.from('legal_consents').insert(rows);
-      if (consentWrite.error && consentWrite.error.code !== '23505') return fail('auth.error.connection');
-      const profileWrite = await supabase.from('profiles').upsert({
-        id: data.user.id, onboarding_status: 'complete', answers: form.draftAnswers, progress_step: null,
+      const consentWrite = await supabase.rpc('record_consent_choices', {
+        choices: accepted, document_version: LEGAL_VERSION, app_version: '1.0.0',
       });
-      if (profileWrite.error) return fail('auth.error.profileSave');
+      if (consentWrite.error) return fail('auth.error.connection');
+      if (form.draftAnswers) {
+        const profileWrite = await supabase.from('profiles').upsert({
+          id: data.user.id, onboarding_status: 'complete', answers: form.draftAnswers, progress_step: null,
+        });
+        if (profileWrite.error) return fail('auth.error.profileSave');
+      }
       return { ok: true };
     } catch { return fail('auth.error.connection'); }
     finally { end(); }
@@ -442,17 +445,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const acceptLegalConsents = async (): Promise<AuthResult> => {
     const current = profileSession.current;
     if (!supabase || current.status !== 'authed') return fail('auth.error.connection');
-    const rows = ['terms', 'privacy', 'health_data_processing'].map((document_type) => ({
-      user_id: current.account.id, document_type, document_version: LEGAL_VERSION,
-    }));
     try {
-      const { error } = await supabase.from('legal_consents').insert(rows);
-      if (error && error.code !== '23505') return fail('auth.error.connection');
+      const { error } = await supabase.rpc('record_consent_choices', {
+        choices: { terms: true, privacy: true, health_data_processing: true },
+        document_version: LEGAL_VERSION, app_version: '1.0.0',
+      });
+      if (error) return fail('auth.error.connection');
       const next = { ...current, consentsCurrent: true };
       profileSession.current = next;
       setSession(next);
       return { ok: true };
     } catch { return fail('auth.error.connection'); }
+  };
+
+  const exportMyData = async (): Promise<DataExportResult> => {
+    if (!supabase || profileSession.current.status !== 'authed') {
+      return { ok: false, errors: { form: { key: 'auth.error.exportData' } } };
+    }
+    try {
+      const { data, error } = await supabase.rpc('export_my_data');
+      return error
+        ? { ok: false, errors: { form: { key: 'auth.error.exportData' } } }
+        : { ok: true, data };
+    } catch {
+      return { ok: false, errors: { form: { key: 'auth.error.exportData' } } };
+    }
   };
 
   const signOut = async () => {
@@ -495,7 +512,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     cancelPasswordRecovery: () => setRecoveringPassword(false),
     completeOnboarding: (answers) => saveProfile('complete', answers, null),
     skipOnboarding: (step) => saveProfile('skipped', null, step),
-    signOut, deleteAccount, acceptLegalConsents,
+    signOut, deleteAccount, acceptLegalConsents, exportMyData,
   };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

@@ -117,6 +117,7 @@ export const auth = {
     consent: 'Please agree to the disclaimers to continue.',
     inProgress: 'Already signing in - give it a moment.',
     deleteAccount: 'לא הצלחנו למחוק את החשבון. נסו שוב.',
+    exportData: 'לא הצלחנו לייצא את הנתונים. נסו שוב.',
   },
 
   onboarding: {
@@ -136,6 +137,8 @@ export const auth = {
     accountLabel: 'Account',
     accountGuest: 'Guest',
     accountGoogle: 'Google account',
+    exportData: 'ייצוא הנתונים שלי',
+    exporting: 'מכינים את הייצוא…',
   },
 
   deleteAccount: {

@@ -130,6 +130,7 @@ export const auth = {
     /** The double-submit backstop. Reachable only if a button forgets its disabled state. */
     inProgress: 'Already signing in - give it a moment.',
     deleteAccount: 'We could not delete your account. Please try again.',
+    exportData: 'We could not export your data. Please try again.',
   },
 
   /** The skip control and what it leaves behind. Lives here, not in `flows.onboarding`. */
@@ -152,6 +153,8 @@ export const auth = {
     accountLabel: 'Account',
     accountGuest: 'Guest',
     accountGoogle: 'Google account',
+    exportData: 'Export my data',
+    exporting: 'Preparing export…',
   },
 
   deleteAccount: {
