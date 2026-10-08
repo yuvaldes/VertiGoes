@@ -8,7 +8,7 @@
 - [x] Public privacy, terms and account-deletion pages
 - [x] Store listing, Data safety, Health declaration and reviewer-note drafts
 - [x] 1024 × 500 feature graphic
-- [x] Signed production Android App Bundle (EAS build ID `d378092c-a016-4f74-b71c-8ea1367c98f6`)
+- [x] Signed production Android App Bundle with final branding (version code `4`, EAS build ID `f7815709-1ad9-4be7-8fe8-ba25c0ba0047`)
 - [x] Three phone screenshots generated from the real app UI
 - [ ] Apply and verify migrations in the release Supabase project
 - [ ] Test signed Android build on a physical device
