@@ -172,8 +172,8 @@ development/staging/production sites and databases, and manual production releas
   the dialer with the signed-in user's saved contact; missing contacts lead to profile setup.
   Opening the dialer does not record a completed phone call.
 - Verify the Render deployment; offline sync and real billing/AI are separate next steps.
-- Existing privacy/disclaimer links still point to placeholders. Supply the actual documents
-  before public signup.
+- Privacy, terms, and account-deletion pages are published on the production app domain;
+  recheck them after changes to the public documents or domain.
 - The free Supabase project can pause when inactive. Choose a plan appropriate to availability
   and backup needs before launch.
 

@@ -50,3 +50,28 @@ deployed database, email delivery, or a complete Google sign-in round trip.
 
 Unfinished content/services can remain clearly marked as coming soon for an initial release.
 They do not need to be advertised as working to make the available features public.
+
+## Automated production audit — 2026-10-08
+
+- [x] TypeScript check passes.
+- [x] All 130 automated tests pass.
+- [x] Production web export succeeds and regenerates branded PWA icons.
+- [x] The live app renders at a phone viewport over HTTPS.
+- [x] App shell, manifest, service worker, install icons, privacy policy, terms, and
+  account-deletion page all return HTTP 200.
+- [x] The manifest uses standalone display mode and valid 192px and 512px icons.
+- [x] The service worker caches only the generic offline page, not private account data.
+- [ ] Confirm the Render production environment has a Sentry DSN and send one controlled
+  test error while watching the Sentry project.
+- [ ] In Render, add and verify `Strict-Transport-Security`, `X-Frame-Options`,
+  `Referrer-Policy`, and a microphone-aware `Permissions-Policy`. The live deployment
+  currently supplies `X-Content-Type-Options: nosniff` but not those additional headers.
+- [x] Production Supabase migrations are applied. Read-only API checks confirmed
+  `public.legal_consents`, `public.health_subjects`, and `public.account_metadata`; anonymous
+  access to legal consent records is denied as designed. Daily mood data uses the validated
+  `public.day_records` structure rather than a separate `daily_mood_checkins` table.
+- [x] The deployed `delete-account` Edge Function accepts the production origin preflight
+  and rejects an unauthenticated POST with HTTP 401. Complete one authenticated deletion
+  with a disposable account before expanding the pilot.
+- [ ] Complete the real-inbox, two-account, and physical-device checks in
+  `PILOT_TESTING_GUIDE.md`.
